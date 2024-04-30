@@ -17,6 +17,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gin-gonic/gin"
 	"github.com/gofor-little/env"
+	"github.com/gin-contrib/cors"
 )
 
 type BucketBasics struct {
@@ -35,6 +36,7 @@ func (basics *BucketBasics) UploadFile(bucketName string, objectKey string, file
 
 func main() {
 	env.Load(".env")
+
 	// Initialize AWS session
 	var AWS_ACCESS_KEY = env.Get("AWS_ACCESS_KEY", "")
 	var AWS_SECRET_KEY = env.Get("AWS_SECRET_KEY", "")
@@ -55,6 +57,8 @@ func main() {
 	basics := &BucketBasics{S3Client: s3Client}
 
 	r := gin.Default()
+	r.Use(cors.Default())
+
 
 	// Handle file upload
 	r.POST("/upload", func(c *gin.Context) {
@@ -67,7 +71,7 @@ func main() {
 		defer file.Close()
 
 		bucketName := "coursecrafter"
-		objectKey := header.Filename
+		objectKey := "files/"+header.Filename
 
 		err = basics.UploadFile(bucketName, objectKey, file)
 		if err != nil {

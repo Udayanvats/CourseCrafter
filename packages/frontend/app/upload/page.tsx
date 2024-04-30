@@ -8,7 +8,7 @@ const UploadPage = () => {
     formData.append("file", acceptedFiles[0]);
 
     try {
-      const response = await fetch("https://localhost/upload", {
+      const response = await fetch("http://localhost:8080/upload", {
         method: "POST",
         body: formData,
       });
