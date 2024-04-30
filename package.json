@@ -3,30 +3,29 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "private":true,
+  "private": true,
   "scripts": {
     "dev": "yarn workspace frontend dev",
     "build": "yarn workspace frontend build",
     "start": "yarn workspace frontend start",
-
-    "frontend:install":"yarn workspace frontend install",
-    "backend:install":"yarn workspace backend install",
-    "frontend:add":"yarn workspace frontend add",
-    "backend:get":"yarn workspace backend get",   
-    "backend:start":"yarn workspace backend start",
-    "install":"yarn frontend:install && yarn backend:install"
-
-
-
- 
+    "backend:start": "yarn workspace backend start",
+    "frontend:install": "yarn workspace frontend install",
+    "backend:install": "yarn workspace backend install",
+    "frontend:add": "yarn workspace frontend add",
+    "backend:get": "yarn workspace backend get",
+    "install": "yarn frontend:install && yarn backend:install && yarn workspace extractor install",
+    "extractor:start": "yarn workspace extractor start",
+    "boot": "concurrently \"docker compose up\" \"yarn extractor:start\" \"yarn backend:start\" \"yarn dev\"  "
   },
-  "workspaces":{
+  "workspaces": {
     "packages": [
       "packages/*"
     ]
   },
-  
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
 }
