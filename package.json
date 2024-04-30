@@ -8,12 +8,12 @@
     "dev": "yarn workspace frontend dev",
     "build": "yarn workspace frontend build",
     "start": "yarn workspace frontend start",
+    "backend:start":"yarn workspace backend start",
 
     "frontend:install":"yarn workspace frontend install",
     "backend:install":"yarn workspace backend install",
     "frontend:add":"yarn workspace frontend add",
     "backend:get":"yarn workspace backend get",   
-    "backend:start":"yarn workspace backend start",
     "install":"yarn frontend:install && yarn backend:install"
 
 
