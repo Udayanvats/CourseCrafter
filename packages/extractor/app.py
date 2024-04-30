@@ -68,7 +68,7 @@ def extract_text(channel, method, properties, body):
                 text.append(shape.text)
 
     print(text)
-    # channel.basic_ack(delivery_tag=method.delivery_tag)
+    channel.basic_ack(delivery_tag=method.delivery_tag)
     
 
 
@@ -79,10 +79,8 @@ channel.basic_consume(queue='extract', on_message_callback=extract_text, auto_ac
 print('Waiting for messages')
 
 if __name__ == '__main__':
-    # ppt = Presentation("uploads/cnn.pptx") 
 
     channel.start_consuming()
-    # get_file_from_s3()
     
 
 

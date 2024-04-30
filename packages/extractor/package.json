@@ -1,0 +1,14 @@
+{
+  "name": "extractor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install":"pip install -r requirements.txt",
+    "start":"python3 app.py"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
