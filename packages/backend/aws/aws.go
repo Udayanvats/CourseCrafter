@@ -58,3 +58,22 @@ func UploadFileToS3(objectKey string, file io.Reader) error {
 	return err
 
 }
+
+
+func GetTextFromS3(object_path string) (string, error) {
+	output, err := S3Client.GetObject(context.TODO(), &s3.GetObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(object_path),
+	})
+	if err != nil {
+		return "", err
+	}
+	buf := new([]byte)
+	_, err = output.Body.Read(*buf)
+	if err != nil {
+		return "", err
+	}
+	return string(*buf), nil
+}
+
+

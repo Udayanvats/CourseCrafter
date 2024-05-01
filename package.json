@@ -15,7 +15,7 @@
     "backend:get": "yarn workspace backend get",
     "install": "yarn frontend:install && yarn backend:install && yarn workspace extractor install",
     "extractor:start": "yarn workspace extractor start",
-    "boot": "concurrently \"docker compose up\" \"yarn extractor:start\" \"yarn backend:start\" \"yarn dev\"  "
+    "boot": "concurrently  \"yarn extractor:start\" \"yarn backend:start\" \"yarn dev\"  "
   },
   "workspaces": {
     "packages": [

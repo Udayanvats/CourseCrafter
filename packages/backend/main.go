@@ -30,6 +30,8 @@ func main() {
 	}
 	defer rmq.Disconnect()
 
+	go rmq.ListenToNotification()
+
 	
 
 
