@@ -3,9 +3,14 @@ from pptx import Presentation
 import boto3
 import os
 import uuid
+from dotenv import load_dotenv
+load_dotenv()
 
-AWS_SERVER_PUBLIC_KEY = os.environ.get('AWS_ACCESS_KEY')
-AWS_SERVER_SECRET_KEY = os.environ.get('AWS_SECRET_KEY')
+
+AWS_SERVER_PUBLIC_KEY = os.getenv('AWS_ACCESS_KEY')
+AWS_SERVER_SECRET_KEY = os.getenv('AWS_SECRET_KEY')
+
+print(AWS_SERVER_PUBLIC_KEY, AWS_SERVER_SECRET_KEY)
 
 s3 = boto3.client('s3',
         aws_access_key_id=AWS_SERVER_PUBLIC_KEY, 
@@ -68,7 +73,7 @@ def extract_text(channel, method, properties, body):
                 text.append(shape.text)
 
     print(text)
-    channel.basic_ack(delivery_tag=method.delivery_tag)
+    # channel.basic_ack(delivery_tag=method.delivery_tag)
     
 
 
