@@ -12,12 +12,8 @@ import (
 	"github.com/gofor-little/env"
 )
 
-
 var S3Client *s3.Client
 var bucketName = "coursecrafter"
-
-
-
 
 func LoadS3() error {
 	env.Load(".env")
@@ -39,26 +35,20 @@ func LoadS3() error {
 
 	S3Client = s3.NewFromConfig(cfg)
 
-
 	return nil
 }
 
-
 func UploadFileToS3(objectKey string, file io.Reader) error {
-
-		
 
 	_, err := S3Client.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(objectKey),
 		Body:   file,
 	})
-	
 
 	return err
 
 }
-
 
 func GetTextFromS3(object_path string) (string, error) {
 	output, err := S3Client.GetObject(context.TODO(), &s3.GetObjectInput{
@@ -68,12 +58,14 @@ func GetTextFromS3(object_path string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	buf := new([]byte)
-	_, err = output.Body.Read(*buf)
+	defer output.Body.Close()
+
+	textBytes, err := io.ReadAll(output.Body)
 	if err != nil {
 		return "", err
 	}
-	return string(*buf), nil
+
+	fmt.Println("Extracted text:", string(textBytes))
+	return string(textBytes), nil
+
 }
-
-
