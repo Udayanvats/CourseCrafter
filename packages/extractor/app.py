@@ -4,6 +4,7 @@ import boto3
 import os
 import uuid
 from dotenv import load_dotenv,dotenv_values
+import tempfile 
 
 load_dotenv()
 
@@ -31,6 +32,10 @@ connection = pika.BlockingConnection(parameters)
 channel = connection.channel()
 
 channel.queue_declare(queue='extract')
+
+def upload_file_to_s3(file,object_name):
+   
+    s3.upload_fileobj(file,bucket_name,object_name)
 
 def get_file_from_s3(filepath):
     try:
@@ -64,6 +69,7 @@ def extract_text(channel, method, properties, body):
     print(f"file path: {s3ObjPath}")
     filepath = get_file_from_s3(s3ObjPath)
     print(f"file path: {filepath}")
+    fileid = s3ObjPath.split("/")[-1].split(".")[0]
     
     ppt = Presentation(filepath) 
     text = []
@@ -73,7 +79,20 @@ def extract_text(channel, method, properties, body):
                 text.append(shape.text)
 
     print(text)
-    # channel.basic_ack(delivery_tag=method.delivery_tag)
+    with tempfile.NamedTemporaryFile(mode='w', delete=True) as temp_file:
+        temp_file.write(str(text))
+        temp_file.flush()  # Flush the buffer to ensure data is written to the file
+
+        s3.upload_file(temp_file.name, bucket_name,"text/"+fileid+".txt")
+
+
+        # Print confirmation message
+        print("File uploaded to S3 successfully")
+
+
+
+#    got the text
+    
     
 
 
