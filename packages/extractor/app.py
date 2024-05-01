@@ -3,9 +3,14 @@ from pptx import Presentation
 import boto3
 import os
 import uuid
+from dotenv import load_dotenv,dotenv_values
+
+load_dotenv()
 
 AWS_SERVER_PUBLIC_KEY = os.environ.get('AWS_ACCESS_KEY')
 AWS_SERVER_SECRET_KEY = os.environ.get('AWS_SECRET_KEY')
+print(AWS_SERVER_PUBLIC_KEY)
+print(AWS_SERVER_SECRET_KEY)
 
 s3 = boto3.client('s3',
         aws_access_key_id=AWS_SERVER_PUBLIC_KEY, 
@@ -68,7 +73,7 @@ def extract_text(channel, method, properties, body):
                 text.append(shape.text)
 
     print(text)
-    channel.basic_ack(delivery_tag=method.delivery_tag)
+    # channel.basic_ack(delivery_tag=method.delivery_tag)
     
 
 
@@ -79,7 +84,6 @@ channel.basic_consume(queue='extract', on_message_callback=extract_text, auto_ac
 print('Waiting for messages')
 
 if __name__ == '__main__':
-
     channel.start_consuming()
     
 

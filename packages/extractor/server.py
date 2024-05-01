@@ -4,8 +4,13 @@ import pika
 # from app import upload_file_to_s3
 import uuid
 import boto3
+from dotenv import load_dotenv,dotenv_values
+
 
 app = Flask(__name__)
+
+load_dotenv()
+
 
 # RabbitMQ connection parameters
 RABBITMQ_HOST = 'localhost'
@@ -13,8 +18,10 @@ RABBITMQ_PORT = 5672
 RABBITMQ_USERNAME = 'guest'
 RABBITMQ_PASSWORD = 'guest'
 # coursecrafter
+
 AWS_SERVER_PUBLIC_KEY = os.environ.get('AWS_ACCESS_KEY')
 AWS_SERVER_SECRET_KEY = os.environ.get('AWS_SECRET_KEY')
+
 bucket_name = 'coursecrafter'
 s3 = boto3.client('s3',
         aws_access_key_id=AWS_SERVER_PUBLIC_KEY, 
