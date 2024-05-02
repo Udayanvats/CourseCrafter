@@ -1,4 +1,4 @@
 python-pptx
 pika
 boto3
-
+dotenv
