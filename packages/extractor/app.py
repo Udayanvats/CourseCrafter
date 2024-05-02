@@ -89,10 +89,12 @@ def extract_text(ch, method, properties, body):
                 if hasattr(shape, "text"):
                     text.append(shape.text)
 
-        print(text)
-        with tempfile.NamedTemporaryFile(mode='w', delete=True) as temp_file:
+        # print(text)
+        with tempfile.NamedTemporaryFile(mode='w', delete=False,encoding='utf-8') as temp_file:
             temp_file.write(str(text))
-            temp_file.flush()  # Flush the buffer to ensure data is written to the file
+       
+            temp_file.flush()  
+
 
             s3.upload_file(temp_file.name, bucket_name,"text/"+fileid+".txt")
             notify_user(json.dumps({
@@ -100,33 +102,18 @@ def extract_text(ch, method, properties, body):
                 "object_path":"text/"+fileid+".txt",
                 "error":""
             }))
-
-        
-
-
-
-
-        
-
-
+            temp_file.close()
+            os.remove(temp_file.name)
             # Print confirmation message
             print("File uploaded to S3 successfully")
     except Exception as e:
         notify_user(json.dumps({
-            status:False,
-            object_path:"",
-            error:"Error extracting text: "+str(e)
+            "status":False,
+            "object_path":"",
+            "error":"Error extracting text: "+str(e)
         }))
         print(f"Error extracting text: {e}")
-    
 
-
-
-
-    
-
-
-   
 
 channel.basic_consume(queue='extract', on_message_callback=extract_text, auto_ack=True)
 
