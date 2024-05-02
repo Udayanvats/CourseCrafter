@@ -1,12 +1,26 @@
+version: "3.8"
 services:
-
-  rabbitmq:
+  rabbitmq2:
     image: rabbitmq:3.13-management
     ports:
       - "5672:5672"
       - "15672:15672"
+    networks:
+      - network-app
+
+  database:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    networks:
+      - network-app
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=coursecrafter
+    volumes:
+    - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     
-  
 networks:
-  main-network:
+  network-app:
+  
   
