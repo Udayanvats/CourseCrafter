@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Upload from "./_components/upload";
+import Homepage from "./homepage/page";
 
 export default function Home() {
   return (
@@ -28,12 +29,8 @@ export default function Home() {
           </a>
         </div>
       </div>
-
-        <Upload/>
-        
-      
-  
-    
+      <Homepage />
+      <Upload />
     </main>
   );
 }
