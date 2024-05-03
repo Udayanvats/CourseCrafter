@@ -5,8 +5,11 @@ import (
 	"CourseCrafter/database"
 	"CourseCrafter/rmq"
 	"CourseCrafter/utils"
+	"encoding/json"
 	"fmt"
 	"strconv"
+
+	// "sync"
 
 	// "fmt"
 
@@ -93,11 +96,11 @@ func main() {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			err = rmq.PublishFile("extract", header.Filename)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
+			// err = rmq.PublishFile("extract", header.Filename)
+			// if err != nil {
+			// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			// 	return
+			// }
 			docsArr = append(docsArr, objectKey)
 			fmt.Println(objectKey, "objectKey")
 
@@ -117,7 +120,6 @@ func main() {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			err = rmq.PublishFile("extract", header.Filename)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
@@ -140,6 +142,33 @@ func main() {
 		course.UserId = userId
 
 		courseId, err := database.AddCourse(course)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		newChannel := make(chan []byte)
+		utils.CourseMutex.Lock()
+		utils.CourseChannels[courseId] = newChannel
+		utils.CourseMutex.Unlock()
+
+		var response struct {
+			CourseId string   `json:"courseId"`
+			Docs     []string `json:"docs"`
+			Pyqs     []string `json:"pyqs"`
+		}
+
+		response.CourseId = courseId
+		response.Docs = docsArr
+		response.Pyqs = pyqsArr
+
+		jsonResponse, err := json.Marshal(response)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		err = rmq.PublishFile("extract", string(jsonResponse))
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -147,6 +176,39 @@ func main() {
 		}
 
 		c.JSON(http.StatusOK, gin.H{"message": "File uploaded successfully", "courseId": courseId})
+	})
+
+	r.GET("/courses/:courseId/status", func(c *gin.Context) {
+		courseId := c.Param("courseId")
+		client := c.Writer
+		client.Header().Set("Content-Type", "text/event-stream")
+		client.Header().Set("Cache-Control", "no-cache")
+		client.Header().Set("Connection", "keep-alive")
+
+		fmt.Fprintf(client, "data: Initial message\n\n")
+		client.Flush()
+
+		channel := utils.CourseChannels[courseId]
+
+		for {
+			select {
+
+			case message := <-channel:
+				fmt.Fprintf(client, "data: %s\n\n", message)
+				client.Flush()
+				if string(message) == "done" {
+					fmt.Fprintf(client, "done")
+					client.Flush()
+					utils.CourseMutex.Lock()
+					delete(utils.CourseChannels, courseId)
+					utils.CourseMutex.Unlock()
+
+					return
+				}
+
+			}
+		}
+
 	})
 
 	r.Run("localhost:8080")

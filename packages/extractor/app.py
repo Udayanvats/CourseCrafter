@@ -76,36 +76,100 @@ def get_file_from_s3(filepath):
 
 def extract_text(ch, method, properties, body):
     try:
-        s3ObjPath=body.decode('utf-8')
-        print(f"file path: {s3ObjPath}")
-        filepath = get_file_from_s3(s3ObjPath)
-        print(f"file path: {filepath}")
-        fileid = s3ObjPath.split("/")[-1].split(".")[0]
+        reqObject=body.decode('utf-8')
+        print(reqObject)
+        # print("Received message: {body}")
+        json_object = json.loads(reqObject)
+      
+        docs = json_object["docs"]
+        courseId = json_object["courseId"]
+        pyqs = json_object["pyqs"]
+
+        print(f"docs: {docs}")
+        print(f"pyqs: {pyqs}")
+        print(f"courseId: {courseId}")
         
-        ppt = Presentation(filepath) 
-        text = []
-        for slide in ppt.slides:
-            for shape in slide.shapes:
-                if hasattr(shape, "text"):
-                    text.append(shape.text)
+        if docs:
+            for doc in docs:
+                s3ObjPath = doc
+                filepath = get_file_from_s3(s3ObjPath)
+                print(f"file path: {filepath}")
+                fileid = s3ObjPath.split("/")[-1].split(".")[0]
+                
+                ppt = Presentation(filepath) 
+                text = []
+                for slide in ppt.slides:
+                    for shape in slide.shapes:
+                        if hasattr(shape, "text"):
+                            text.append(shape.text)
 
-        # print(text)
-        with tempfile.NamedTemporaryFile(mode='w', delete=False,encoding='utf-8') as temp_file:
-            temp_file.write(str(text))
-       
-            temp_file.flush()  
+                # print(text)
+                with tempfile.NamedTemporaryFile(mode='w', delete=False,encoding='utf-8') as temp_file:
+                    temp_file.write(str(text))
+                
+                    temp_file.flush()  
 
 
-            s3.upload_file(temp_file.name, bucket_name,"text/"+fileid+".txt")
-            notify_user(json.dumps({
-                "status":True,
-                "object_path":"text/"+fileid+".txt",
-                "error":""
-            }))
-            temp_file.close()
-            os.remove(temp_file.name)
-            # Print confirmation message
-            print("File uploaded to S3 successfully")
+                    s3.upload_file(temp_file.name, bucket_name,"text/"+fileid+".txt")
+                    notify_user(json.dumps({
+                        "status":True,
+                        "object_path":"text/"+fileid+".txt",
+                        "error":"",
+                        "courseId":courseId,
+                        "file":doc
+
+                    }))
+                    temp_file.close()
+                    os.remove(temp_file.name)
+                    # Print confirmation message
+                    print("File uploaded to S3 successfully")
+
+
+        if pyqs:
+            for pyq in pyqs:
+                s3ObjPath = pyq
+                filepath = get_file_from_s3(s3ObjPath)
+                print(f"file path: {filepath}")
+                fileid = s3ObjPath.split("/")[-1].split(".")[0]
+                
+                ppt = Presentation(filepath) 
+                text = []
+                for slide in ppt.slides:
+                    for shape in slide.shapes:
+                        if hasattr(shape, "text"):
+                            text.append(shape.text)
+
+                # print(text)
+                with tempfile.NamedTemporaryFile(mode='w', delete=False,encoding='utf-8') as temp_file:
+                    temp_file.write(str(text))
+                
+                    temp_file.flush()  
+
+
+                    s3.upload_file(temp_file.name, bucket_name,"text/"+fileid+".txt")
+                    notify_user(json.dumps({
+                        "status":True,
+                        "object_path":"text/"+fileid+".txt",
+                        "error":"",
+                        "courseId":courseId,
+                        "message":pyq
+
+                    }))
+                    temp_file.close()
+                    os.remove(temp_file.name)
+                    # Print confirmation message
+                    print("File uploaded to S3 successfully")
+
+        notify_user(json.dumps({
+            "status":True,
+            "object_path":"",
+            "error":"",
+            "message":"done"
+
+        }))
+
+
+
     except Exception as e:
         notify_user(json.dumps({
             "status":False,

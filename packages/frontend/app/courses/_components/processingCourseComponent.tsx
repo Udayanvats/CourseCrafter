@@ -14,7 +14,7 @@ export default function ProcessingCourseComponent({courseId}:{
         if(!courseId){
             return
         }
-        const eventSource = new EventSource('/api/courses/processing')
+        const eventSource = new EventSource(`${process.env.NEXT_PUBLIC_BACKEND_URL}/courses/${courseId}/status`)
         eventSource.onmessage = (event) => {
             const data = JSON.parse(event.data)
             console.log(data)
