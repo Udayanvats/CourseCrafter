@@ -5,7 +5,6 @@ import "sync"
 
 var (
 	CourseChannels     = make(map[string]chan []byte)
-	
 	CourseMutex       sync.Mutex
 )
 
