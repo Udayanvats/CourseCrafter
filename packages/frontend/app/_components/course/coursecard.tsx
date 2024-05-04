@@ -3,12 +3,15 @@ import React from "react";
 import CheckIcon from "./checkIcon";
 import { Badge } from "@/components/ui/badge";
 import { ClockIcon } from "lucide-react";
+import { CircularProgressbar } from "react-circular-progressbar";
 interface CoursecardProps {
   topic: string;
   status: boolean;
   username: string;
 }
 const Coursecard = ({ topic, status, username }: CoursecardProps) => {
+  const percentage = 70;
+
   const getDaysAgo = (date: Date): number => {
     const today = new Date();
     const diffTime = Math.abs(today.getTime() - date.getTime());
@@ -39,14 +42,41 @@ const Coursecard = ({ topic, status, username }: CoursecardProps) => {
         </div>
       </div>
 
-      {/* s<div className="ml-auto bg-gray-100 py-1 px-3 rounded-full">7/12</div> */}
-      <div
-        className="radial-progress"
-        style={{ "--value": 70 }}
-        role="progressbar"
-      >
-        70%
-      </div>
+      <CircularProgressbar
+        value={percentage}
+        text={`${percentage}%`}
+        counterClockwise={false}
+        background={true}
+        backgroundPadding={2}
+        styles={{
+          path: {
+            stroke: `rgba(62, 152, 199, ${percentage / 100})`,
+            strokeWidth: 4,
+            strokeLinecap: "butt",
+            transition: "stroke-dashoffset 0.5s ease 0s",
+            transform: "rotate(0.25turn)",
+            transformOrigin: "center center",
+          },
+          trail: {
+            stroke: "#d6d6d6",
+            strokeWidth: 14, // Increase the width of the trail
+            strokeLinecap: "butt",
+            transform: "rotate(0.25turn)",
+            transformOrigin: "center center",
+          },
+          text: {
+            fill: "#f88",
+            fontWeight: "bold",
+            fontSize: "20px",
+            dominantBaseline: "middle", // Center vertically
+            textAnchor: "middle", // Center horizontally
+          },
+          background: {
+            fill: "#FFFF", // Change the color of the background
+          },
+        }}
+        className="w-20 h-20"
+      />
     </div>
   );
 };
