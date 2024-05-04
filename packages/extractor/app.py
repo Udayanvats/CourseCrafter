@@ -83,6 +83,7 @@ def extract_text(ch, method, properties, body):
       
         docs = json_object["docs"]
         courseId = json_object["courseId"]
+        print("GOt course id",courseId)
         pyqs = json_object["pyqs"]
 
         print(f"docs: {docs}")
@@ -95,7 +96,7 @@ def extract_text(ch, method, properties, body):
                 filepath = get_file_from_s3(s3ObjPath)
                 print(f"file path: {filepath}")
                 fileid = s3ObjPath.split("/")[-1].split(".")[0]
-                
+                filename = s3ObjPath.split("/")[-1]
                 ppt = Presentation(filepath) 
                 text = []
                 for slide in ppt.slides:
@@ -116,7 +117,7 @@ def extract_text(ch, method, properties, body):
                         "object_path":"text/"+fileid+".txt",
                         "error":"",
                         "courseId":courseId,
-                        "file":doc
+                        "message":filename
 
                     }))
                     temp_file.close()
@@ -164,9 +165,10 @@ def extract_text(ch, method, properties, body):
             "status":True,
             "object_path":"",
             "error":"",
-            "message":"done"
-
+            "message":"done",
+            "courseId":courseId,
         }))
+        
 
 
 

@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	// "github.com/gofor-little/env"
+	"CourseCrafter/database"
 	"CourseCrafter/utils"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -115,7 +116,7 @@ func ListenToNotification() {
 
 	for msg := range msgs {
 		// Do something with the message
-		fmt.Println(string(msg.Body))
+		fmt.Println("THIS IS THE MESSAGE I RECEIVED ", string(msg.Body))
 
 		var notification Notification
 		err := json.Unmarshal(msg.Body, &notification)
@@ -126,10 +127,18 @@ func ListenToNotification() {
 		}
 
 		fmt.Println(notification.Error)
-		if notification.Status == false {
+		if !notification.Status {
 			fmt.Println("Error in uploading file")
 		}
-		fmt.Println(notification.Object_path, "Object path")
+		fmt.Println(notification.Object_path, "Object path", "notificatiion couse id", notification.CourseId, "notification message", notification.Message)
+		if string(notification.CourseId) != "" && string(notification.Message) != "done" {
+			err = database.UpdateProcessingStatus(notification.CourseId, notification.Message, true)
+			if err != nil {
+				fmt.Println("Error in updating processing status", err.Error())
+			}
+		}
+
+		fmt.Println("SENDING MESSAGE", notification.Message)
 
 		courseProcessingChannel := utils.CourseChannels[notification.CourseId]
 		courseProcessingChannel <- []byte(notification.Message)
