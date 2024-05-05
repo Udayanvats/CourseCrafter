@@ -266,6 +266,15 @@ attr-accept@^2.2.2:
   resolved "https://registry.npmjs.org/attr-accept/-/attr-accept-2.2.2.tgz"
   integrity sha512-7prDjvt9HmqiZ0cl5CRjtS84sEyhsHP2coDkaZKRKVfCDo9s7iw7ChVmar78Gu9pC4SoR/28wFu/G5JJhTnqEg==
 
+axios@^1.6.8:
+  version "1.6.8"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.6.8.tgz#66d294951f5d988a00e87a0ffb955316a619ea66"
+  integrity sha512-v/ZHtJDU39mDpyBoFVkETcd/uNdxrWRrg3bKpOKzXFA6Bvqopts6ALSMU3y6ijYxbw2B+wPrIv46egTzJXCLGQ==
+  dependencies:
+    follow-redirects "^1.15.6"
+    form-data "^4.0.0"
+    proxy-from-env "^1.1.0"
+
 balanced-match@^1.0.0:
   version "1.0.2"
   resolved "https://registry.npmjs.org/balanced-match/-/balanced-match-1.0.2.tgz"
