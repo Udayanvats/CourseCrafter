@@ -209,6 +209,10 @@ func main() {
 		c.JSON(http.StatusOK, courses)
 	})
 
+	r.POST("/signup", func(c *gin.Context) {
+		
+	})
+
 	r.GET("/courses/:courseId/status", func(c *gin.Context) {
 		courseId := c.Param("courseId")
 		client := c.Writer

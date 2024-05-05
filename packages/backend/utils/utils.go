@@ -10,6 +10,11 @@ var (
 	CourseMutex sync.Mutex
 )
 
+type User struct{
+	Name string `json:"name"`
+	Email string `json:"email"`
+	Password string `json:"password"`
+}
 type Course struct {
 	Title          string          `json:"title"`
 	Mode           int             `json:"mode"`
