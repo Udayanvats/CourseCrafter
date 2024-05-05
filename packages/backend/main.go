@@ -2,7 +2,7 @@ package main
 
 import (
 	"CourseCrafter/aws"
-	"CourseCrafter/cohere"
+	// "CourseCrafter/cohere"
 	"CourseCrafter/database"
 	"CourseCrafter/rmq"
 	"CourseCrafter/utils"
@@ -328,15 +328,150 @@ func main() {
 
 	})
 
-	r.GET("/cohere", func(c *gin.Context) {
-		generateContent, err := cohere.CohereTest()
-		if err != nil {
-			// Handle the error, perhaps by sending an appropriate response
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate content"})
-			return
+	// r.GET("/coursecontent/:courseId", func(c *gin.Context) {
+	// 	courseId := c.Param("courseId")
+	// 	client := c.Writer
+	// 	client.Header().Set("Content-Type", "text/event-stream")
+	// 	client.Header().Set("Cache-Control", "no-cache")
+	// 	client.Header().Set("Connection", "keep-alive")
+	// 	fmt.Printf("started streaming for course %s\n", courseId)
+
+	// 	//get alrready generated content
+	// 	utils.CourseContentMutex.Lock()
+	// 	courseContent := utils.CourseContentMap[courseId]
+	// 	utils.CourseContentMutex.Unlock()
+
+	// 	courseContentMutex := courseContent.ContentMutext
+	// 	courseContentMutex.Lock()
+	// 	client.Write([]byte("data: " + courseContent.Content + "\n\n"))
+	// 	client.Flush()
+	// 	courseContentMutex.Unlock()
+
+	// 	//now get relatime content
+
+	// 	channel := utils.CourseStreamChannels[courseId]
+
+	// 	for message := range channel {
+	// 		//send to user
+	// 	}
+
+	// })
+
+	r.GET("/coursecontent/:courseId", func(c *gin.Context) {
+		courseId := c.Param("courseId")
+		client := c.Writer
+		client.Header().Set("Content-Type", "text/event-stream")
+		client.Header().Set("Cache-Control", "no-cache")
+		client.Header().Set("Connection", "keep-alive")
+		fmt.Printf("started streaming for course %s\n", courseId)
+		client.Flush()
+		type Response struct {
+			Data           *string `json:"data"`
+			Error          *string `json:"error"`
+			Done           bool    `json:"done"`
+			InitailReponse *string `json:"initailReponse"`
 		}
-		fmt.Print(generateContent)
+
+		//get alrready generated content
+		utils.CourseContentMutex.Lock()
+		courseContent := utils.CourseContentMap[courseId]
+		utils.CourseContentMutex.Unlock()
+
+		courseContentMutex := courseContent.ContentMutext
+		courseContentMutex.Lock()
+		// var res Response = Response{
+		// 	Data:           nil,
+		// 	Error:          nil,
+		// 	Done:           false,
+		// 	InitailReponse: &courseContent.Content,
+		// }
+		// var jsonResponse, err = json.Marshal(res)
+		// if err != nil {
+		// 	fmt.Println("error while converting inital res to json", err)
+		// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		// 	c.Writer.Header().Set("Connection", "close")
+		// 	return
+		// }
+
+		// client.Write([]byte("data: " + string(jsonResponse) + "\n\n"))
+		// client.Flush()
+		// courseContentMutex.Unlock()
+
+		//now get relatime content
+		utils.CourseStreamMutex.Lock()
+		channel := utils.CourseStreamChannels[courseId]
+		utils.CourseStreamMutex.Unlock()
+
+		fmt.Println("channel got")
+
+		defer close(channel)
+		defer func() {
+			utils.CourseStreamMutex.Lock()
+			defer utils.CourseStreamMutex.Unlock()
+			delete(utils.CourseStreamChannels, courseId)
+		}()
+
+		for message := range channel {
+
+			if message.Error != nil {
+
+				fmt.Println("Error received as ", message.Error)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": message.Error})
+				c.Writer.Header().Set("Connection", "close")
+				return
+
+			} else if message.Done {
+				fmt.Println("Done received as ", message.Done)
+				var res Response = Response{
+					Data:           nil,
+					Error:          nil,
+					Done:           true,
+					InitailReponse: nil,
+				}
+
+				var jsonResponse, err = json.Marshal(res)
+				if err != nil {
+					fmt.Println("error while converting inital res to json", err)
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					c.Writer.Header().Set("Connection", "close")
+					return
+				}
+
+				client.Write([]byte("data: " + string(jsonResponse) + "\n\n"))
+				client.Flush()
+				break
+			} else {
+				fmt.Println("Message received as ", message.Message)
+				var res Response = Response{
+					Data:           &message.Message,
+					Error:          nil,
+					Done:           false,
+					InitailReponse: nil,
+				}
+				var jsonResponse, err = json.Marshal(res)
+				if err != nil {
+					fmt.Println("error while converting inital res to json", err)
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					c.Writer.Header().Set("Connection", "close")
+					return
+				}
+				client.Write([]byte("data: " + string(jsonResponse) + "\n\n"))
+				client.Flush()
+			}
+
+		}
+
 	})
+
+	// r.GET("/cohere", func(c *gin.Context) {
+	// 	generateContent, err := cohere.CohereTest()
+	// 	if err != nil {
+	// 		// Handle the error, perhaps by sending an appropriate response
+	// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate content"})
+	// 		return
+	// 	}
+	// 	fmt.Print(generateContent)
+	// })
 
 	r.Run("localhost:8080")
 }
