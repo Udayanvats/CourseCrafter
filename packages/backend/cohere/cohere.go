@@ -7,11 +7,12 @@ import (
 
 	cohere "github.com/cohere-ai/cohere-go/v2"
 	cohereclient "github.com/cohere-ai/cohere-go/v2/client"
+	"github.com/cohere-ai/cohere-go/v2/core"
 	"github.com/gofor-little/env"
 	// "github.com/sashabaranov/go-openai"
 )
 
-func CohereTest() (*cohere.NonStreamedChatResponse, error) {
+func CohereTest() (*core.Stream[cohere.StreamedChatResponse], error) {
 	var cohereToken = env.Get("COHERE_API_KEY", "")
 
 	extracted_json, err := aws.GetTextFromS3("text/c715e1cf-6c59-4130-820f-d42cb154bd79.json")
@@ -80,18 +81,34 @@ The extracted text contains key concepts, definitions, and explanations presente
 
 }
 
-func CallCohere(authToken string, prompt string) (*cohere.NonStreamedChatResponse, error) {
+// func CallCohere(authToken string, prompt string) (*cohere.NonStreamedChatResponse, error) {
+// 	client := cohereclient.NewClient(cohereclient.WithToken(authToken))
+
+// 	response, err := client.Chat(
+// 		context.TODO(),
+// 		&cohere.ChatRequest{
+// 			Message: prompt,
+// 		},
+// 	)
+// 	if err != nil {
+// 		return response, err
+// 	}
+
+//		return response, nil
+//	}
+func CallCohere(authToken string, prompt string) (*core.Stream[cohere.StreamedChatResponse], error) {
 	client := cohereclient.NewClient(cohereclient.WithToken(authToken))
 
-	response, err := client.Chat(
+	// Start a streaming chat session
+	stream, err := client.ChatStream(
 		context.TODO(),
-		&cohere.ChatRequest{
+		&cohere.ChatStreamRequest{
 			Message: prompt,
 		},
 	)
 	if err != nil {
-		return response, err
+		return nil, err
 	}
 
-	return response, nil
+	return stream, nil
 }

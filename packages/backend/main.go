@@ -8,6 +8,7 @@ import (
 	"CourseCrafter/utils"
 	"encoding/json"
 	"fmt"
+	"io"
 	"strconv"
 	"strings"
 
@@ -328,15 +329,43 @@ func main() {
 
 	})
 
+	// r.GET("/cohere", func(c *gin.Context) {
+	// 	generateContent, err := cohere.CohereTest()
+	// 	if err != nil {
+	// 		// Handle the error, perhaps by sending an appropriate response
+	// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate content"})
+	// 		return
+	// 	}
+	// 	fmt.Print(generateContent)
+	// })
 	r.GET("/cohere", func(c *gin.Context) {
-		generateContent, err := cohere.CohereTest()
+		stream, err := cohere.CohereTest()
 		if err != nil {
 			// Handle the error, perhaps by sending an appropriate response
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate content"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start streaming session"})
 			return
 		}
-		fmt.Print(generateContent)
+	
+		// Defer the closure of the stream
+		defer stream.Close()
+	
+		for {
+			// Receive a message from the stream
+			message, err := stream.Recv()
+			if err == io.EOF {
+				// End of stream, break the loop
+				break
+			}
+			if err != nil {
+				// Handle non-EOF errors
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Error receiving message from stream"})
+				return
+			}
+			// Do something with the received message, e.g., send it to the client
+			c.JSON(http.StatusOK, gin.H{"message": message})
+		}
 	})
+	
 
 	r.Run("localhost:8080")
 }
