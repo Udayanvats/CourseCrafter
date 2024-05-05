@@ -8,7 +8,7 @@
     "css": "app/globals.css",
     "baseColor": "slate",
     "cssVariables": false,
-    "prefix": ""
+    "prefix": "shad"
   },
   "aliases": {
     "components": "@/components",

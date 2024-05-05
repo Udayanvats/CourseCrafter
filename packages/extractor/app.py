@@ -18,10 +18,10 @@ print(AWS_SERVER_SECRET_KEY)
 print(AWS_SERVER_PUBLIC_KEY, AWS_SERVER_SECRET_KEY)
 
 s3 = boto3.client('s3',
-        aws_access_key_id=AWS_SERVER_PUBLIC_KEY, 
-        aws_secret_access_key=AWS_SERVER_SECRET_KEY, 
-        region_name="ap-south-1"
-        )
+    aws_access_key_id=AWS_SERVER_PUBLIC_KEY, 
+    aws_secret_access_key=AWS_SERVER_SECRET_KEY, 
+    region_name="ap-south-1"
+)
 
 RABBITMQ_HOST = 'localhost'
 RABBITMQ_PORT = 5672
@@ -76,54 +76,45 @@ def get_file_from_s3(filepath):
 
 def extract_text(ch, method, properties, body):
     try:
-        reqObject=body.decode('utf-8')
+        reqObject = body.decode('utf-8')
         print(reqObject)
-        # print("Received message: {body}")
         json_object = json.loads(reqObject)
-      
         docs = json_object["docs"]
         courseId = json_object["courseId"]
+        print("GOt course id", courseId)
         pyqs = json_object["pyqs"]
-
         print(f"docs: {docs}")
         print(f"pyqs: {pyqs}")
         print(f"courseId: {courseId}")
-        
+        json_data = {
+            "pyqs": "",
+            "docs": []
+        }
+
         if docs:
             for doc in docs:
                 s3ObjPath = doc
                 filepath = get_file_from_s3(s3ObjPath)
-                print(f"file path: {filepath}")
                 fileid = s3ObjPath.split("/")[-1].split(".")[0]
-                
-                ppt = Presentation(filepath) 
+                filename = s3ObjPath.split("/")[-1]
+                ppt = Presentation(filepath)
                 text = []
                 for slide in ppt.slides:
                     for shape in slide.shapes:
                         if hasattr(shape, "text"):
                             text.append(shape.text)
+                json_data["docs"].append({
+                    "filename": filename,
+                    "contents": [{"page": i + 1, "text": t} for i, t in enumerate(text)]
+                })
+                notify_user(json.dumps({
+                    "status": True,
+                    "error": "",
+                    "courseId": courseId,
+                    "message": filename
+                }))
 
-                # print(text)
-                with tempfile.NamedTemporaryFile(mode='w', delete=False,encoding='utf-8') as temp_file:
-                    temp_file.write(str(text))
-                
-                    temp_file.flush()  
-
-
-                    s3.upload_file(temp_file.name, bucket_name,"text/"+fileid+".txt")
-                    notify_user(json.dumps({
-                        "status":True,
-                        "object_path":"text/"+fileid+".txt",
-                        "error":"",
-                        "courseId":courseId,
-                        "file":doc
-
-                    }))
-                    temp_file.close()
-                    os.remove(temp_file.name)
-                    # Print confirmation message
-                    print("File uploaded to S3 successfully")
-
+          
 
         if pyqs:
             for pyq in pyqs:
@@ -131,50 +122,41 @@ def extract_text(ch, method, properties, body):
                 filepath = get_file_from_s3(s3ObjPath)
                 print(f"file path: {filepath}")
                 fileid = s3ObjPath.split("/")[-1].split(".")[0]
-                
-                ppt = Presentation(filepath) 
+                ppt = Presentation(filepath)
                 text = []
                 for slide in ppt.slides:
                     for shape in slide.shapes:
                         if hasattr(shape, "text"):
                             text.append(shape.text)
+                notify_user(json.dumps({
+                    "status": True,
+                    "error": "",
+                    "courseId": courseId,
+                    "message": pyq
+                }))
+                json_data["pyqs"]+= "\n".join(text)
+        
 
-                # print(text)
-                with tempfile.NamedTemporaryFile(mode='w', delete=False,encoding='utf-8') as temp_file:
-                    temp_file.write(str(text))
-                
-                    temp_file.flush()  
-
-
-                    s3.upload_file(temp_file.name, bucket_name,"text/"+fileid+".txt")
-                    notify_user(json.dumps({
-                        "status":True,
-                        "object_path":"text/"+fileid+".txt",
-                        "error":"",
-                        "courseId":courseId,
-                        "message":pyq
-
-                    }))
-                    temp_file.close()
-                    os.remove(temp_file.name)
-                    # Print confirmation message
-                    print("File uploaded to S3 successfully")
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False) as temp_file:
+            temp_file.write(json.dumps(json_data))
+            temp_file_name = temp_file.name
+        print(f"Temp file created: {temp_file_name}")
+        upload_file_to_s3(open(temp_file_name, "rb"), "text/" + courseId + ".json")
+        os.unlink(temp_file_name)  # Remove the temporary file
 
         notify_user(json.dumps({
-            "status":True,
-            "object_path":"",
-            "error":"",
-            "message":"done"
-
+            "status": True,
+            "object_path": "text/" + courseId + ".json",
+            "error": "",
+            "message": "done",
+            "courseId": courseId,
         }))
-
-
 
     except Exception as e:
         notify_user(json.dumps({
-            "status":False,
-            "object_path":"",
-            "error":"Error extracting text: "+str(e)
+            "status": False,
+            "object_path": "",
+            "error": "Error extracting text: " + str(e)
         }))
         print(f"Error extracting text: {e}")
 

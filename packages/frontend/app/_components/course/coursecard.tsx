@@ -2,7 +2,7 @@
 import React from "react";
 import CheckIcon from "./checkIcon";
 import { Badge } from "@/components/ui/badge";
-import { ClockIcon } from "lucide-react";
+// import { ClockIcon } from "lucide-react";
 import { CircularProgressbar } from "react-circular-progressbar";
 interface CoursecardProps {
   topic: string;
@@ -36,7 +36,10 @@ const Coursecard = ({ topic, status, username }: CoursecardProps) => {
             {status == true ? (
               <CheckIcon className="ml-2 h-4 w-4 text-green-500" />
             ) : (
-              <ClockIcon className="ml-2 h-4 w-4 text-yellow-500" />
+              <div>
+
+              </div>
+              // <ClockIcon className="ml-2 h-4 w-4 text-yellow-500" />
             )}
           </div>
         </div>
@@ -47,7 +50,7 @@ const Coursecard = ({ topic, status, username }: CoursecardProps) => {
         text={`${percentage}%`}
         counterClockwise={false}
         background={true}
-        backgroundPadding={8}
+        backgroundPadding={10}
         styles={{
           path: {
             stroke: `rgba(62, 152, 199, ${percentage / 100})`,
@@ -60,9 +63,9 @@ const Coursecard = ({ topic, status, username }: CoursecardProps) => {
           trail: {
             stroke: "#d6d6d6",
             strokeWidth: 14, // Increase the width of the trail
-            strokeLinecap: "butt",
-            transform: "rotate(0.25turn)",
-            transformOrigin: "center center",
+            // strokeLinecap: "butt",
+            // transform: "rotate(0.25turn)",
+            // transformOrigin: "center center",
           },
           text: {
             fill: "#f88",
@@ -73,6 +76,7 @@ const Coursecard = ({ topic, status, username }: CoursecardProps) => {
           },
           background: {
             fill: "#FFFF", // Change the color of the background
+            width:"500px"
           },
         }}
         className="w-20 h-20"

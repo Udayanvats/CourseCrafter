@@ -8,6 +8,8 @@ import (
 	"fmt"
 
 	// "github.com/gofor-little/env"
+	"CourseCrafter/aws"
+	"CourseCrafter/database"
 	"CourseCrafter/utils"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -72,11 +74,11 @@ func ListenToNotification() {
 	fmt.Println("Listening to notification")
 	// var cohereToken = env.Get("COHERE_API_KEY", "")
 	type Notification struct {
-		Error       string `json:"error"`
-		Status      bool   `json:"status"`
-		Object_path string `json:"object_path"`
-		CourseId    string `json:"courseId"`
-		Message     string `json:"message"`
+		Error       string  `json:"error"`
+		Status      bool    `json:"status"`
+		Object_path *string `json:"object_path"`
+		CourseId    string  `json:"courseId"`
+		Message     string  `json:"message"`
 	}
 
 	ch, err := conn.Channel()
@@ -115,7 +117,7 @@ func ListenToNotification() {
 
 	for msg := range msgs {
 		// Do something with the message
-		fmt.Println(string(msg.Body))
+		fmt.Println("THIS IS THE MESSAGE I RECEIVED ", string(msg.Body))
 
 		var notification Notification
 		err := json.Unmarshal(msg.Body, &notification)
@@ -126,15 +128,28 @@ func ListenToNotification() {
 		}
 
 		fmt.Println(notification.Error)
-		if notification.Status == false {
+		if !notification.Status {
 			fmt.Println("Error in uploading file")
 		}
-		fmt.Println(notification.Object_path, "Object path")
+		fmt.Println(notification.Object_path, "Object path", "notificatiion couse id", notification.CourseId, "notification message", notification.Message)
+		if string(notification.CourseId) != "" && string(notification.Message) != "done" {
+			err = database.UpdateProcessingStatus(notification.CourseId, notification.Message, true)
+			if err != nil {
+				fmt.Println("Error in updating processing status", err.Error())
+			}
+		}
+
+		fmt.Println("SENDING MESSAGE", notification.Message)
 
 		courseProcessingChannel := utils.CourseChannels[notification.CourseId]
 		courseProcessingChannel <- []byte(notification.Message)
-
-		// extracted_text, err := aws.GetTextFromS3(notification.Object_path)
+		if notification.Message == "done" {
+			extracted_json, err := aws.GetTextFromS3(*notification.Object_path)
+			if err != nil {
+				fmt.Println("Failed to get text from S3:", err)
+			}
+			fmt.Println(extracted_json, "Extracted text")
+		}
 
 		// if err != nil {
 		// 	fmt.Println("Failed to get text from S3:", err)
