@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	// "github.com/gofor-little/env"
 	"CourseCrafter/aws"
@@ -148,8 +149,19 @@ func ListenToNotification() {
 			if err != nil {
 				fmt.Println("Failed to get text from S3:", err)
 			}
-			go cohere.StartGenerationTopics(extracted_json, notification.CourseId)
-			// go cohere.StartGeneration(extracted_json, notification.CourseId)
+			topicList := cohere.StartGenerationTopics(extracted_json, notification.CourseId)
+			jsonBytes := []byte(topicList)
+
+			// Create a reader from byte slice.
+			reader := strings.NewReader(string(jsonBytes))
+			objectKey := "course/" + notification.CourseId + ".json"
+
+			// Upload the file to S3.
+			err = aws.UploadFileToS3(objectKey, reader)
+			if err != nil {
+				fmt.Println("Failed to upload file to S3:", err)
+			}
+
 		}
 
 		// if err != nil {

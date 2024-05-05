@@ -16,7 +16,6 @@ type CourseContent struct {
 	ContentMutext sync.Mutex
 }
 
-
 var (
 	CourseContentMap   = make(map[string]CourseContent)
 	CourseContentMutex sync.Mutex
@@ -44,6 +43,7 @@ type StreamResponse struct {
 	Message string  `json:"status"`
 	Error   *string `json:"error"`
 	Done    bool    `json:"done"`
+	// TopicList []string `json:"topicList"`
 }
 
 func ListTopicsPrompt(courseJson string) string {
@@ -69,14 +69,7 @@ func ListTopicsPrompt(courseJson string) string {
 	Extract topics from the provided content on each page and organize them into an array.
 	
 	Overall, the goal is to identify the main topics covered in the presentation content.
-	
-	JSON Format for Output:
-	[
-	  {
-		"topicName": "Topic Name"
-		
-	  }
-	]
+	[ {"topicList":[topic1,topic2,...]}, {{ "topicName":"", "extracted content":""}} ]
 	`, courseJson)
 }
 func InputPrompt(courseJson string) string {

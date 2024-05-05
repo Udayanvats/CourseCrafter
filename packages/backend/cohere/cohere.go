@@ -10,6 +10,7 @@ import (
 
 	cohere "github.com/cohere-ai/cohere-go/v2"
 	cohereclient "github.com/cohere-ai/cohere-go/v2/client"
+
 	// "github.com/cohere-ai/cohere-go/v2/core"
 	"github.com/gofor-little/env"
 	// "github.com/sashabaranov/go-openai"
@@ -83,38 +84,21 @@ import (
 
 // }
 
-// func CallCohere(authToken string, prompt string) (*cohere.NonStreamedChatResponse, error) {
-// 	client := cohereclient.NewClient(cohereclient.WithToken(authToken))
+func CallCohere(authToken string, prompt string) (*cohere.NonStreamedChatResponse, error) {
+	client := cohereclient.NewClient(cohereclient.WithToken(authToken))
 
-// 	stream, err := client.ChatStream(
-// 		context.TODO(),
-// 		&cohere.ChatStreamRequest{
-// 			Message: prompt,
-// 		},
-// 	)
-// 	defer stream.Close()
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	response, err := client.Chat(
+		context.TODO(),
+		&cohere.ChatRequest{
+			Message: prompt,
+		},
+	)
+	if err != nil {
+		return response, err
+	}
 
-// 	for {
-// 		message, err := stream.Recv()
-// 		if errors.Is(err, io.EOF) {
-// 			fmt.Println("EOF")
-// 			break
-// 		}
-// 		if err != nil {
-// 			// The stream has encountered a non-recoverable error. Propagate the
-// 			// error by simply returning the error like usual.
-// 			fmt.Println("error while receiving message", err)
-// 			return nil, err
-// 		}
-// 		// Do something with the message!
-// 		fmt.Println("messageeeee", message)
-// 	}
-
-// 	return nil, nil
-// }
+	return response, nil
+}
 
 func StartGeneration(extracted_json string, courseId string) {
 	var cohereToken = env.Get("COHERE_API_KEY", "")
@@ -181,66 +165,14 @@ func StartGeneration(extracted_json string, courseId string) {
 
 }
 
-
-func StartGenerationTopics(extracted_json string, courseId string) {
+func StartGenerationTopics(extracted_json string, courseId string) string {
 	var cohereToken = env.Get("COHERE_API_KEY", "")
 	fmt.Println(courseId, "cohere Course Id")
 	inputPrompt := utils.ListTopicsPrompt(extracted_json)
-	// fmt.Println(inputPrompt, "input prompt")
-	client := cohereclient.NewClient(cohereclient.WithToken(cohereToken))
-
-	stream, err := client.ChatStream(
-		context.TODO(),
-		&cohere.ChatStreamRequest{
-			Message: inputPrompt,
-		},
-	)
-
+	topicsList, err := CallCohere(cohereToken, inputPrompt)
 	if err != nil {
-		fmt.Println("error while starting generation of topics", err)
+		panic("failed to generate content: " + err.Error())
 	}
-
-	defer stream.Close()
-	utils.CourseStreamMutex.Lock()
-	channel := make(chan utils.StreamResponse)
-	utils.CourseStreamChannels[courseId] = channel
-	utils.CourseStreamMutex.Unlock()
-
-	if err != nil {
-
-		errMessage := err.Error()
-
-		channel <- utils.StreamResponse{
-			Error: &errMessage,
-		}
-	}
-
-	for {
-		message, err := stream.Recv()
-		if errors.Is(err, io.EOF) {
-			fmt.Println("EOF")
-			channel <- utils.StreamResponse{
-				Done: true,
-			}
-			break
-		} else if err != nil {
-			// The stream has encountered a non-recoverable error. Propagate the
-			// error by simply returning the error like usual.
-			fmt.Println("error while receiving message", err)
-			errMessage := err.Error()
-			channel <- utils.StreamResponse{
-				Error: &errMessage,
-			}
-
-		}
-		// fmt.Println("messageeeee", message.TextGeneration.Text)
-		if message.TextGeneration != nil && message.TextGeneration.Text != "" {
-			channel <- utils.StreamResponse{
-				Message: message.TextGeneration.Text,
-			}
-			// fmt.Println("messageeeee", message.TextGeneration.Text)
-
-		}
-	}
+	return topicsList.Text
 
 }

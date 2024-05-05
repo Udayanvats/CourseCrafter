@@ -2,6 +2,8 @@ package main
 
 import (
 	"CourseCrafter/aws"
+	"CourseCrafter/cohere"
+
 	// "CourseCrafter/cohere"
 	"CourseCrafter/database"
 	"CourseCrafter/rmq"
@@ -192,6 +194,7 @@ func main() {
 
 		c.JSON(http.StatusOK, gin.H{"message": "File uploaded successfully", "courseId": courseId})
 	})
+
 	r.POST("/courses", func(c *gin.Context) {
 		userID := c.PostForm("userId")
 		// userId:=  strconv.Itoa(userID)
@@ -357,7 +360,18 @@ func main() {
 	// 		//send to user
 	// 	}
 
-	// })
+	// // })
+
+	r.GET("/cohere", func(c *gin.Context) {
+		extracted_json, err := aws.GetTextFromS3("text/c715e1cf-6c59-4130-820f-d42cb154bd79.json")
+		if err != nil {
+			fmt.Println("Failed to get text from S3:", err)
+		}
+		// fmt.Print(extracted_json)
+
+		topicList := cohere.StartGenerationTopics(extracted_json, "c715e1cf-6c59-4130-820f-d42cb154bd79")
+		c.JSON(http.StatusOK, topicList)
+	})
 
 	r.GET("/coursecontent/:courseId", func(c *gin.Context) {
 		courseId := c.Param("courseId")
@@ -368,45 +382,13 @@ func main() {
 		fmt.Printf("started streaming for course %s\n", courseId)
 		client.Flush()
 		type Response struct {
-			Data           *string  `json:"data"`
-			Error          *string  `json:"error"`
-			Done           bool     `json:"done"`
-			InitailReponse *string  `json:"initailReponse"`
-			Topics         []string `json:"topics"`
+			Data           *string `json:"data"`
+			Error          *string `json:"error"`
+			Done           bool    `json:"done"`
+			InitailReponse *string `json:"initailReponse"`
 		}
 
 		// send list of topics
-		topicsChannel := utils.CourseStreamChannels[courseId]
-
-		var topics []string
-		for topicMessage := range topicsChannel {
-			if topicMessage.Error != nil {
-				jsonResponse, err := json.Marshal(Response{Error: topicMessage.Error})
-				if err != nil {
-					fmt.Println("error while converting response to JSON", err)
-					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-					c.Writer.Header().Set("Connection", "close")
-					return
-				}
-				client.Write([]byte("data: " + string(jsonResponse) + "\n\n"))
-				client.Flush()
-				c.Writer.Header().Set("Connection", "close")
-				return
-			} else if topicMessage.Done {
-				jsonResponse, err := json.Marshal(Response{Topics: topics, Done: true})
-				if err != nil {
-					fmt.Println("error while converting response to JSON", err)
-					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-					c.Writer.Header().Set("Connection", "close")
-					return
-				}
-				client.Write([]byte("data: " + string(jsonResponse) + "\n\n"))
-				client.Flush()
-				break
-			} else {
-				topics = append(topics, topicMessage.Message)
-			}
-		}
 
 		//get alrready generated content
 		utils.CourseContentMutex.Lock()
