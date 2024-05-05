@@ -327,5 +327,35 @@ func main() {
 
 	})
 
+	r.GET("/coursecontent/:courseId", func(c *gin.Context) {
+		courseId := c.Param("courseId")
+		client := c.Writer
+		client.Header().Set("Content-Type", "text/event-stream")
+		client.Header().Set("Cache-Control", "no-cache")
+		client.Header().Set("Connection", "keep-alive")
+		fmt.Printf("started streaming for course %s\n", courseId)
+
+		//get alrready generated content
+		utils.CourseContentMutex.Lock()
+		courseContent := utils.CourseContentMap[courseId]
+		utils.CourseContentMutex.Unlock()
+
+		courseContentMutex := courseContent.ContentMutext
+		courseContentMutex.Lock()
+		client.Write([]byte("data: " + courseContent.Content + "\n\n"))
+		client.Flush()
+		courseContentMutex.Unlock()
+
+
+		//now get relatime content
+
+		channel := utils.CourseStreamChannels[courseId]
+
+		for message := range channel {
+			//send to user
+		}
+
+	})
+
 	r.Run("localhost:8080")
 }
