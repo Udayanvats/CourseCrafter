@@ -1,10 +1,39 @@
 "use client";
 import { Input } from "@/components/ui/input";
 import Coursecard from "../_components/course/coursecard";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import axios from "axios";
 
-export default function Widget() {
+export default function Courses() {
+  const [courses, setCourses] = useState([]);
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const formData = new FormData();
+        formData.append("userId", "2");
+
+        const response = await fetch("http://localhost:8080/courses", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch courses");
+        }
+
+        const responseData = await response.json();
+
+        console.log(responseData);
+        setCourses(responseData);
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
   return (
     <div className="bg-white min-h-screen text-black">
       <div className="border-b border-gray-200 p-4">
@@ -41,6 +70,14 @@ export default function Widget() {
       </div>
       <div className="p-4">
         <div className="grid grid-cols-1 gap-6">
+          {courses.map((course) => (
+            <Coursecard
+              key={course.userId}
+              topic={course.title}
+              status={true}
+              username="anurag"
+            />
+          ))}
           <Coursecard
             topic="Introduction to Web Development"
             status={true}

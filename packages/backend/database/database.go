@@ -9,6 +9,7 @@ import (
 	"CourseCrafter/utils"
 
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/lib/pq"
 )
 
 var pool *pgxpool.Pool
@@ -37,4 +38,34 @@ func AddCourse(course utils.Course) (string, error) {
 		return "", err
 	}
 	return id, nil
+}
+
+func GetCourses(userId string) ([]utils.Course, error) {
+	fmt.Print("DATABSE MEH", userId)
+	var courses []utils.Course
+
+	rows, err := pool.Query(context.Background(), `SELECT id, title, mode, docs, pyqs FROM course WHERE userId = $1`, userId)
+	// fmt.Print(rows)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var course utils.Course
+		var id string
+		err := rows.Scan(&id, &course.Title, &course.Mode, pq.Array(&course.Docs), pq.Array(&course.Pyqs))
+		if err != nil {
+			return nil, err
+		}
+		course.UserId = userId
+		courses = append(courses, course)
+	}
+	// fmt.Print(courses)
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return courses, nil
 }

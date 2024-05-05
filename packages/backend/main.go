@@ -177,6 +177,25 @@ func main() {
 
 		c.JSON(http.StatusOK, gin.H{"message": "File uploaded successfully", "courseId": courseId})
 	})
+	r.POST("/courses", func(c *gin.Context) {
+		userID := c.PostForm("userId")
+		// userId:=  strconv.Itoa(userID)
+		fmt.Print(userID)
+		if userID == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "userId is required"})
+			return
+		}
+
+		courses, err := database.GetCourses(userID)
+		if err != nil {
+			fmt.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		// fmt.Println("Courses:", courses)
+		c.JSON(http.StatusOK, courses)
+	})
 
 	r.GET("/courses/:courseId/status", func(c *gin.Context) {
 		courseId := c.Param("courseId")

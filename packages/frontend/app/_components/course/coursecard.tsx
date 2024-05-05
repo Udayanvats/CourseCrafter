@@ -19,7 +19,7 @@ const Coursecard = ({ topic, status, username }: CoursecardProps) => {
     return diffDays;
   };
   return (
-    <div className="border p-4 flex items-center justify-between rounded-md shadow-md">
+    <div className="border p-4 flex items-center justify-between rounded-md shadow-md ">
       <div className="flex">
         <div className="w-16 h-16 m-4 bg-zinc-200 flex items-center justify-center">
           <img src="https://placehold.co/64" alt="Course Thumbnail" />
@@ -47,7 +47,7 @@ const Coursecard = ({ topic, status, username }: CoursecardProps) => {
         text={`${percentage}%`}
         counterClockwise={false}
         background={true}
-        backgroundPadding={2}
+        backgroundPadding={8}
         styles={{
           path: {
             stroke: `rgba(62, 152, 199, ${percentage / 100})`,
