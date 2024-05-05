@@ -3,7 +3,9 @@ package cohere
 import (
 	"CourseCrafter/aws"
 	"context"
+	"errors"
 	"fmt"
+	"io"
 
 	cohere "github.com/cohere-ai/cohere-go/v2"
 	cohereclient "github.com/cohere-ai/cohere-go/v2/client"
@@ -83,15 +85,33 @@ The extracted text contains key concepts, definitions, and explanations presente
 func CallCohere(authToken string, prompt string) (*cohere.NonStreamedChatResponse, error) {
 	client := cohereclient.NewClient(cohereclient.WithToken(authToken))
 
-	response, err := client.Chat(
+	stream, err := client.ChatStream(
 		context.TODO(),
-		&cohere.ChatRequest{
+		&cohere.ChatStreamRequest{
 			Message: prompt,
 		},
 	)
+	defer stream.Close()
 	if err != nil {
-		return response, err
-	}
+		return nil, err
+	  }
+	
 
-	return response, nil
+	for {
+		message, err := stream.Recv()
+		if errors.Is(err, io.EOF) {
+			fmt.Println("EOF")
+		  break
+		}
+		if err != nil {
+		  // The stream has encountered a non-recoverable error. Propagate the
+		  // error by simply returning the error like usual.
+		  fmt.Println("error while receiving message", err)
+		  return nil, err
+		}
+		// Do something with the message!
+		fmt.Println("messageeeee", message)
+	  }
+
+	return nil, nil
 }
