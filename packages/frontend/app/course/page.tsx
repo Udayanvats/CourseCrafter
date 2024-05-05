@@ -3,7 +3,6 @@ import { Input } from "@/components/ui/input";
 import Coursecard from "../_components/course/coursecard";
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import axios from "axios";
 
 export default function Courses() {
   const [courses, setCourses] = useState([]);

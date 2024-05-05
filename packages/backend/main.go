@@ -2,6 +2,7 @@ package main
 
 import (
 	"CourseCrafter/aws"
+	"CourseCrafter/cohere"
 	"CourseCrafter/database"
 	"CourseCrafter/rmq"
 	"CourseCrafter/utils"
@@ -325,6 +326,16 @@ func main() {
 		client.Flush()
 		c.Writer.Header().Set("Connection", "close")
 
+	})
+
+	r.GET("/cohere", func(c *gin.Context) {
+		generateContent, err := cohere.CohereTest()
+		if err != nil {
+			// Handle the error, perhaps by sending an appropriate response
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate content"})
+			return
+		}
+		fmt.Print(generateContent)
 	})
 
 	r.Run("localhost:8080")
