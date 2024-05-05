@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	// "github.com/gofor-little/env"
+	"CourseCrafter/aws"
 	"CourseCrafter/database"
 	"CourseCrafter/utils"
 
@@ -73,11 +74,11 @@ func ListenToNotification() {
 	fmt.Println("Listening to notification")
 	// var cohereToken = env.Get("COHERE_API_KEY", "")
 	type Notification struct {
-		Error       string `json:"error"`
-		Status      bool   `json:"status"`
-		Object_path string `json:"object_path"`
-		CourseId    string `json:"courseId"`
-		Message     string `json:"message"`
+		Error       string  `json:"error"`
+		Status      bool    `json:"status"`
+		Object_path *string `json:"object_path"`
+		CourseId    string  `json:"courseId"`
+		Message     string  `json:"message"`
 	}
 
 	ch, err := conn.Channel()
@@ -142,8 +143,13 @@ func ListenToNotification() {
 
 		courseProcessingChannel := utils.CourseChannels[notification.CourseId]
 		courseProcessingChannel <- []byte(notification.Message)
-
-		// extracted_text, err := aws.GetTextFromS3(notification.Object_path)
+		if notification.Message == "done" {
+			extracted_json, err := aws.GetTextFromS3(*notification.Object_path)
+			if err != nil {
+				fmt.Println("Failed to get text from S3:", err)
+			}
+			fmt.Println(extracted_json, "Extracted text")
+		}
 
 		// if err != nil {
 		// 	fmt.Println("Failed to get text from S3:", err)

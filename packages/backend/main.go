@@ -202,6 +202,8 @@ func main() {
 		if err != nil {
 			fmt.Println("error while getting course", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.Writer.Header().Set("Connection", "close")
+
 			return
 		}
 		fmt.Println(course)
@@ -211,6 +213,8 @@ func main() {
 		if err != nil {
 			fmt.Println("error while converting processing data to json", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.Writer.Header().Set("Connection", "close")
+
 			return
 		}
 
@@ -229,6 +233,8 @@ func main() {
 		if err != nil {
 			fmt.Println("error while converting inital res to json", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.Writer.Header().Set("Connection", "close")
+
 			return
 		}
 
@@ -251,10 +257,14 @@ func main() {
 			if err != nil {
 				fmt.Println("error while converting done res to json", err)
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				c.Writer.Header().Set("Connection", "close")
+
 				return
 			}
 			client.Write([]byte("data: " + string(doneResponseString) + "\n\n"))
 			client.Flush()
+			c.Writer.Header().Set("Connection", "close")
+
 			return
 		}
 
@@ -283,6 +293,8 @@ func main() {
 			if err != nil {
 				fmt.Println("error while converting response to json", err)
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				c.Writer.Header().Set("Connection", "close")
+
 				return
 			}
 
@@ -292,6 +304,8 @@ func main() {
 		}
 
 		client.Flush()
+		c.Writer.Header().Set("Connection", "close")
+
 
 	})
 

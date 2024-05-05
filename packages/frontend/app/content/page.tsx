@@ -12,7 +12,7 @@ export default function Content() {
       <div className="flex-1 overflow-y-auto">
         <div className="bg-gray-100 py-4 px-6">
           <div className="flex space-x-4 overflow-x-auto">
-          <Buttoncomponent text="Introduction" isSelected={false} isLoding={true}/>
+          <Buttoncomponent text="Introduction" isSelected={false} isLoading={true}/>
           </div>
         </div>
         <div className="p-8">
