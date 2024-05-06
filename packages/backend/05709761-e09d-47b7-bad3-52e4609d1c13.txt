@@ -1,0 +1,144 @@
+
+[
+    {
+        "topicName": "Convolutional Neural Networks (CNNs)",
+        "content": "CNNs are a type of artificial neural network designed for image recognition and processing. They typically have three layers: convolutional, pooling, and fully connected layers. The convolutional layer performs dot products between matrices, with one matrix being learnable parameters (kernel) and the other a restricted portion of the image. This produces an activation map, a 2D representation of the image. The pooling layer summarizes nearby outputs, reducing the spatial size. The fully connected layer, a feedforward neural network, performs classification based on extracted features. Activation functions like ReLu and softmax aid training and prediction.",
+        "fileAndPage": [
+            {
+                "filename": "cnn.pptx",
+                "pagenumber": 15,
+                "pyqs": [
+                    "Explain the architecture of a CNN and the role of each layer.",
+                    "Describe the process of forward pass in the convolutional layer and how it produces an activation map."
+                ]
+            },
+            {
+                "filename": "cnn.pptx",
+                "pagenumber": 18,
+                "pyqs": [
+                    "What is the purpose of the kernel in the convolutional layer?",
+                    "How does the convolutional layer carry the computational load in a CNN?"
+                ]
+            },
+            {
+                "filename": "cnn.pptx",
+                "pagenumber": 23,
+                "pyqs": [
+                    "Explain the role of the pooling layer in a CNN.",
+                    "How does the pooling layer help in reducing the spatial size of the representation?"
+                ]
+            },
+            {
+                "filename": "cnn.pptx",
+                "pagenumber": 27,
+                "pyqs": [
+                    "Describe the fully connected layer and its role in classification.",
+                    "How does a feedforward neural network differ from other types of neural networks in terms of information flow?"
+                ]
+            },
+            {
+                "filename": "cnn.pptx",
+                "pagenumber": 29,
+                "pyqs": [
+                    "What is the purpose of an activation function in a neural network?",
+                    "Explain the role of activation functions in training via backpropagation.",
+                    "In which layers of a CNN are ReLu and softmax activation functions typically used?"
+                ]
+            }
+        ]
+    },
+    {
+        "topicName": "Object Detection with CNNs",
+        "content": "Object detection using CNNs involves locating and classifying objects within an image. This includes object localization (finding object locations) and object classification. Region-based CNN (R-CNN) is a two-stage pipeline that uses selective search to generate region proposals and then classifies objects within these regions. Fast R-CNN improves speed by generating a feature map first and then classifying region proposals. Faster R-CNN eliminates selective search, using a Region Proposal Network (RPN) to learn region proposals directly from the feature map. YOLO (You Only Look Once) is a state-of-the-art algorithm that divides the image into grids and predicts boundary boxes and class probabilities. SSD (Single Shot MultiBox Detector) performs object localization and classification in a single forward pass, making it faster.",
+        "fileAndPage": [
+            {
+                "filename": "cnn.pptx",
+                "pagenumber": 31,
+                "pyqs": [
+                    "Explain the difference between object detection and object classification.",
+                    "What is the purpose of bounding boxes in object detection algorithms?"
+                ]
+            },
+            {
+                "filename": "cnn.pptx",
+                "pagenumber": 34,
+                "pyqs": [
+                    "How does object detection differ from object classification in terms of bounding boxes?",
+                    "Provide an example of an image with multiple objects and explain how object detection algorithms would identify and locate each object."
+                ]
+            },
+            {
+                "filename": "cnn.pptx",
+                "pagenumber": 36,
+                "pyqs": [
+                    "Define object localization and explain why it is considered a regression problem.",
+                    "How do you calculate the x and y coordinates for the bounding boxes in object localization?"
+                ]
+            },
+            {
+                "filename": "cnn.pptx",
+                "pagenumber": 39,
+                "pyqs": [
+                    "Explain the R-CNN object detection pipeline and its two stages.",
+                    "How does R-CNN generate region proposals using selective search?"
+                ]
+            },
+            {
+                "filename": "cnn.pptx",
+                "pagenumber": 46,
+                "pyqs": [
+                    "How does Fast R-CNN improve the speed compared to R-CNN?",
+                    "Explain the steps involved in the Fast R-CNN algorithm."
+                ]
+            },
+            {
+                "filename": "cnn.pptx",
+                "pagenumber": 54,
+                "pyqs": [
+                    "Why is Fast R-CNN faster than R-CNN in terms of convolutional operations?",
+                    "Provide a code snippet to demonstrate the difference in convolutional operations between R-CNN and Fast R-CNN."
+                ]
+            },
+            {
+                "filename": "cnn.pptx",
+                "pagenumber": 58,
+                "pyqs": [
+                    "How does Faster R-CNN eliminate the selective search algorithm?",
+                    "Explain the Region Proposal Network (RPN) and its role in Faster R-CNN."
+                ]
+            },
+            {
+                "filename": "cnn.pptx",
+                "pagenumber": 62,
+                "pyqs": [
+                    "What are anchor boxes and how are they used in Faster R-CNN?",
+                    "Explain the sliding window approach used by the Region Proposal Network."
+                ]
+            },
+            {
+                "filename": "cnn.pptx",
+                "pagenumber": 64,
+                "pyqs": [
+                    "Calculate the Intersection over Union (IoU) for two given bounding boxes.",
+                    "Explain how Non-Maximum Suppression (NMS) is used to remove redundant region proposals."
+                ]
+            },
+            {
+                "filename": "cnn.pptx",
+                "pagenumber": 83,
+                "pyqs": [
+                    "Explain the YOLO algorithm and its key steps.",
+                    "How does YOLO divide the image and predict boundary boxes and class probabilities?"
+                ]
+            },
+            {
+                "filename": "cnn.pptx",
+                "pagenumber": 85,
+                "pyqs": [
+                    "Define Single Shot MultiBox Detector (SSD) and explain its three components.",
+                    "How does SSD perform object localization and classification in a single forward pass?"
+                ]
+            }
+        ]
+    }
+]
