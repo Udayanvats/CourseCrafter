@@ -69,7 +69,11 @@ func ListTopicsPrompt(courseJson string) string {
 	Extract topics from the provided content on each page and organize them into an array.
 	
 	Overall, the goal is to identify the main topics covered in the presentation content.
-	[ {"topicList":[topic1,topic2,...]}, {{ "topicName":"", "extracted content":""}} ]
+	Output format of the topic should be an array of strings containing the extracted topics.
+	Output format:
+	["Topic 1", "Topic 2", "Topic 3", ...]
+
+	Only provide the array , nothing else.
 	`, courseJson)
 }
 func InputPrompt(courseJson string) string {

@@ -2,11 +2,13 @@ package cohere
 
 import (
 	// "CourseCrafter/aws"
+	"CourseCrafter/aws"
 	"CourseCrafter/utils"
 	"context"
 	"errors"
 	"fmt"
 	"io"
+	"os"
 
 	cohere "github.com/cohere-ai/cohere-go/v2"
 	cohereclient "github.com/cohere-ai/cohere-go/v2/client"
@@ -134,34 +136,61 @@ func StartGeneration(extracted_json string, courseId string) {
 			Error: &errMessage,
 		}
 	}
+	courseContent := utils.CourseContentMap[courseId]
 
 	for {
 		message, err := stream.Recv()
 		if errors.Is(err, io.EOF) {
 			fmt.Println("EOF")
-			channel <- utils.StreamResponse{
-				Done: true,
-			}
+			// channel <- utils.StreamResponse{
+			// 	Done: true,
+			// }
 			break
 		} else if err != nil {
 			// The stream has encountered a non-recoverable error. Propagate the
 			// error by simply returning the error like usual.
 			fmt.Println("error while receiving message", err)
-			errMessage := err.Error()
-			channel <- utils.StreamResponse{
-				Error: &errMessage,
-			}
+			// errMessage := err.Error()
+			// channel <- utils.StreamResponse{
+			// 	Error: &errMessage,
+			// }
 
 		}
 		// fmt.Println("messageeeee", message.TextGeneration.Text)
 		if message.TextGeneration != nil && message.TextGeneration.Text != "" {
-			channel <- utils.StreamResponse{
-				Message: message.TextGeneration.Text,
-			}
+			// courseContent.ContentMutext.Lock()
+			fmt.Println("messageeeeeasdasdasdasd", message.TextGeneration.Text)
+			courseContent.Content += message.TextGeneration.Text
+			// courseContent.ContentMutext.Unlock()
+
+			// channel <- utils.StreamResponse{
+			// 	Message: message.TextGeneration.Text,
+			// }
 			// fmt.Println("messageeeee", message.TextGeneration.Text)
 
 		}
 	}
+	fmt.Println(courseContent.Content, "creatinf file")
+
+	file, err := os.Create(courseId + ".txt")
+	if err != nil {
+		fmt.Println("Error creating file:", err)
+	}
+
+	fmt.Println("writing to file")
+	// courseContent.ContentMutext.Lock()
+	_, err = file.Write([]byte(courseContent.Content))
+	if err != nil {
+		fmt.Println("Error writing JSON to file:", err)
+	}
+	// courseContent.ContentMutext.Unlock()
+
+	err = aws.UploadFileToS3("course/"+courseId+".txt", file)
+	if err != nil {
+		fmt.Println("Error uploading file to S3:", err)
+	}
+
+	defer file.Close()
 
 }
 
