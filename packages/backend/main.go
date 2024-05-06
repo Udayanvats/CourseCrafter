@@ -370,7 +370,9 @@ func main() {
 		// fmt.Print(extracted_json)
 
 		topicList := cohere.StartGenerationTopics(extracted_json, "c715e1cf-6c59-4130-820f-d42cb154bd79")
-		c.JSON(http.StatusOK, topicList)
+		c.JSON(http.StatusOK, gin.H{
+			"code":    http.StatusOK,
+			"message": string(topicList)})
 	})
 
 	r.GET("/coursecontent/:courseId", func(c *gin.Context) {
