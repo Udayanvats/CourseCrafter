@@ -27,8 +27,7 @@ export default function CourseCreator() {
 
       if (response.ok) {
         const data = await response.json();
-        const token = data.token;
-        document.cookie = `token=${token}`;
+        const token = data.token;   
         router.push("/homepage");
       } else {
         // Handle error response (e.g., display error message)
@@ -52,7 +51,6 @@ export default function CourseCreator() {
     if (response.ok) {
       const data = await response.json();
       const token = data.token;
-      document.cookie = `token=${token}`;
       router.push("/homepage");
     } else {
       console.error("Login failed");

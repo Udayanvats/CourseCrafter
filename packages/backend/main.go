@@ -4,6 +4,11 @@ import (
 	"CourseCrafter/auth"
 	"CourseCrafter/aws"
 	"CourseCrafter/cohere"
+	"context"
+	"runtime"
+
+	// "CourseCrafter/cohere"
+	// "CourseCrafter/cohere"
 	"CourseCrafter/database"
 	"CourseCrafter/rmq"
 	"CourseCrafter/utils"
@@ -16,8 +21,155 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
+
+func handleStreamingRequest(ctx context.Context, c *gin.Context, courseId string) {
+	type Response struct {
+		Data           *string `json:"data"`
+		Error          *string `json:"error"`
+		Done           bool    `json:"done"`
+		InitailReponse *string `json:"initailReponse"`
+		TopicList      *string `json:"topicList"`
+	}
+
+	client := c.Writer
+	client.Header().Set("Content-Type", "text/event-stream")
+	client.Header().Set("Cache-Control", "no-cache")
+	client.Header().Set("Connection", "keep-alive")
+	fmt.Printf("started streaming for course %s\n", courseId)
+	fmt.Println("file", "topicList/"+courseId+".txt")
+	client.Flush()
+
+	channel := utils.CourseStreamChannels[courseId]
+
+	fmt.Println("got here adds")
+	topicList, err := aws.GetTextFromS3("topicList/" + courseId + ".txt")
+
+	if err != nil {
+		fmt.Println("Failed to get text from S3:", err)
+	}
+	var topicResponse Response = Response{
+		Data:           nil,
+		Error:          nil,
+		Done:           false,
+		InitailReponse: nil,
+		TopicList:      &topicList,
+	}
+	topicJsonResponse, err := json.Marshal(topicResponse)
+	if err != nil {
+		fmt.Println("error while converting inital res to json", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.Writer.Header().Set("Connection", "close")
+		return
+	}
+	client.Write([]byte("data: " + string(topicJsonResponse) + "\n\n"))
+
+	client.Flush()
+	utils.CourseContentMutex.Lock()
+	if utils.CourseContentMap[courseId] != nil {
+		(utils.CourseContentMap[courseId]).ContentMutex.Lock()
+		var res Response = Response{
+			Data:           &utils.CourseContentMap[courseId].Content,
+			Error:          nil,
+			Done:           false,
+			InitailReponse: nil,
+		}
+		var jsonResponse, err = json.Marshal(res)
+		if err != nil {
+			fmt.Println("error while converting inital res to json", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.Writer.Header().Set("Connection", "close")
+			return
+		}
+
+		client.Write([]byte("data: " + string(jsonResponse) + "\n\n"))
+		client.Flush()
+		utils.CourseContentMap[courseId].ContentMutex.Unlock()
+	}
+
+	utils.CourseContentMutex.Unlock()
+
+	for {
+		select {
+		case <-ctx.Done():
+			fmt.Println("Context canceled, stopping streaming")
+			return
+		case message := <-*channel:
+			if message.Error != nil {
+
+				fmt.Println("Error received as ", message.Error)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": message.Error})
+				c.Writer.Header().Set("Connection", "close")
+				return
+
+			} else if message.Done {
+				fmt.Println("Done received as ", message.Done)
+				var res Response = Response{
+					Data:           nil,
+					Error:          nil,
+					Done:           true,
+					InitailReponse: nil,
+				}
+
+				var jsonResponse, err = json.Marshal(res)
+				if err != nil {
+					fmt.Println("error while converting inital res to json", err)
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					c.Writer.Header().Set("Connection", "close")
+					return
+				}
+
+				client.Write([]byte("data: " + string(jsonResponse) + "\n\n"))
+				client.Flush()
+				break
+			} else if message.TopicList != nil {
+				fmt.Println("TopicList received as ", message.TopicList)
+				var res Response = Response{
+					Data:           nil,
+					Error:          nil,
+					Done:           false,
+					InitailReponse: nil,
+					TopicList:      message.TopicList,
+				}
+
+				var jsonResponse, err = json.Marshal(res)
+				if err != nil {
+					fmt.Println("error while converting inital res to json", err)
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
+					c.Writer.Header().Set("Connection", "close")
+					return
+				}
+
+				client.Write([]byte("data: " + string(jsonResponse) + "\n\n"))
+				client.Flush()
+			} else {
+				// fmt.Println("Message received as ", message.Message)
+				utils.CourseContentMap[courseId].ContentMutex.Lock()
+				utils.CourseContentMap[courseId].Content += message.Message
+				utils.CourseContentMap[courseId].ContentMutex.Unlock()
+				var res Response = Response{
+					Data:           &message.Message,
+					Error:          nil,
+					Done:           false,
+					InitailReponse: nil,
+				}
+				var jsonResponse, err = json.Marshal(res)
+				if err != nil {
+					fmt.Println("error while converting inital res to json", err)
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					c.Writer.Header().Set("Connection", "close")
+					return
+				}
+
+				client.Write([]byte("data: " + string(jsonResponse) + "\n\n"))
+				client.Flush()
+			}
+		}
+	}
+}
 
 func main() {
 
@@ -117,11 +269,13 @@ func main() {
 		userID, _ := c.Get("userId")
 		userId, _ := userID.(int)
 
-		mode, err := strconv.Atoi(modeStr)
+		modeInt , err  := strconv.Atoi(modeStr)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid mode"})
 			return
 		}
+		mode:= utils.Mode(modeInt)
+		fmt.Println(mode, "modeInt")
 
 		// if err != nil {
 		// 	c.JSON(http.StatusBadRequest, gin.H{"error": "No file uploaded"})
@@ -139,17 +293,15 @@ func main() {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			objectKey := "files/" + header.Filename
+			fileExt := strings.Split(header.Filename, ".")[1]
+			newFilename := uuid.New().String() + "." + fileExt
+			objectKey := "files/" + newFilename
 			err = aws.UploadFileToS3(objectKey, file)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			// err = rmq.PublishFile("extract", header.Filename)
-			// if err != nil {
-			// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			// 	return
-			// }
+
 			docsArr = append(docsArr, objectKey)
 			fmt.Println(objectKey, "objectKey")
 
@@ -163,7 +315,9 @@ func main() {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			objectKey := "files/" + header.Filename
+			fileExt := strings.Split(header.Filename, ".")[1]
+			newFilename := uuid.New().String() + "." + fileExt
+			objectKey := "files/" + newFilename
 			err = aws.UploadFileToS3(objectKey, file)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -204,6 +358,11 @@ func main() {
 		fmt.Println(course.ProcessingData, "course")
 
 		courseId, err := database.AddCourse(course)
+		//initialting course id in upload test
+		utils.CourseStreamMutex.Lock()
+		channel := make(chan utils.StreamResponse)
+		utils.CourseStreamChannels[courseId] = &channel
+		utils.CourseStreamMutex.Unlock()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"erroerer": err.Error()})
 			return
@@ -213,18 +372,20 @@ func main() {
 
 		newChannel := make(chan []byte)
 		utils.CourseMutex.Lock()
-		utils.CourseChannels[courseId] = newChannel
+		utils.CourseProcessingChannels[courseId] = newChannel
 		utils.CourseMutex.Unlock()
 
 		var response struct {
 			CourseId string   `json:"courseId"`
 			Docs     []string `json:"docs"`
 			Pyqs     []string `json:"pyqs"`
+			Mode    utils.Mode `json:"mode"`
 		}
 
 		response.CourseId = courseId
 		response.Docs = docsArr
 		response.Pyqs = pyqsArr
+		response.Mode = mode
 
 		jsonResponse, err := json.Marshal(response)
 		if err != nil {
@@ -341,10 +502,10 @@ func main() {
 			return
 		}
 
-		channel := utils.CourseChannels[courseId]
+		channel := utils.CourseProcessingChannels[courseId]
 
 		for message := range channel {
-			fmt.Println("messageeeee", string(message))
+			// fmt.Println("messageeeee", string(message))
 			if string(message) == "done" {
 				var doneResponse ProcessingES
 				doneResponse.Done = true
@@ -425,110 +586,12 @@ func main() {
 
 	r.GET("/coursecontent/:courseId", func(c *gin.Context) {
 		courseId := c.Param("courseId")
-		client := c.Writer
-		client.Header().Set("Content-Type", "text/event-stream")
-		client.Header().Set("Cache-Control", "no-cache")
-		client.Header().Set("Connection", "keep-alive")
-		fmt.Printf("started streaming for course %s\n", courseId)
-		client.Flush()
-		type Response struct {
-			Data           *string `json:"data"`
-			Error          *string `json:"error"`
-			Done           bool    `json:"done"`
-			InitailReponse *string `json:"initailReponse"`
-		}
 
-		// send list of topics
-
-		//get alrready generated content
-		utils.CourseContentMutex.Lock()
-		courseContent := utils.CourseContentMap[courseId]
-		utils.CourseContentMutex.Unlock()
-
-		courseContentMutex := courseContent.ContentMutext
-		courseContentMutex.Lock()
-		// var res Response = Response{
-		// 	Data:           nil,
-		// 	Error:          nil,
-		// 	Done:           false,
-		// 	InitailReponse: &courseContent.Content,
-		// }
-		// var jsonResponse, err = json.Marshal(res)
-		// if err != nil {
-		// 	fmt.Println("error while converting inital res to json", err)
-		// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		// 	c.Writer.Header().Set("Connection", "close")
-		// 	return
-		// }
-
-		// client.Write([]byte("data: " + string(jsonResponse) + "\n\n"))
-		// client.Flush()
-		// courseContentMutex.Unlock()
-
-		//now get relatime content
-		utils.CourseStreamMutex.Lock()
-		channel := utils.CourseStreamChannels[courseId]
-		utils.CourseStreamMutex.Unlock()
-
-		fmt.Println("channel got")
-
-		defer close(channel)
-		defer func() {
-			utils.CourseStreamMutex.Lock()
-			defer utils.CourseStreamMutex.Unlock()
-			delete(utils.CourseStreamChannels, courseId)
-		}()
-
-		for message := range channel {
-
-			if message.Error != nil {
-
-				fmt.Println("Error received as ", message.Error)
-				c.JSON(http.StatusInternalServerError, gin.H{"error": message.Error})
-				c.Writer.Header().Set("Connection", "close")
-				return
-
-			} else if message.Done {
-				fmt.Println("Done received as ", message.Done)
-				var res Response = Response{
-					Data:           nil,
-					Error:          nil,
-					Done:           true,
-					InitailReponse: nil,
-				}
-
-				var jsonResponse, err = json.Marshal(res)
-				if err != nil {
-					fmt.Println("error while converting inital res to json", err)
-					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-					c.Writer.Header().Set("Connection", "close")
-					return
-				}
-
-				client.Write([]byte("data: " + string(jsonResponse) + "\n\n"))
-				client.Flush()
-				break
-			} else {
-				fmt.Println("Message received as ", message.Message)
-				var res Response = Response{
-					Data:           &message.Message,
-					Error:          nil,
-					Done:           false,
-					InitailReponse: nil,
-				}
-				var jsonResponse, err = json.Marshal(res)
-				if err != nil {
-					fmt.Println("error while converting inital res to json", err)
-					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-					c.Writer.Header().Set("Connection", "close")
-					return
-				}
-				client.Write([]byte("data: " + string(jsonResponse) + "\n\n"))
-				client.Flush()
-			}
-
-		}
-
+		numGoroutines := runtime.NumGoroutine()
+		fmt.Println("numGoroutines", numGoroutines)
+		ctx, cancel := context.WithCancel(c.Request.Context())
+		defer cancel() // Cancel the context when the handler function returns
+		handleStreamingRequest(ctx, c, courseId)
 	})
 
 	r.Run("localhost:8080")

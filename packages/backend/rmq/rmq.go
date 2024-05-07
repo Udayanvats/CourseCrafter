@@ -6,7 +6,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
+	"os"
+	"sync"
 
 	// "github.com/gofor-little/env"
 	"CourseCrafter/aws"
@@ -75,11 +76,12 @@ func PublishFile(queueName, json string) error {
 func ListenToNotification() {
 	fmt.Println("Listening to notification")
 	type Notification struct {
-		Error       string  `json:"error"`
-		Status      bool    `json:"status"`
-		Object_path *string `json:"object_path"`
-		CourseId    string  `json:"courseId"`
-		Message     string  `json:"message"`
+		Error       string      `json:"error"`
+		Status      bool        `json:"status"`
+		Object_path *string     `json:"object_path"`
+		CourseId    string      `json:"courseId"`
+		Message     string      `json:"message"`
+		Mode        *utils.Mode `json:"mode"`
 	}
 
 	ch, err := conn.Channel()
@@ -142,26 +144,85 @@ func ListenToNotification() {
 
 		fmt.Println("SENDING MESSAGE", notification.Message)
 
-		courseProcessingChannel := utils.CourseChannels[notification.CourseId]
-		courseProcessingChannel <- []byte(notification.Message)
+		courseProcessingChannel := utils.CourseProcessingChannels[notification.CourseId]
+		if courseProcessingChannel == nil {
+			courseProcessingChannel = make(chan []byte)
+			utils.CourseProcessingChannels[notification.CourseId] = courseProcessingChannel
+		}
+		fmt.Println("SENDING MESSAGE", notification.Message)
 		if notification.Message == "done" {
+			if utils.CourseContentMap[notification.CourseId] == nil {
+				utils.CourseContentMap[notification.CourseId] = &utils.CourseContent{
+					Content:      "",
+					ContentMutex: sync.Mutex{},
+				}
+			}
 			extracted_json, err := aws.GetTextFromS3(*notification.Object_path)
 			if err != nil {
 				fmt.Println("Failed to get text from S3:", err)
 			}
+			fmt.Println("starrting topic generation MODE", *notification.Mode)
 			topicList := cohere.StartGenerationTopics(extracted_json, notification.CourseId)
-			jsonBytes := []byte(topicList)
+			// fmt.Println("TOPIC LIST", topicList)
 
-			// Create a reader from byte slice.
-			reader := strings.NewReader(string(jsonBytes))
-			objectKey := "course/" + notification.CourseId + ".json"
+			// utils.CourseStreamMutex.Lock()
+			channel := utils.CourseStreamChannels[notification.CourseId]
+			fmt.Println(channel, "channell")
 
-			// Upload the file to S3.
-			err = aws.UploadFileToS3(objectKey, reader)
+			go func() {
+				*channel <- utils.StreamResponse{
+					TopicList: &topicList,
+				}
+			}()
+			// utils.CourseStreamMutex.Unlock()
+			fmt.Println("done sending to channel")
+			file, err := os.Create(notification.CourseId + ".txt")
 			if err != nil {
-				fmt.Println("Failed to upload file to S3:", err)
+				fmt.Println("Error creating file", err)
 			}
 
+			if err != nil {
+				fmt.Println("Error marshalling json", err)
+			}
+
+			file.Write([]byte(topicList))
+			// fmt.Println("TOPIC LIST", topicList)
+			_, err = file.Seek(0, 0)
+			if err != nil {
+				fmt.Println("Error seeking file:", err)
+				return
+			}
+
+			err = aws.UploadFileToS3("topicList/"+notification.CourseId+".txt", file)
+			if err != nil {
+				fmt.Println("Error uploading file to s3", err)
+			}
+
+			file.Close()
+			os.Remove(notification.CourseId + ".txt")
+			courseProcessingChannel <- []byte(notification.Message)
+			var receivedMode utils.Mode
+			if notification.Mode != nil {
+				receivedMode = utils.Mode(*notification.Mode)
+			} else {
+				receivedMode = utils.Simple
+			}
+
+			fmt.Println("MODE", receivedMode)
+
+			if receivedMode == utils.Simple {
+				go cohere.StartGeneration(extracted_json, notification.CourseId, topicList, *channel)
+
+			} else if receivedMode == utils.Detailed {
+				go cohere.StartDetailedGeneration(extracted_json, notification.CourseId, topicList, *channel)
+			} else {
+				go cohere.StartGeneration(extracted_json, notification.CourseId, topicList, *channel)
+			}
+
+			// Create goa reader from byte slice.
+
+		} else {
+			courseProcessingChannel <- []byte(notification.Message)
 		}
 
 		// if err != nil {

@@ -1,3 +1,4 @@
 python-pptx
 pika
 boto3
+pdfminer.six
