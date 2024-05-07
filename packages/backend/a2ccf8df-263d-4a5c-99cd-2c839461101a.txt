@@ -1,0 +1,124 @@
+[
+    {
+        "topic":"Deep learning models for image segmentation",
+        "subtopics": [
+            "Neural Networks",
+            "ANN"
+        ]
+    },
+    {
+        "topic":"Pooling",
+        "subtopics": [
+            "Padding",
+            "Stride",
+            "down sampling the size of an image",
+            "types of pooling layers (max pooling, average pooling)"
+        ]
+    },
+    {
+        "topic":"Convolutional Neural Network (CNN)",
+        "subtopics": [
+            "architecture of CNN (convolution layer, pooling layer, fully connected layer)",
+            "applications of CNN (object detection, semantic segmentation, image captioning)"
+        ]
+    },
+    {
+        "topic":"Convolution Layer",
+        "subtopics": [
+            "core building block of CNN",
+            "performs dot product between matrices",
+            "slides kernel across image to produce activation map"
+        ]
+    },
+    {
+        "topic":"Pooling Layer",
+        "subtopics": [
+            "summarizes nearby outputs",
+            "reduces spatial size of representation"
+        ]
+    },
+    {
+        "topic":"Fully Connected Layer",
+        "subtopics": [
+            "performs classification based on extracted features",
+            "feed forward neural networks (FNN)",
+            "information moves only forward in FNN"
+        ]
+    },
+    {
+        "topic":"Activation Functions",
+        "subtopics": [
+            "decide if neuron should be activated",
+            "help train via back propagation",
+            "ReLU and softmax functions commonly used"
+        ]
+    },
+    {
+        "topic":"Object Detection",
+        "subtopics": [
+            "object localisation and classification",
+            "drawing bounding boxes around objects",
+            "algorithms: R-CNN, Fast R-CNN, Faster R-CNN, YOLO, SSD"
+        ]
+    },
+    {
+        "topic":"Object Localisation",
+        "subtopics": [
+            "locate object within image",
+            "regression problem to find coordinates for bounding box"
+        ]
+    },
+    {
+        "topic":"R-CNN (Region-based CNN)",
+        "subtopics": [
+            "two-stage pipeline: generate ROIs and classify objects",
+            "uses selective search for region proposals",
+            "slow and not suitable for real-time applications"
+        ]
+    },
+    {
+        "topic":"Selective Search",
+        "subtopics": [
+            "initial oversegmentation, region merging, hierarchical grouping, final region proposals"
+        ]
+    },
+    {
+        "topic":"Fast R-CNN",
+        "subtopics": [
+            "improves speed by generating feature map first",
+            "still uses selective search, not suitable for real-time"
+        ]
+    },
+    {
+        "topic":"Faster R-CNN",
+        "subtopics": [
+            "replaces selective search with Region Proposal Network (RPN)",
+            "uses anchor boxes and sliding window approach",
+            "faster but still not suitable for real-time processing"
+        ]
+    },
+    {
+        "topic":"Region Proposal Network (RPN)",
+        "subtopics": [
+            "predicts region proposals using anchor boxes",
+            "uses objectness score and Intersection over Union (IoU) metric",
+            "applies Non-Maximum Suppression (NMS) to remove redundant proposals"
+        ]
+    },
+    {
+        "topic":"YOLO (You Only Look Once)",
+        "subtopics": [
+            "state-of-the-art object detection algorithm",
+            "divides image into grid and predicts boundary boxes and scores",
+            "versions: YOLOv1, Fast YOLO, YOLOv2, YOLOv3, YOLOv4, YOLOv5"
+        ]
+    },
+    {
+        "topic":"Single Shot MultiBox Detector (SSD)",
+        "subtopics": [
+            "performs object localization and classification in single forward pass",
+            "uses grid cells and confidence scores for predictions",
+            "convolutional feature layers added to predict objects at different scales"
+        ]
+    }
+]

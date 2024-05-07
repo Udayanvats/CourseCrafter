@@ -4,7 +4,6 @@ import (
 	// "CourseCrafter/aws"
 	"CourseCrafter/aws"
 	"CourseCrafter/utils"
-	"bufio"
 	"context"
 	"errors"
 	"fmt"
@@ -102,7 +101,7 @@ func CallCohere(authToken string, prompt string) (*cohere.NonStreamedChatRespons
 	return response, nil
 }
 
-func StartGeneration(extractedJSON string, courseID string, topicLists string) {
+func StartGeneration(extractedJSON string, courseID string, topicLists string,channel chan utils.StreamResponse) {
 	var cohereToken = env.Get("COHERE_API_KEY", "")
 	fmt.Println(courseID, "cohere Course Id")
 
@@ -121,11 +120,20 @@ func StartGeneration(extractedJSON string, courseID string, topicLists string) {
 		return
 	}
 	defer stream.Close()
+	fmt.Println("pree course stream mutex")
 
-	utils.CourseStreamMutex.Lock()
-	channel := make(chan utils.StreamResponse)
-	utils.CourseStreamChannels[courseID] = channel
-	utils.CourseStreamMutex.Unlock()
+	
+	// utils.CourseStreamMutex.Lock()
+	// var channel chan utils.StreamResponse
+	// if utils.CourseStreamChannels[courseID] == nil {
+	// 	channel = make(chan utils.StreamResponse)
+	// 	utils.CourseStreamChannels[courseID] = &channel
+	// }else{
+	// 	channel = *utils.CourseStreamChannels[courseID]
+	// }
+
+	
+	// utils.CourseStreamMutex.Unlock()
 
 	var courseContent string
 
@@ -154,32 +162,27 @@ func StartGeneration(extractedJSON string, courseID string, topicLists string) {
 		}
 
 		if message.TextGeneration != nil && message.TextGeneration.Text != "" {
-			utils.CourseContentMap[courseID].ContentMutex.Lock()
-			courseContent += message.TextGeneration.Text
-			utils.CourseContentMap[courseID].ContentMutex.Unlock()
-			channel <- utils.StreamResponse{Message: message.TextGeneration.Text}
+			
+			channel<- utils.StreamResponse{Message: message.TextGeneration.Text}
 		}
 	}
 
-	file, err := os.Create(courseID + ".text")
+	file, err := os.Create(courseID + ".txt")
 	if err != nil {
 		fmt.Println("Error creating temporary file:", err)
 		return
 	}
-	// defer os.Remove(file.Name())
-	writer := bufio.NewWriter(file)
+	defer os.Remove(file.Name())
 
-	// utils.CourseContentMap[courseID].ContentMutex.Lock()
-	_, err = writer.WriteString(courseContent)
-	fmt.Println("courseContent", courseContent, "saasdasdsa")
+	_, err = file.WriteString(courseContent)
 	if err != nil {
-		fmt.Println("Error writing JSON to file:", err)
+		fmt.Println("Error writing to file:", err)
 		return
 	}
-	err = writer.Flush()
+
+	_, err = file.Seek(0, 0)
 	if err != nil {
-		fmt.Println("Error flushing writer:", err)
-		file.Close()
+		fmt.Println("Error seeking file:", err)
 		return
 	}
 
@@ -195,10 +198,12 @@ func StartGeneration(extractedJSON string, courseID string, topicLists string) {
 }
 func StartGenerationTopics(extracted_json string, courseId string) string {
 	var cohereToken = env.Get("COHERE_API_KEY", "")
-	fmt.Println(courseId, "cohere Course Id")
+	fmt.Println(courseId, "cohere Course Id",cohereToken)
 	inputPrompt := utils.ListTopicsPrompt(extracted_json)
+	fmt.Println("input prompt")
 	topicsList, err := CallCohere(cohereToken, inputPrompt)
 	if err != nil {
+		fmt.Println("error while starting generation", err)
 		panic("failed to generate content: " + err.Error())
 	}
 	return topicsList.Text

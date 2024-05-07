@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 
 	// "github.com/gofor-little/env"
 	"CourseCrafter/aws"
@@ -141,8 +142,12 @@ func ListenToNotification() {
 
 		fmt.Println("SENDING MESSAGE", notification.Message)
 
-		courseProcessingChannel := utils.CourseChannels[notification.CourseId]
-		courseProcessingChannel <- []byte(notification.Message)
+		courseProcessingChannel := utils.CourseProcessingChannels[notification.CourseId]
+		if courseProcessingChannel == nil {
+			courseProcessingChannel = make(chan []byte)
+			utils.CourseProcessingChannels[notification.CourseId] = courseProcessingChannel
+		}
+		fmt.Println("SENDING MESSAGE", notification.Message)
 		if notification.Message == "done" {
 			extracted_json, err := aws.GetTextFromS3(*notification.Object_path)
 			if err != nil {
@@ -152,23 +157,49 @@ func ListenToNotification() {
 			topicList := cohere.StartGenerationTopics(extracted_json, notification.CourseId)
 			fmt.Println("TOPIC LIST", topicList)
 
-			cohere.StartGeneration(extracted_json, notification.CourseId,topicList)
-			// jsonBytes := []byte(topicList)
+			// utils.CourseStreamMutex.Lock()
+			channel := utils.CourseStreamChannels[notification.CourseId]
+			fmt.Println(channel, "channell")
 
-			// // Create a reader from byte slice.
-			// file,err:=os.Create(notification.CourseId+".json")
-			// if err != nil {
-			// 	fmt.Println("Failed to create file:", err)
-			// }
-			// _, err = file.Write(jsonBytes)
-			// objectKey := "course/" + notification.CourseId + ".json"
+			go func() {
+				*channel <- utils.StreamResponse{
+					TopicList: &topicList,
+				}
+			}()
+			// utils.CourseStreamMutex.Unlock()
+			fmt.Println("done sending to channel")
+			file, err := os.Create(notification.CourseId + ".txt")
+			if err != nil {
+				fmt.Println("Error creating file", err)
+			}
 
-			// // Upload the file to S3.
-			// err = aws.UploadFileToS3(objectKey, reader)
-			// if err != nil {
-			// 	fmt.Println("Failed to upload file to S3:", err)
-			// }
+			if err != nil {
+				fmt.Println("Error marshalling json", err)
+			}
 
+			file.Write([]byte(topicList))
+			fmt.Println("TOPIC LIST", topicList)
+			_, err = file.Seek(0, 0)
+			if err != nil {
+				fmt.Println("Error seeking file:", err)
+				return
+			}
+
+			err = aws.UploadFileToS3("topicList/"+notification.CourseId+".txt", file)
+			if err != nil {
+				fmt.Println("Error uploading file to s3", err)
+			}
+
+			file.Close()
+			courseProcessingChannel <- []byte(notification.Message)
+			// close(courseProcessingChannel)
+
+			go cohere.StartGeneration(extracted_json, notification.CourseId, topicList, *channel)
+
+			// Create goa reader from byte slice.
+
+		} else {
+			courseProcessingChannel <- []byte(notification.Message)
 		}
 
 		// if err != nil {
