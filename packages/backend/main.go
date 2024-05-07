@@ -26,6 +26,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func handleStreamingRequest(ctx context.Context, c *gin.Context, courseId string) {
@@ -219,11 +220,13 @@ func main() {
 		modeStr := c.Request.FormValue("mode")
 		userId := c.Request.FormValue("userId")
 
-		mode, err := strconv.Atoi(modeStr)
+		modeInt , err  := strconv.Atoi(modeStr)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid mode"})
 			return
 		}
+		mode:= utils.Mode(modeInt)
+		fmt.Println(mode, "modeInt")
 
 		// if err != nil {
 		// 	c.JSON(http.StatusBadRequest, gin.H{"error": "No file uploaded"})
@@ -241,17 +244,15 @@ func main() {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			objectKey := "files/" + header.Filename
+			fileExt := strings.Split(header.Filename, ".")[1]
+			newFilename := uuid.New().String() + "." + fileExt
+			objectKey := "files/" + newFilename
 			err = aws.UploadFileToS3(objectKey, file)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			// err = rmq.PublishFile("extract", header.Filename)
-			// if err != nil {
-			// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			// 	return
-			// }
+
 			docsArr = append(docsArr, objectKey)
 			fmt.Println(objectKey, "objectKey")
 
@@ -265,7 +266,9 @@ func main() {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			objectKey := "files/" + header.Filename
+			fileExt := strings.Split(header.Filename, ".")[1]
+			newFilename := uuid.New().String() + "." + fileExt
+			objectKey := "files/" + newFilename
 			err = aws.UploadFileToS3(objectKey, file)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -327,11 +330,13 @@ func main() {
 			CourseId string   `json:"courseId"`
 			Docs     []string `json:"docs"`
 			Pyqs     []string `json:"pyqs"`
+			Mode    utils.Mode `json:"mode"`
 		}
 
 		response.CourseId = courseId
 		response.Docs = docsArr
 		response.Pyqs = pyqsArr
+		response.Mode = mode
 
 		jsonResponse, err := json.Marshal(response)
 		if err != nil {

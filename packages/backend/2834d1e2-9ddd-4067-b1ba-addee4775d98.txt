@@ -1,0 +1,69 @@
+[
+    {
+        "topic": "Deep Learning Models for Image Segmentation",
+        "subtopics": [
+            "Neural Networks",
+            "ANN"
+        ]
+    },
+    {
+        "topic": "Pooling",
+        "subtopics": [
+            "Padding",
+            "Stride",
+            "Downsampling",
+            "Types of Pooling Layers (Max and Average Pooling)"
+        ]
+    },
+    {
+        "topic": "Convolutional Neural Networks (CNNs)",
+        "subtopics": [
+            "Architecture of CNNs",
+            "Convolution Layer",
+            "Pooling Layer",
+            "Fully Connected Layer",
+            "Activation Functions"
+        ]
+    },
+    {
+        "topic": "Applications of CNNs",
+        "subtopics": [
+            "Object Detection",
+            "Semantic Segmentation",
+            "Image Captioning"
+        ]
+    },
+    {
+        "topic": "Object Detection Algorithms",
+        "subtopics": [
+            "Object Localization",
+            "Object Classification",
+            "Region-Based CNN (R-CNN)",
+            "Selective Search",
+            "Fast R-CNN",
+            "Faster R-CNN",
+            "Region Proposal Network (RPN)",
+            "Intersection over Union (IoU)",
+            "Non-Maximum Suppression (NMS)"
+        ]
+    },
+    {
+        "topic": "YOLO (You Only Look Once)",
+        "subtopics": [
+            "Regression Problem",
+            "Dividing Image into Grid",
+            "Boundary Boxes and Scores",
+            "Confidence Scores",
+            "Versions: YOLOv1, Fast YOLO, YOLOv2, YOLOv3, YOLOv4, YOLOv5"
+        ]
+    },
+    {
+        "topic": "Single Shot MultiBox Detector (SSD)",
+        "subtopics": [
+            "Single Shot",
+            "MultiBox",
+            "Detector",
+            "Convolutional Feature Layers"
+        ]
+    }
+]

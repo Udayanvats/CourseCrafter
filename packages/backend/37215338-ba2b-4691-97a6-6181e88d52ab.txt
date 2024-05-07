@@ -1,0 +1,83 @@
+[
+    {
+        "topic": "Introduction to Emotional Intelligence",
+        "subtopics": [
+            "Emotions in daily life",
+            "Logical vs. Emotional",
+            "Using Emotions Wisely"
+        ]
+    },
+    {
+        "topic": "Understanding Emotional Intelligence",
+        "subtopics": [
+            "Definition of Emotional Intelligence",
+            "EQ vs. IQ",
+            "Components of Emotional Quotient"
+        ]
+    },
+    {
+        "topic": "Benefits of Emotional Intelligence",
+        "subtopics": [
+            "In the Workplace",
+            "Health Benefits",
+            "Improved Relationships"
+        ]
+    },
+    {
+        "topic": "Developing Emotional Intelligence",
+        "subtopics": [
+            "Reducing stress and improving decision-making",
+            "Key skills for emotional intelligence",
+            "Practicing emotional intelligence in daily life"
+        ]
+    },
+    {
+        "topic": "Emotional Intelligence for Students",
+        "subtopics": [
+            "Academic Success",
+            "Interpersonal Relationships",
+            "Leadership Skills",
+            "Stress Management",
+            "Career Advancement",
+            "Problem Solving",
+            "Bullying Prevention"
+        ]
+    },
+    {
+        "topic": "Activities for Developing Emotional Intelligence",
+        "subtopics": [
+            "Emotion Charades",
+            "Feelings Journal",
+            "Gratitude Journal",
+            "Group Problem-Solving",
+            "Mindfulness Exercises",
+            "Empathy Walk",
+            "Counselor-led Workshops",
+            "Self-Reflection Essays"
+        ]
+    },
+    {
+        "topic": "Technology's Impact on Emotional Intelligence",
+        "subtopics": [
+            "Access to Well-Being Apps",
+            "Global Connectivity",
+            "Digital Miscommunication",
+            "Social Comparison and FOMO"
+        ]
+    },
+    {
+        "topic": "Leveraging Technology for Emotional Intelligence",
+        "subtopics": [
+            "Balancing Face-to-Face and Digital Interactions",
+            "Educational Platforms",
+            "Accessing Support and Resources"
+        ]
+    },
+    {
+        "topic": "Conclusion",
+        "subtopics": [
+            "Impact of Low EI",
+            "Key Takeaways about Emotional Intelligence"
+        ]
+    }
+]

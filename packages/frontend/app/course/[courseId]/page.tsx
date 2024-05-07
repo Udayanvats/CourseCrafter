@@ -54,11 +54,11 @@ export default function CoursePage({ params: {
             eventStream.onmessage = (event) => {
                 // console.log(event.data)
                 const eventSourseData: EventSourceData = JSON.parse(event.data)
-                if (eventSourseData.done == true) {
+                if (eventSourseData?.done == true) {
                     eventStream.close()
                     return
                 }
-                else if(eventSourseData.topicList){
+                else if(eventSourseData?.topicList){
                     
                     setTopicList(JSON.parse(eventSourseData.topicList))
                     
@@ -98,8 +98,9 @@ export default function CoursePage({ params: {
 
     return (
         <div className="w-full h-full flex  " >
-          
+        
             <Sidebar topicList={topicList} currentTopicIndex={currentTopicIndex} />
+            {/* {streamText} */}
             <ContentComponent data={jsonData}  topicList={topicList} currentTopicIndex={currentTopicIndex} setCurrentTopicIndex={setCurrentTopicIndex} />
         </div>
     )

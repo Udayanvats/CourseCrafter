@@ -19,12 +19,12 @@ export default function Content({ contents, topic }: {
 
             {
                 contents?.Introduction &&
-                <div className="mb-3 text-xl ">
-                    <div className="font-bold text-white">
+                <div className="mb-3  ">
+                    <div className="font-bold text-white text-xl">
 
                         Introduction :
                     </div>
-                    <div className="mb-3 font-bold">
+                    <div className="mb-3 ">
 
                         {contents?.Introduction}
                     </div>

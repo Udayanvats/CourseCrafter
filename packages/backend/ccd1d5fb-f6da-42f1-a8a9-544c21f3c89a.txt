@@ -1,0 +1,50 @@
+[
+    {
+        "topic": "Deep Learning Models for Image Segmentation",
+        "subtopics": [
+            "Neural Networks",
+            "ANN"
+        ]
+    },
+    {
+        "topic": "Pooling",
+        "subtopics": [
+            "Padding",
+            "Stride",
+            "Downsampling image size",
+            "Types of pooling layers (Max and Average Pooling)"
+        ]
+    },
+    {
+        "topic": "Convolutional Neural Networks (CNNs)",
+        "subtopics": [
+            "Architecture of CNNs",
+            "Convolution Layer",
+            "Pooling Layer",
+            "Fully Connected Layer",
+            "Activation Functions"
+        ]
+    },
+    {
+        "topic": "Applications of CNNs",
+        "subtopics": [
+            "Object Detection",
+            "Semantic Segmentation",
+            "Image Captioning"
+        ]
+    },
+    {
+        "topic": "Object Detection Algorithms",
+        "subtopics": [
+            "Object Localization",
+            "Object Classification",
+            "Region-based CNN (R-CNN)",
+            "Selective Search",
+            "Fast R-CNN",
+            "Faster R-CNN",
+            "Region Proposal Network (RPN)",
+            "YOLO",
+            "Single Shot MultiBox Detector (SSD)"
+        ]
+    }
+]

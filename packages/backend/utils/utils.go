@@ -1,9 +1,15 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"sync"
 )
+
+type TopicListObjectType struct {
+	Topic     string   `json:"topic"`
+	SubTopics []string `json:"subTopics"`
+}
 
 var (
 	CourseProcessingChannels = make(map[string]chan []byte)
@@ -26,9 +32,16 @@ var (
 	CourseStreamMutex    sync.Mutex
 )
 
+type Mode int
+
+const (
+	Simple Mode = iota
+	Detailed
+)
+
 type Course struct {
 	Title          string                    `json:"title"`
-	Mode           int                       `json:"mode"`
+	Mode           Mode                      `json:"mode"`
 	Docs           []string                  `json:"docs"`
 	Pyqs           []string                  `json:"pyqs"`
 	UserId         string                    `json:"userId"`
@@ -152,4 +165,71 @@ func InputPrompt(courseJson string, topicList string) string {
 	Additional Context:
 	The extracted text contains key concepts, definitions, and explanations presented in a lecture. The goal is to create detailed study notes that include examples and explanations in simple language to assist students in understanding the material thoroughly and quickly, thereby improving their academic performance.
 	`, courseJson, topicList)
+}
+
+func DetailedPrompt(courseJson string, topicList TopicListObjectType) string {
+	jsonstring, err := json.Marshal(topicList)
+	if err != nil {
+		return ""
+	}
+	fmt.Println(string(jsonstring),)
+	return fmt.Sprintf(`
+	"The following is the json format in which the input will be provided to you:"
+	
+	
+	Input JSON Format:
+	[
+	  {
+		"content": "Content on a page of a PPT/PDF.",
+		"pageNumber": Page number
+	  },
+	  {
+		"content": "Next content on another page.",
+		"pageNumber": Page number
+	  },
+	  ...
+	]
+	
+	%s
+
+	  This is the Topic and subtopics extracted from the content:
+
+	%s
+	
+	Instructions for Note Generation:
+	
+	Detail-Oriented Notes: Break down the extracted text into detailed study notes. Include explanations, examples, and definitions to ensure comprehensive coverage of the topic. Provide real-world examples to illustrate key concepts and enhance understanding.
+	
+	Clarity and Simplicity: Ensure that the generated notes are clear and easy to understand. Use concise language and keep the explanations straightforward to facilitate quick comprehension.
+	
+	Scoring Optimization: Aim to produce study materials that can help students score well in exams. Prioritize accuracy, relevance, and completeness in the generated notes.
+	
+	Minimum 5 Key Points: Each set of notes should contain a minimum of 5 key points that are essential for understanding the topic thoroughly and scoring well in exams.
+	
+	JSON Format: Provide the notes in the following JSON format, Provide the JSON Object:
+	
+	
+	{	
+		"Introduction": string,
+		"Content":[
+			string,
+			string,
+			...
+		],
+		"Conclusion": string,
+	}
+	
+
+	More Intructions:
+	Introduction -> Detailed description of the topic.
+	Content ->  Should be array , each element should content detailed description of the subtopic, it should be atleast 10 points,around  200 words.
+	Conclusion -> Summary of all the important parts of the topic.
+
+	You have to only return the json Object , and not an Array , do not return any additional text or symbols or code indicators.
+	
+	Overall, the generated notes should be detailed, informative, and engaging enough for a student that studies from these notes shouldn't have to search for the same topic ever again.
+	
+	Additional Context:
+	The extracted text contains key concepts, definitions, and explanations presented in a lecture. The goal is to create detailed study notes that include examples and explanations in simple language to assist students in understanding the material thoroughly and quickly, thereby improving their academic performance.
+	`, courseJson, string(jsonstring))
 }
