@@ -4,16 +4,16 @@ import (
 	// "CourseCrafter/aws"
 	"CourseCrafter/aws"
 	"CourseCrafter/utils"
+	"bufio"
 	"context"
 	"errors"
 	"fmt"
 	"io"
 	"os"
+	"sync"
 
 	cohere "github.com/cohere-ai/cohere-go/v2"
 	cohereclient "github.com/cohere-ai/cohere-go/v2/client"
-
-	// "github.com/cohere-ai/cohere-go/v2/core"
 	"github.com/gofor-little/env"
 	// "github.com/sashabaranov/go-openai"
 )
@@ -102,11 +102,12 @@ func CallCohere(authToken string, prompt string) (*cohere.NonStreamedChatRespons
 	return response, nil
 }
 
-func StartGeneration(extracted_json string, courseId string) {
+func StartGeneration(extractedJSON string, courseID string, topicLists string) {
 	var cohereToken = env.Get("COHERE_API_KEY", "")
-	fmt.Println(courseId, "cohere Course Id")
-	inputPrompt := utils.InputPrompt(extracted_json)
-	// fmt.Println(inputPrompt, "input prompt")
+	fmt.Println(courseID, "cohere Course Id")
+
+	inputPrompt := utils.InputPrompt(extractedJSON, topicLists)
+
 	client := cohereclient.NewClient(cohereclient.WithToken(cohereToken))
 
 	stream, err := client.ChatStream(
@@ -115,85 +116,83 @@ func StartGeneration(extracted_json string, courseId string) {
 			Message: inputPrompt,
 		},
 	)
-
 	if err != nil {
 		fmt.Println("error while starting generation", err)
-
+		return
 	}
-
 	defer stream.Close()
-	utils.CourseStreamMutex.Lock()
 
+	utils.CourseStreamMutex.Lock()
 	channel := make(chan utils.StreamResponse)
-	utils.CourseStreamChannels[courseId] = channel
+	utils.CourseStreamChannels[courseID] = channel
 	utils.CourseStreamMutex.Unlock()
 
+	var courseContent string
+
 	if err != nil {
-
 		errMessage := err.Error()
+		channel <- utils.StreamResponse{Error: &errMessage}
+	}
 
-		channel <- utils.StreamResponse{
-			Error: &errMessage,
+	if utils.CourseContentMap[courseID] == nil {
+		utils.CourseContentMap[courseID] = &utils.CourseContent{
+			Content:      "",
+			ContentMutex: sync.Mutex{},
 		}
 	}
-	courseContent := utils.CourseContentMap[courseId]
 
 	for {
 		message, err := stream.Recv()
 		if errors.Is(err, io.EOF) {
 			fmt.Println("EOF")
-			// channel <- utils.StreamResponse{
-			// 	Done: true,
-			// }
+			channel <- utils.StreamResponse{Done: true}
 			break
 		} else if err != nil {
-			// The stream has encountered a non-recoverable error. Propagate the
-			// error by simply returning the error like usual.
 			fmt.Println("error while receiving message", err)
-			// errMessage := err.Error()
-			// channel <- utils.StreamResponse{
-			// 	Error: &errMessage,
-			// }
-
+			errMessage := err.Error()
+			channel <- utils.StreamResponse{Error: &errMessage}
 		}
-		// fmt.Println("messageeeee", message.TextGeneration.Text)
+
 		if message.TextGeneration != nil && message.TextGeneration.Text != "" {
-			// courseContent.ContentMutext.Lock()
-			fmt.Println("messageeeeeasdasdasdasd", message.TextGeneration.Text)
-			courseContent.Content += message.TextGeneration.Text
-			// courseContent.ContentMutext.Unlock()
-
-			// channel <- utils.StreamResponse{
-			// 	Message: message.TextGeneration.Text,
-			// }
-			// fmt.Println("messageeeee", message.TextGeneration.Text)
-
+			utils.CourseContentMap[courseID].ContentMutex.Lock()
+			courseContent += message.TextGeneration.Text
+			utils.CourseContentMap[courseID].ContentMutex.Unlock()
+			channel <- utils.StreamResponse{Message: message.TextGeneration.Text}
 		}
 	}
-	fmt.Println(courseContent.Content, "creatinf file")
 
-	file, err := os.Create(courseId + ".txt")
+	file, err := os.Create(courseID + ".text")
 	if err != nil {
-		fmt.Println("Error creating file:", err)
+		fmt.Println("Error creating temporary file:", err)
+		return
 	}
+	// defer os.Remove(file.Name())
+	writer := bufio.NewWriter(file)
 
-	fmt.Println("writing to file")
-	// courseContent.ContentMutext.Lock()
-	_, err = file.Write([]byte(courseContent.Content))
+	// utils.CourseContentMap[courseID].ContentMutex.Lock()
+	_, err = writer.WriteString(courseContent)
+	fmt.Println("courseContent", courseContent, "saasdasdsa")
 	if err != nil {
 		fmt.Println("Error writing JSON to file:", err)
+		return
 	}
-	// courseContent.ContentMutext.Unlock()
+	err = writer.Flush()
+	if err != nil {
+		fmt.Println("Error flushing writer:", err)
+		file.Close()
+		return
+	}
 
-	err = aws.UploadFileToS3("course/"+courseId+".txt", file)
+	// utils.CourseContentMap[courseID].ContentMutex.Unlock()
+
+	err = aws.UploadFileToS3("courses/"+courseID+".txt", file)
 	if err != nil {
 		fmt.Println("Error uploading file to S3:", err)
+		return
 	}
 
-	defer file.Close()
-
+	fmt.Println("file uploaded to s3")
 }
-
 func StartGenerationTopics(extracted_json string, courseId string) string {
 	var cohereToken = env.Get("COHERE_API_KEY", "")
 	fmt.Println(courseId, "cohere Course Id")

@@ -151,6 +151,8 @@ func ListenToNotification() {
 			fmt.Println("starrting topic generation")
 			topicList := cohere.StartGenerationTopics(extracted_json, notification.CourseId)
 			fmt.Println("TOPIC LIST", topicList)
+
+			cohere.StartGeneration(extracted_json, notification.CourseId,topicList)
 			// jsonBytes := []byte(topicList)
 
 			// // Create a reader from byte slice.

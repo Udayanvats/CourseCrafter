@@ -5,6 +5,7 @@ import (
 	"CourseCrafter/cohere"
 
 	// "CourseCrafter/cohere"
+	// "CourseCrafter/cohere"
 	"CourseCrafter/database"
 	"CourseCrafter/rmq"
 	"CourseCrafter/utils"
@@ -392,11 +393,11 @@ func main() {
 
 		//get alrready generated content
 		utils.CourseContentMutex.Lock()
-		courseContent := utils.CourseContentMap[courseId]
+		// courseContent := utils.CourseContentMap[courseId]
 		utils.CourseContentMutex.Unlock()
 
-		courseContentMutex := courseContent.ContentMutext
-		courseContentMutex.Lock()
+		// courseContentMutex := courseContent.ContentMutext
+		// courseContentMutex.Lock()
 		// var res Response = Response{
 		// 	Data:           nil,
 		// 	Error:          nil,
@@ -480,6 +481,16 @@ func main() {
 		}
 
 	})
+
+	// r.GET("/cohere", func(c *gin.Context) {
+	// 	generateContent, err := cohere.CohereTest()
+	// 	if err != nil {
+	// 		// Handle the error, perhaps by sending an appropriate response
+	// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate content"})
+	// 		return
+	// 	}
+	// 	fmt.Print(generateContent)
+	// })
 
 	r.Run("localhost:8080")
 }

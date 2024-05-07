@@ -13,11 +13,11 @@ var (
 
 type CourseContent struct {
 	Content       string `json:"content"`
-	ContentMutext sync.Mutex
+	ContentMutex sync.Mutex
 }
 
 var (
-	CourseContentMap   = make(map[string]CourseContent)
+	CourseContentMap   = make(map[string]*CourseContent)
 	CourseContentMutex sync.Mutex
 )
 
@@ -76,7 +76,7 @@ func ListTopicsPrompt(courseJson string) string {
 	Only provide the array , nothing else.
 	`, courseJson)
 }
-func InputPrompt(courseJson string) string {
+func InputPrompt(courseJson string,topicList string) string {
 	return fmt.Sprintf(`
 	"The following is the json format in which the input will be provided to you:"
 	
@@ -94,6 +94,8 @@ func InputPrompt(courseJson string) string {
 	  ...
 	]
 	
+	%s
+	  These are the list of topics extracted from the content:
 	%s
 	
 	Instructions for Note Generation:
@@ -125,5 +127,5 @@ func InputPrompt(courseJson string) string {
 	
 	Additional Context:
 	The extracted text contains key concepts, definitions, and explanations presented in a lecture. The goal is to create detailed study notes that include examples and explanations in simple language to assist students in understanding the material thoroughly and quickly, thereby improving their academic performance.
-	`, courseJson)
+	`, courseJson,topicList)
 }
