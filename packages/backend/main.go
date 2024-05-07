@@ -1,28 +1,22 @@
 package main
 
 import (
+	"CourseCrafter/auth"
 	"CourseCrafter/aws"
 	"CourseCrafter/cohere"
-
-	// "CourseCrafter/cohere"
 	"CourseCrafter/database"
 	"CourseCrafter/rmq"
 	"CourseCrafter/utils"
+
 	"encoding/json"
 	"fmt"
-
-	// "io"
+	"net/http"
 	"strconv"
 	"strings"
 
-	// "sync"
-
-	// "fmt"
-
-	"net/http"
-
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func main() {
@@ -50,7 +44,59 @@ func main() {
 	r := gin.Default()
 	r.Use(cors.Default())
 
-	r.POST("/upload", func(c *gin.Context) {
+	r.POST("/login", func(c *gin.Context) {
+		var user utils.User
+		if err := c.ShouldBindJSON(&user); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		dbUser, err := database.GetUserByEmail(user.Email)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid email or password"})
+			return
+		}
+		if err := bcrypt.CompareHashAndPassword([]byte(dbUser.Password), []byte(user.Password)); err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid email or password"})
+			return
+		}
+		tokenString, err := auth.GenerateToken(dbUser.Id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
+			return
+		}
+		c.SetCookie("token", tokenString, 3600, "/", "", false, true)
+		c.SetCookie("userId", strconv.Itoa(dbUser.Id), 3600, "/", "", false, true)
+		c.JSON(http.StatusOK, gin.H{"token": tokenString})
+	})
+
+	r.POST("/signup", func(c *gin.Context) {
+		var user utils.User
+		if err := c.ShouldBindJSON(&user); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		user.Password, err = auth.HashPassword(user.Password)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to hash password"})
+			return
+		}
+		user.Id, err = database.AddUser(user)
+		fmt.Print(err)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user"})
+			return
+		}
+		tokenString, err := auth.GenerateToken(user.Id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
+			return
+		}
+		c.SetCookie("token", tokenString, 3600, "/", "", false, true)
+		c.SetCookie("userId", strconv.Itoa(user.Id), 3600, "/", "", false, true)
+		c.JSON(http.StatusOK, gin.H{"token": tokenString})
+	})
+
+	r.POST("/upload", auth.AuthMiddleware(), func(c *gin.Context) {
 		form, err := c.MultipartForm()
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "No file uploaded"})
@@ -68,7 +114,8 @@ func main() {
 		pyqs := form.File["pyqs"]
 		title := c.Request.FormValue("title")
 		modeStr := c.Request.FormValue("mode")
-		userId := c.Request.FormValue("userId")
+		userID, _ := c.Get("userId")
+		userId, _ := userID.(int)
 
 		mode, err := strconv.Atoi(modeStr)
 		if err != nil {
@@ -195,27 +242,28 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"message": "File uploaded successfully", "courseId": courseId})
 	})
 
-	r.POST("/courses", func(c *gin.Context) {
-		userID := c.PostForm("userId")
-		// userId:=  strconv.Itoa(userID)
-		fmt.Print(userID)
-		if userID == "" {
+	r.POST("/courses", auth.AuthMiddleware(), func(c *gin.Context) {
+		userID, _ := c.Get("userId")
+
+		fmt.Println("This is the userID", userID)
+		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "userId is required"})
 			return
 		}
-
-		courses, err := database.GetCourses(userID)
+		userId, _ := userID.(int)
+		// userIdnum, _ := strconv.Atoi(userId)
+		fmt.Print("THIS IS USER ID being sent", userId)
+		courses, err := database.GetCourses(userId)
 		if err != nil {
 			fmt.Println(err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		// fmt.Println("Courses:", courses)
 		c.JSON(http.StatusOK, courses)
 	})
 
-	r.GET("/courses/:courseId/status", func(c *gin.Context) {
+	r.GET("/courses/:courseId/status", auth.AuthMiddleware(), func(c *gin.Context) {
 		courseId := c.Param("courseId")
 		client := c.Writer
 		client.Header().Set("Content-Type", "text/event-stream")
@@ -362,7 +410,7 @@ func main() {
 
 	// // })
 
-	r.GET("/cohere", func(c *gin.Context) {
+	r.GET("/cohere", auth.AuthMiddleware(), func(c *gin.Context) {
 		extracted_json, err := aws.GetTextFromS3("text/c715e1cf-6c59-4130-820f-d42cb154bd79.json")
 		if err != nil {
 			fmt.Println("Failed to get text from S3:", err)
