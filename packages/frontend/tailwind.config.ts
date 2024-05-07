@@ -32,7 +32,14 @@ const config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      colors:{
+        background:"#191919",
+        primary:"#00adb5",
+        card:"#31363F"
+      }
     },
+
+
   },
   plugins: [require("tailwindcss-animate"),require("daisyui")],
 } satisfies Config
