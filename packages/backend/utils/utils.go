@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
+	"github.com/gofor-little/env"
 )
 
 type TopicListObjectType struct {
@@ -39,12 +40,19 @@ const (
 	Detailed
 )
 
+
+type User struct {
+	Id       int    `json:"id"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
 type Course struct {
 	Title          string                    `json:"title"`
 	Mode           Mode                      `json:"mode"`
 	Docs           []string                  `json:"docs"`
 	Pyqs           []string                  `json:"pyqs"`
-	UserId         string                    `json:"userId"`
+	UserId         int                       `json:"userId"`
 	ProcessingData map[string]ProcessingData `json:"processingData"`
 }
 
@@ -58,6 +66,8 @@ type StreamResponse struct {
 	Done      bool    `json:"done"`
 	TopicList *string `json:"topicList"`
 }
+
+var jwtSecret = []byte(env.Get("JWT_SECRET", ""))
 
 func ListTopicsPrompt(courseJson string) string {
 	fmt.Println(courseJson,"courseJSonnnnn  asds")
@@ -238,3 +248,22 @@ func DetailedPrompt(courseJson string, topicList TopicListObjectType) string {
 	The extracted text contains key concepts, definitions, and explanations presented in a lecture. The goal is to create detailed study notes that include examples and explanations in simple language to assist students in understanding the material thoroughly and quickly, thereby improving their academic performance.
 	`, courseJson, string(jsonstring))
 }
+
+// func ValidateToken(tokenString string) (int, error) {
+// 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+// 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+// 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+// 		}
+// 		return jwtSecret, nil
+// 	})
+// 	if err != nil {
+// 		return 0, err
+// 	}
+// 	fmt.Print("Token", token)
+// 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+// 		userId := int(claims["userId"].(float64))
+// 		return userId, nil
+// 	} else {
+// 		return 0, fmt.Errorf("invalid token")
+// 	}
+// }
