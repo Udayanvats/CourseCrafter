@@ -47,6 +47,7 @@ type User struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
+
 type Course struct {
 	Title          string                    `json:"title"`
 	Mode           Mode                      `json:"mode"`

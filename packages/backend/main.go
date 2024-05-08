@@ -424,6 +424,8 @@ func main() {
 		c.JSON(http.StatusOK, courses)
 	})
 
+	
+
 	r.GET("/courses/:courseId/status", auth.AuthMiddleware(), func(c *gin.Context) {
 		courseId := c.Param("courseId")
 		client := c.Writer
