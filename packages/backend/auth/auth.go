@@ -27,7 +27,7 @@ func GetGoogleUrl(c *gin.Context) {
 	conf := &oauth2.Config{
 		ClientID:     GOOGLE_CLIENT_ID,
 		ClientSecret: GOOGLE_CLIENT_SECRET,
-		RedirectURL:  "http://localhost:8080/auth/google/callback",
+		RedirectURL:  "http://localhost:3000/loggedIn",
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.profile",
 		},
@@ -53,7 +53,7 @@ func LoginWithGoogle(c *gin.Context) {
 	conf := &oauth2.Config{
 		ClientID:     GOOGLE_CLIENT_ID,
 		ClientSecret: GOOGLE_CLIENT_SECRET,
-		RedirectURL:  "http://localhost:8080/auth/google/callback",
+		RedirectURL:  "http://localhost:3000/loggedIn",
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.profile",
 		},
@@ -78,7 +78,7 @@ func LoginWithGoogle(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to create Userinfo service"})
 		return
 	}
-
+	var ID int
 	userInfo, err := userinfoService.Get().Do(googleapi.QueryParameter("access_token", tok.AccessToken))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to get user info"})
@@ -88,16 +88,23 @@ func LoginWithGoogle(c *gin.Context) {
 	user := utils.User{Name: userInfo.Name, Email: userInfo.Email, Password: userInfo.Email}
 
 	// Assuming you have a function AddUser in your database package
-	id, err := database.AddUser(user)
+	loggedUser, err := database.GetUserByEmail(userInfo.Email)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to create user"})
-		return
+
+		id, err := database.AddUser(user)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to create user"})
+			return
+		}
+		ID = id
+	} else {
+		ID = loggedUser.Id
 	}
 
 	// Generate JWT token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": userInfo.Name,
-		"userId":   id,
+		"userId":   ID,
 	})
 
 	// Generate the token string
@@ -108,7 +115,7 @@ func LoginWithGoogle(c *gin.Context) {
 	}
 
 	// Set JWT token in cookie
-	c.SetCookie("jwt", tokenString, 3600, "/", "localhost", false, true)
+	c.SetCookie("jwt", tokenString, 3600, "/", "", false, true)
 
 	c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("User %s created", userInfo.Name)})
 }

@@ -194,7 +194,12 @@ func main() {
 	defer database.Disconnect()
 
 	r := gin.Default()
-	r.Use(cors.Default())
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+		AllowHeaders:     []string{"Content-Type"},
+		AllowCredentials: true,
+	}))
 
 	r.POST("/pyqs", func(c *gin.Context) {
 		// topicList := cohere.StartGenerationTopics(extracted_json, notification.CourseId)
