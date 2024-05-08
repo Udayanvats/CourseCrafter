@@ -218,6 +218,42 @@ func ListenToNotification() {
 			} else {
 				go cohere.StartGeneration(extracted_json, notification.CourseId, topicList, *channel)
 			}
+			filePath := "text/" + notification.CourseId + ".json"
+
+			pyqContent, err := aws.GetTextFromS3(filePath)
+			if err != nil {
+				panic("failed to get text from S3: " + err.Error())
+			}
+			var data utils.Data
+			if err := json.Unmarshal([]byte(pyqContent), &data); err != nil {
+				fmt.Println("Error:", err)
+				return
+			}
+			pyqAnalysis := cohere.PyqsGeneration(data.Pyqs[0].Contents, topicList)
+			pyqFile, err := os.Create(notification.CourseId + ".json")
+			if err != nil {
+				fmt.Println("Error creating pyqFile", err)
+			}
+
+			if err != nil {
+				fmt.Println("Error marshalling json", err)
+			}
+
+			pyqFile.Write([]byte(pyqAnalysis))
+			// fmt.Println("TOPIC LIST", topicList)
+			_, err = pyqFile.Seek(0, 0)
+			if err != nil {
+				fmt.Println("Error seeking pyqFile:", err)
+				return
+			}
+
+			err = aws.UploadFileToS3("pyq/"+notification.CourseId+".json", pyqFile)
+			if err != nil {
+				fmt.Println("Error uploading file to s3", err)
+			}
+
+			pyqFile.Close()
+			os.Remove(notification.CourseId + ".json")
 
 			// Create goa reader from byte slice.
 

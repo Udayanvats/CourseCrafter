@@ -203,7 +203,7 @@ func main() {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		// fmt.Print("TOPIC LIST :", topicList)
+		fmt.Print("TOPIC LIST :", topicList)
 		pyqContent, err := aws.GetTextFromS3("text/589d18c5-1ae4-4713-9ff2-ce038c11bc85.json")
 		var data utils.Data
 		if err := json.Unmarshal([]byte(pyqContent), &data); err != nil {
@@ -213,7 +213,7 @@ func main() {
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
-		fmt.Print("PYQ CONTENT", data.Pyqs[0].Contents)
+		// fmt.Print("PYQ CONTENT", data.Pyqs[0].Contents)
 		pyqAnalysis := cohere.PyqsGeneration(data.Pyqs[0].Contents, topicList)
 		fmt.Print(pyqContent)
 
