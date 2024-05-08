@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
+
 	"github.com/gofor-little/env"
 )
 
@@ -40,7 +41,6 @@ const (
 	Detailed
 )
 
-
 type User struct {
 	Id       int    `json:"id"`
 	Name     string `json:"name"`
@@ -66,6 +66,13 @@ type StreamResponse struct {
 	Error     *string `json:"error"`
 	Done      bool    `json:"done"`
 	TopicList *string `json:"topicList"`
+}
+
+type Data struct {
+	Pyqs []struct {
+		Filename string `json:"filename"`
+		Contents string `json:"contents"`
+	} `json:"pyqs"`
 }
 
 var jwtSecret = []byte(env.Get("JWT_SECRET", ""))
@@ -183,7 +190,7 @@ func DetailedPrompt(courseJson string, topicList TopicListObjectType) string {
 	if err != nil {
 		return ""
 	}
-	fmt.Println(string(jsonstring),)
+	fmt.Println(string(jsonstring))
 	return fmt.Sprintf(`
 	"The following is the json format in which the input will be provided to you:"
 	
@@ -243,6 +250,48 @@ func DetailedPrompt(courseJson string, topicList TopicListObjectType) string {
 	Additional Context:
 	The extracted text contains key concepts, definitions, and explanations presented in a lecture. The goal is to create detailed study notes that include examples and explanations in simple language to assist students in understanding the material thoroughly and quickly, thereby improving their academic performance.
 	`, courseJson, string(jsonstring))
+}
+
+func GeneratePYQanalaysis(extracted_json string, topicList string) string {
+	return fmt.Sprintf(`
+	"The following is the JSON format in which the input will be provided to you:"
+
+The following are the  list of topics in a json format  from which you have to classify the questions being provided in the input string.
+%s
+Input string format:
+"The input string contains the all the extracted contents from the past year question papers.It contains questions as well as their marks or the module numbers of the questions."
+
+%s
+
+Instructions for Analyzing Past Year Questions:
+
+You will have access to a list of topics and subtopics  in JSON format.
+Now that you have the input string containing the questions and their marks or module numbers,you need to classify the questions based on the topics and subtopics provided in the topics List json.The output format is as below:
+
+
+
+Output format:
+[
+  {
+    "topic name": "Name of the topic"(this should strictly  be from the topic List provided to you in the input and not from the contents of the question paper.),
+    "number of questions": "Count of questions for this topic",
+
+    "pyqcontent": [{
+	  "count": "Count of questions for this subtopic.",
+	  "subtopic": "Sub topic name", (this should strictly  be from the topic List provided to you in the input and not from the contents of the question paper.)
+	  "question": "Question text here.",
+	},
+	{
+
+	}]
+  },
+  ...
+]
+
+Only provide the array, nothing else.
+Only the questions from the input String matter other contents like the question paper name,year and other irrelevant stuff doesn't matters.
+
+	`, topicList, extracted_json)
 }
 
 // func ValidateToken(tokenString string) (int, error) {

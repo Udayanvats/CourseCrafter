@@ -303,3 +303,16 @@ func StartGenerationTopics(extracted_json string, courseId string) string {
 	return topicsList.Text
 
 }
+
+
+func PyqsGeneration(extracted_json string, topicListString string) string {
+	var cohereToken = env.Get("COHERE_API_KEY", "")
+	inputPrompt := utils.GeneratePYQanalaysis(extracted_json,topicListString)
+	// fmt.Println("input prompt")
+	pyqAnalaysis, err := CallCohere(cohereToken, inputPrompt)
+	if err != nil {
+		fmt.Println("error while starting generation", err)
+		panic("failed to generate content: " + err.Error())
+	}
+	return pyqAnalaysis.Text
+}

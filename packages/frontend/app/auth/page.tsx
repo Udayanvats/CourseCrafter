@@ -4,16 +4,28 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function CourseCreator() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const searchParams = useSearchParams()
+  // useEffect(() => {
+  //     const code = searchParams.get('code')
+  //     async function loginWithGoogle() {
+  //         await post("loginWithGoogle", JSON.stringify(code))
+  //         router.replace("/")
+  //         router.refresh()
 
+  //     }
+  //     if (code) {
+  //         loginWithGoogle()
+  //     }
+  // }, [])
   const handleRegister = async () => {
     try {
       // Make a POST request to signup endpoint

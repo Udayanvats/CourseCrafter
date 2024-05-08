@@ -196,6 +196,33 @@ func main() {
 	r := gin.Default()
 	r.Use(cors.Default())
 
+	r.POST("/pyqs", func(c *gin.Context) {
+		// topicList := cohere.StartGenerationTopics(extracted_json, notification.CourseId)
+		topicList, err := aws.GetTextFromS3("topicList/589d18c5-1ae4-4713-9ff2-ce038c11bc85.txt")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		// fmt.Print("TOPIC LIST :", topicList)
+		pyqContent, err := aws.GetTextFromS3("text/589d18c5-1ae4-4713-9ff2-ce038c11bc85.json")
+		var data utils.Data
+		if err := json.Unmarshal([]byte(pyqContent), &data); err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		fmt.Print("PYQ CONTENT", data.Pyqs[0].Contents)
+		pyqAnalysis := cohere.PyqsGeneration(data.Pyqs[0].Contents, topicList)
+		fmt.Print(pyqContent)
+
+		c.JSON(http.StatusOK, pyqAnalysis)
+	})
+
+	r.GET("/auth/google/url", auth.GetGoogleUrl)
+	r.POST("/auth/google/login", auth.LoginWithGoogle)
+
 	r.POST("/login", func(c *gin.Context) {
 		var user utils.User
 		if err := c.ShouldBindJSON(&user); err != nil {
@@ -248,7 +275,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"token": tokenString})
 	})
 
-	r.POST("/upload", auth.AuthMiddleware(), func(c *gin.Context) {
+	r.POST("/upload", func(c *gin.Context) {
 		form, err := c.MultipartForm()
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "No file uploaded"})
@@ -269,12 +296,12 @@ func main() {
 		userID, _ := c.Get("userId")
 		userId, _ := userID.(int)
 
-		modeInt , err  := strconv.Atoi(modeStr)
+		modeInt, err := strconv.Atoi(modeStr)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid mode"})
 			return
 		}
-		mode:= utils.Mode(modeInt)
+		mode := utils.Mode(modeInt)
 		fmt.Println(mode, "modeInt")
 
 		// if err != nil {
@@ -376,10 +403,10 @@ func main() {
 		utils.CourseMutex.Unlock()
 
 		var response struct {
-			CourseId string   `json:"courseId"`
-			Docs     []string `json:"docs"`
-			Pyqs     []string `json:"pyqs"`
-			Mode    utils.Mode `json:"mode"`
+			CourseId string     `json:"courseId"`
+			Docs     []string   `json:"docs"`
+			Pyqs     []string   `json:"pyqs"`
+			Mode     utils.Mode `json:"mode"`
 		}
 
 		response.CourseId = courseId
@@ -423,8 +450,6 @@ func main() {
 
 		c.JSON(http.StatusOK, courses)
 	})
-
-	
 
 	r.GET("/courses/:courseId/status", auth.AuthMiddleware(), func(c *gin.Context) {
 		courseId := c.Param("courseId")
