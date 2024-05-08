@@ -20,9 +20,11 @@ export default function CourseCreator() {
       const response = await fetch("http://localhost:8080/signup", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          // "Content-Type": "application/json",
         },
         body: JSON.stringify({ name, email, password }), // Send name, email, and password in request body
+        credentials: "include",
+        cache: "no-store",
       });
 
       if (response.ok) {
@@ -46,6 +48,7 @@ export default function CourseCreator() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ email, password }),
+      cache: "no-store",
     });
 
     if (response.ok) {
@@ -167,6 +170,7 @@ export default function CourseCreator() {
                   <Button
                     className="btn bg-black text-white py-2 w-full"
                     type="submit"
+                    onClick={handleRegister}
                   >
                     Sign up
                   </Button>

@@ -194,7 +194,12 @@ func main() {
 	defer database.Disconnect()
 
 	r := gin.Default()
-	r.Use(cors.Default())
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+		AllowHeaders:     []string{"Origin"},
+		AllowCredentials: true,
+	}))
 
 	r.POST("/login", func(c *gin.Context) {
 		var user utils.User
@@ -269,12 +274,12 @@ func main() {
 		userID, _ := c.Get("userId")
 		userId, _ := userID.(int)
 
-		modeInt , err  := strconv.Atoi(modeStr)
+		modeInt, err := strconv.Atoi(modeStr)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid mode"})
 			return
 		}
-		mode:= utils.Mode(modeInt)
+		mode := utils.Mode(modeInt)
 		fmt.Println(mode, "modeInt")
 
 		// if err != nil {
@@ -376,10 +381,10 @@ func main() {
 		utils.CourseMutex.Unlock()
 
 		var response struct {
-			CourseId string   `json:"courseId"`
-			Docs     []string `json:"docs"`
-			Pyqs     []string `json:"pyqs"`
-			Mode    utils.Mode `json:"mode"`
+			CourseId string     `json:"courseId"`
+			Docs     []string   `json:"docs"`
+			Pyqs     []string   `json:"pyqs"`
+			Mode     utils.Mode `json:"mode"`
 		}
 
 		response.CourseId = courseId
@@ -423,8 +428,6 @@ func main() {
 
 		c.JSON(http.StatusOK, courses)
 	})
-
-	
 
 	r.GET("/courses/:courseId/status", auth.AuthMiddleware(), func(c *gin.Context) {
 		courseId := c.Param("courseId")
