@@ -2,11 +2,14 @@ import pika
 from pptx import Presentation      
 import boto3
 import os
-import uuid
 from dotenv import load_dotenv,dotenv_values
 import tempfile 
 import json
-from pdfminer.high_level import extract_text
+from PyPDF2 import PdfReader
+import pytesseract
+from PIL import Image
+import io
+
 
 
 load_dotenv()
@@ -78,15 +81,34 @@ def get_file_from_s3(filepath):
 
 def extract_text_from_ppt(ppt_path):
     ppt = Presentation(ppt_path)
-    text = []
+    text =""
     for slide in ppt.slides:
         for shape in slide.shapes:
             if hasattr(shape, "text"):
-                text.append(shape.text)
+                text+=shape.text
+                text+="\n"
+
+    
     return text
 
 def extract_text_from_pdf(filepath):
-    text = extract_text(filepath)
+    reader = PdfReader(filepath)
+    number_of_pages = len(reader.pages)
+    text=""
+    for i in range(number_of_pages):
+        page = reader.pages[i]
+        text += page.extract_text()
+        for image in page.images:
+            # file=os.write(tempfile.NamedTemporaryFile(suffix=".png",delete=False),image.data)
+
+            text+=extract_text_from_image(Image.open(io.BytesIO(image.data)))
+    
+    print(text,"text")
+    return text
+
+
+def extract_text_from_image(image):
+    text = pytesseract.image_to_string(image)
     return text
 
 
@@ -116,9 +138,10 @@ def process_documents(ch, method, properties, body):
         print(f"pyqs: {pyqs}")
         print(f"courseId: {courseId}")
         json_data = {
-            "pyqs": "",
+            "pyqs": [],
             "docs": []
         }
+
 
         if docs:
             for doc in docs:
@@ -127,9 +150,10 @@ def process_documents(ch, method, properties, body):
                 fileid = s3ObjPath.split("/")[-1].split(".")[0]
                 filename = s3ObjPath.split("/")[-1]
                 text = extract_text(filepath)
+                os.remove(filepath)
                 json_data["docs"].append({
                     "filename": filename,
-                    "contents": [{"page": i + 1, "text": t} for i, t in enumerate(text)]
+                    "contents": text
                 })
                 notify_user(json.dumps({
                     "status": True,
@@ -147,6 +171,8 @@ def process_documents(ch, method, properties, body):
                 print(f"file path: {filepath}")
                 fileid = s3ObjPath.split("/")[-1].split(".")[0]
                 text = extract_text(filepath)
+                os.remove(filepath)
+
                 notify_user(json.dumps({
                     "status": True,
                     "error": "",
@@ -154,7 +180,11 @@ def process_documents(ch, method, properties, body):
                     "message": pyq,
     
                 }))
-                json_data["pyqs"]+= "\n".join(text)
+                json_data["pyqs"].append({
+                    "filename": pyq,
+                    "contents": text
+                })
+
         
 
         with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False) as temp_file:
@@ -187,6 +217,7 @@ channel.basic_consume(queue='extract', on_message_callback=process_documents, au
 print('Waiting for messages')
 
 if __name__ == '__main__':
+    print("Starting extractor")
     channel.start_consuming()
     
 

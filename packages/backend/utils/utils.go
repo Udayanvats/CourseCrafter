@@ -60,6 +60,7 @@ type StreamResponse struct {
 }
 
 func ListTopicsPrompt(courseJson string) string {
+	fmt.Println(courseJson,"courseJSonnnnn  asds")
 	return fmt.Sprintf(`
 	"The following is the JSON format in which the input will be provided to you:"
 
@@ -92,7 +93,7 @@ func ListTopicsPrompt(courseJson string) string {
 		...
 	]
 
-	Only provide the array , nothing else.
+	Only provide the array , nothing else, Do NOT provide additional text or syymbols , start from array end with array.
 	`, courseJson)
 }
 func InputPrompt(courseJson string, topicList string) string {
@@ -104,11 +105,11 @@ func InputPrompt(courseJson string, topicList string) string {
 	[
 	  {
 		"content": "Content on a page of a PPT/PDF.",
-		"pageNumber": Page number
+		
 	  },
 	  {
 		"content": "Next content on another page.",
-		"pageNumber": Page number
+		
 	  },
 	  ...
 	]
@@ -127,6 +128,9 @@ func InputPrompt(courseJson string, topicList string) string {
 	
 	Minimum 5 Key Points: Each set of notes should contain a minimum of 5 key points that are essential for understanding the topic thoroughly and scoring well in exams.
 	
+	IMPORTANT(MY LIFE IS ON STAKE IF YOU DONT FOLLOW THIS):You have to only return the json , do not return any additional text or symbols or code indicators, do not add anything at start end no code indicators,start from array end with array.
+
+
 	JSON Format: Provide the notes in the following JSON format:
 	[
 	  {
@@ -154,11 +158,12 @@ func InputPrompt(courseJson string, topicList string) string {
 	  ...
 	]
 
+
+
 	Introduction should be detailed and should provide a brief overview of the topic.
 	Content should be very descriptive and should contain all the key points and subpoints.You should make it atleast 10 points.
 	Conclusion should be a summary of all the important parts of the topic.
 
-	You have to only return the json , dont return any additional text or symbols or code indicators.
 	
 	Overall, the generated notes should be detailed, informative, and engaging enough for a student that studies from these notes shouldn't have to search for the same topic ever again.
 	
@@ -172,7 +177,7 @@ func DetailedPrompt(courseJson string, topicList TopicListObjectType) string {
 	if err != nil {
 		return ""
 	}
-	fmt.Println(string(jsonstring),)
+	fmt.Println(string(jsonstring))
 	return fmt.Sprintf(`
 	"The following is the json format in which the input will be provided to you:"
 	

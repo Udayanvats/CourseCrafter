@@ -1,4 +1,7 @@
 python-pptx
 pika
 boto3
-pdfminer.six
+PyPDF2
+pytesseract
+pillow
+python-dotenv
