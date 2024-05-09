@@ -1,3 +1,7 @@
 python-pptx
 pika
 boto3
+PyPDF2
+pytesseract
+pillow
+python-dotenv
