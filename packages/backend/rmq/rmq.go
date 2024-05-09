@@ -201,6 +201,7 @@ func ListenToNotification() {
 			file.Close()
 			os.Remove(notification.CourseId + ".txt")
 			courseProcessingChannel <- []byte(notification.Message)
+
 			var receivedMode utils.Mode
 			if notification.Mode != nil {
 				receivedMode = utils.Mode(*notification.Mode)
@@ -209,15 +210,6 @@ func ListenToNotification() {
 			}
 
 			fmt.Println("MODE", receivedMode)
-
-			if receivedMode == utils.Simple {
-				go cohere.StartGeneration(extracted_json, notification.CourseId, topicList, *channel)
-
-			} else if receivedMode == utils.Detailed {
-				go cohere.StartDetailedGeneration(extracted_json, notification.CourseId, topicList, *channel)
-			} else {
-				go cohere.StartGeneration(extracted_json, notification.CourseId, topicList, *channel)
-			}
 			filePath := "text/" + notification.CourseId + ".json"
 
 			pyqContent, err := aws.GetTextFromS3(filePath)
@@ -229,7 +221,8 @@ func ListenToNotification() {
 				fmt.Println("Error:", err)
 				return
 			}
-			pyqAnalysis := cohere.PyqsGeneration(data.Pyqs[0].Contents, topicList)
+			pyqAnalysis := cohere.PyqsGeneration(data.Pyqs[0].Contents, topicList, *channel)
+
 			pyqFile, err := os.Create(notification.CourseId + ".json")
 			if err != nil {
 				fmt.Println("Error creating pyqFile", err)
@@ -240,7 +233,7 @@ func ListenToNotification() {
 			}
 
 			pyqFile.Write([]byte(pyqAnalysis))
-			// fmt.Println("TOPIC LIST", topicList)
+
 			_, err = pyqFile.Seek(0, 0)
 			if err != nil {
 				fmt.Println("Error seeking pyqFile:", err)
@@ -254,6 +247,15 @@ func ListenToNotification() {
 
 			pyqFile.Close()
 			os.Remove(notification.CourseId + ".json")
+
+			if receivedMode == utils.Simple {
+				go cohere.StartGeneration(extracted_json, notification.CourseId, topicList, *channel)
+
+			} else if receivedMode == utils.Detailed {
+				go cohere.StartDetailedGeneration(extracted_json, notification.CourseId, topicList, *channel)
+			} else {
+				go cohere.StartGeneration(extracted_json, notification.CourseId, topicList, *channel)
+			}
 
 			// Create goa reader from byte slice.
 

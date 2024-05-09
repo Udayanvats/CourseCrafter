@@ -219,10 +219,10 @@ func main() {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
 		// fmt.Print("PYQ CONTENT", data.Pyqs[0].Contents)
-		pyqAnalysis := cohere.PyqsGeneration(data.Pyqs[0].Contents, topicList)
+		// pyqAnalysis := cohere.PyqsGeneration(data.Pyqs[0].Contents, topicList,channel)
 		fmt.Print(pyqContent)
 
-		c.JSON(http.StatusOK, pyqAnalysis)
+		// c.JSON(http.StatusOK, pyqAnalysis)
 	})
 
 	r.GET("/auth/google/url", auth.GetGoogleUrl)

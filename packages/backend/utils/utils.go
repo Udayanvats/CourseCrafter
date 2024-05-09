@@ -62,10 +62,11 @@ type ProcessingData struct {
 	Type   string `json:"type"`
 }
 type StreamResponse struct {
-	Message   string  `json:"status"`
-	Error     *string `json:"error"`
-	Done      bool    `json:"done"`
-	TopicList *string `json:"topicList"`
+	Message    string  `json:"status"`
+	Error      *string `json:"error"`
+	Done       bool    `json:"done"`
+	TopicList  *string `json:"topicList"`
+	PyqContent *string `json:"pyqContent"`
 }
 
 type Data struct {
@@ -78,7 +79,7 @@ type Data struct {
 var jwtSecret = []byte(env.Get("JWT_SECRET", ""))
 
 func ListTopicsPrompt(courseJson string) string {
-	fmt.Println(courseJson,"courseJSonnnnn  asds")
+	fmt.Println(courseJson, "courseJSonnnnn  asds")
 	return fmt.Sprintf(`
 	"The following is the JSON format in which the input will be provided to you:"
 
