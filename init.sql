@@ -9,7 +9,7 @@ CREATE TABLE users(
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE course (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    userId SERIAL REFERENCES users (id),
+    "userId" SERIAL REFERENCES users (id),
     title VARCHAR(255) NOT NULL,
     docs TEXT[] NOT NULL,
     pyqs TEXT[],

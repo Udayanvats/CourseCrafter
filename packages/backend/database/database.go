@@ -45,7 +45,7 @@ func GetUserByEmail(email string) (utils.User, error) {
 func AddCourse(course utils.Course) (string, error) {
 	var id string
 	fmt.Println(course.Docs, "docs", course.Pyqs, "pyqs")
-	err := pool.QueryRow(context.Background(), `INSERT INTO course (title, mode, docs,pyqs,userId,"processingData") VALUES ($1, $2, $3, $4, $5,$6) RETURNING id`,
+	err := pool.QueryRow(context.Background(), `INSERT INTO course (title, mode, docs,pyqs,"userId","processingData") VALUES ($1, $2, $3, $4, $5,$6) RETURNING id`,
 		course.Title, course.Mode, course.Docs, course.Pyqs, course.UserId, course.ProcessingData).Scan(&id)
 
 	if err != nil {

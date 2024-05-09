@@ -32,6 +32,7 @@ func handleStreamingRequest(ctx context.Context, c *gin.Context, courseId string
 		Done           bool    `json:"done"`
 		InitailReponse *string `json:"initailReponse"`
 		TopicList      *string `json:"topicList"`
+		pyqContent     *string `json:"pyqContent"`
 	}
 
 	client := c.Writer
@@ -145,6 +146,28 @@ func handleStreamingRequest(ctx context.Context, c *gin.Context, courseId string
 
 				client.Write([]byte("data: " + string(jsonResponse) + "\n\n"))
 				client.Flush()
+			} else if message.PyqContent != nil {
+				fmt.Println("PyqContent received as ", message.PyqContent)
+				var res Response = Response{
+					Data:           nil,
+					Error:          nil,
+					Done:           false,
+					InitailReponse: nil,
+					pyqContent:     message.PyqContent,
+				}
+
+				var jsonResponse, err = json.Marshal(res)
+				if err != nil {
+					fmt.Println("error while converting inital res to json", err)
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					c.Writer.Header().Set("Connection", "close")
+					return
+				}
+
+				client.Write([]byte("data: " + string(jsonResponse) + "\n\n"))
+
+				client.Flush()
+
 			} else {
 				// fmt.Println("Message received as ", message.Message)
 				utils.CourseContentMap[courseId].ContentMutex.Lock()
@@ -280,7 +303,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"token": tokenString})
 	})
 
-	r.POST("/upload", func(c *gin.Context) {
+	r.POST("/upload", auth.AuthMiddleware(), func(c *gin.Context) {
 		form, err := c.MultipartForm()
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "No file uploaded"})
@@ -300,6 +323,7 @@ func main() {
 		modeStr := c.Request.FormValue("mode")
 		userID, _ := c.Get("userId")
 		userId, _ := userID.(int)
+		fmt.Println(userId, "userId")
 
 		modeInt, err := strconv.Atoi(modeStr)
 		if err != nil {
@@ -388,7 +412,6 @@ func main() {
 		}
 
 		fmt.Println(course.ProcessingData, "course")
-
 		courseId, err := database.AddCourse(course)
 		//initialting course id in upload test
 		utils.CourseStreamMutex.Lock()

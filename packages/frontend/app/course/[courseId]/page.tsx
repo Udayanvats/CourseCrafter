@@ -24,6 +24,7 @@ type EventSourceData={
     done: boolean;
     initialResponse: string | null;
     topicList: string | null;
+    pyqContent: string | null;
 }
 
 
@@ -62,6 +63,9 @@ export default function CoursePage({ params: {
                     
                     setTopicList(JSON.parse(eventSourseData.topicList))
                     
+                }
+                else if(eventSourseData?.pyqContent){
+                    console.log(eventSourseData.pyqContent,"PYQ CONTENT")
                 }
                 else {
 

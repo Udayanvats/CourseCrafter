@@ -165,6 +165,7 @@ func ListenToNotification() {
 			topicList := cohere.StartGenerationTopics(extracted_json, notification.CourseId)
 			// fmt.Println("TOPIC LIST", topicList)
 
+
 			// utils.CourseStreamMutex.Lock()
 			channel := utils.CourseStreamChannels[notification.CourseId]
 			fmt.Println(channel, "channell")
@@ -174,6 +175,7 @@ func ListenToNotification() {
 					TopicList: &topicList,
 				}
 			}()
+			go cohere.PyqsGeneration(extracted_json,topicList, *channel, notification.CourseId)
 			// utils.CourseStreamMutex.Unlock()
 			fmt.Println("done sending to channel")
 			file, err := os.Create(notification.CourseId + ".txt")
@@ -221,32 +223,18 @@ func ListenToNotification() {
 				fmt.Println("Error:", err)
 				return
 			}
-			pyqAnalysis := cohere.PyqsGeneration(data.Pyqs[0].Contents, topicList, *channel)
 
-			pyqFile, err := os.Create(notification.CourseId + ".json")
 			if err != nil {
 				fmt.Println("Error creating pyqFile", err)
 			}
 
-			if err != nil {
-				fmt.Println("Error marshalling json", err)
-			}
+		
+			
 
-			pyqFile.Write([]byte(pyqAnalysis))
+		
 
-			_, err = pyqFile.Seek(0, 0)
-			if err != nil {
-				fmt.Println("Error seeking pyqFile:", err)
-				return
-			}
-
-			err = aws.UploadFileToS3("pyq/"+notification.CourseId+".json", pyqFile)
-			if err != nil {
-				fmt.Println("Error uploading file to s3", err)
-			}
-
-			pyqFile.Close()
-			os.Remove(notification.CourseId + ".json")
+			
+		
 
 			if receivedMode == utils.Simple {
 				go cohere.StartGeneration(extracted_json, notification.CourseId, topicList, *channel)
