@@ -324,6 +324,7 @@ func main() {
 		userID, _ := c.Get("userId")
 		userId, _ := userID.(int)
 		fmt.Println(userId, "userId")
+		
 
 		modeInt, err := strconv.Atoi(modeStr)
 		if err != nil {

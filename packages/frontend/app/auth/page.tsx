@@ -13,7 +13,7 @@ export default function CourseCreator() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const searchParams = useSearchParams()
+  const searchParams = useSearchParams();
   // useEffect(() => {
   //     const code = searchParams.get('code')
   //     async function loginWithGoogle() {
@@ -41,8 +41,8 @@ export default function CourseCreator() {
 
       if (response.ok) {
         const data = await response.json();
-        const token = data.token;   
-        router.push("/homepage");
+        const token = data.token;
+        router.push("/");
       } else {
         // Handle error response (e.g., display error message)
         console.error("Signup failed");
@@ -61,12 +61,13 @@ export default function CourseCreator() {
       },
       body: JSON.stringify({ email, password }),
       cache: "no-store",
+      credentials: "include",
     });
 
     if (response.ok) {
       const data = await response.json();
       const token = data.token;
-      router.push("/homepage");
+      router.push("/");
     } else {
       console.error("Login failed");
     }
@@ -74,28 +75,20 @@ export default function CourseCreator() {
   // const router = useRouter();
 
   const loginWithGoogle = async () => {
-    const res=await fetch("http://localhost:8080/auth/google/url", {
+    const res = await fetch("http://localhost:8080/auth/google/url", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
       },
       cache: "no-store",
-
-    })
+    });
 
     if (res.ok) {
       const data = await res.json();
-      console.log(data,data.url)
+      console.log(data, data.url);
       router.push(data.url);
-      
-
     }
-    
-
-
-      
-
-  }
+  };
 
   return (
     <div className="flex min-h-[100dvh] flex-col items-center justify-center shadow-lg bg-gray-100 px-4 py-12 dark:bg-gray-950">

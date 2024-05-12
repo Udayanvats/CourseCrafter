@@ -43,13 +43,13 @@ export default function UploadForm({
     formData.append("userId", "a1df4b0b-2ed9-4245-b74c-b60728640a93");
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/upload`,
+      "http://localhost:8080/upload",
+      // `${process.env.NEXT_PUBLIC_BACKEND_URL}/upload`,
       {
         method: "POST",
         body: formData,
-        credentials:"include",
-        cache:"no-store"
-        
+        credentials: "include",
+        cache: "no-store",
       }
     );
 
