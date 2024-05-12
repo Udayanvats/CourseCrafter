@@ -20,7 +20,7 @@ const LandingPage = () => {
         <div className="px-20 pb-6 pt-6 shadow-lg shadow-gray-50  border rounded-lg mx-12 border-gray mt-16 ">
           <Features />
         </div>
-
+{/* Hello */}
         <Video />
       </div>
       <BackgroundBeams />
