@@ -42,6 +42,7 @@ export default function UploadForm({
     formData.append("title", uploadFormData.title);
 
     const response = await fetch(
+    
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/upload`,
       {
         method: "POST",

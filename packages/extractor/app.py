@@ -40,6 +40,7 @@ parameters = pika.ConnectionParameters(host=RABBITMQ_HOST, port=RABBITMQ_PORT, c
 connection = pika.BlockingConnection(parameters)
 channel = connection.channel()
 
+
 channel.queue_declare(queue='extract')
 channel.queue_declare(queue='notification',durable=True)
 
