@@ -5,6 +5,7 @@ import (
 	"CourseCrafter/aws"
 	"CourseCrafter/cohere"
 	"context"
+	"io"
 	"runtime"
 
 	// "CourseCrafter/cohere"
@@ -32,7 +33,7 @@ func handleStreamingRequest(ctx context.Context, c *gin.Context, courseId string
 		Done           bool    `json:"done"`
 		InitailReponse *string `json:"initailReponse"`
 		TopicList      *string `json:"topicList"`
-		pyqContent     *string `json:"pyqContent"`
+		PyqContent     *string `json:"pyqContent"`
 	}
 
 	client := c.Writer
@@ -49,7 +50,7 @@ func handleStreamingRequest(ctx context.Context, c *gin.Context, courseId string
 	topicList, err := aws.GetTextFromS3("topicList/" + courseId + ".txt")
 
 	if err != nil {
-		fmt.Println("Failed to get text from S3:", err)
+		fmt.Println("Failed to get text from S3 fdffdf:", err)
 	}
 	var topicResponse Response = Response{
 		Data:           nil,
@@ -69,7 +70,44 @@ func handleStreamingRequest(ctx context.Context, c *gin.Context, courseId string
 
 	client.Flush()
 	utils.CourseContentMutex.Lock()
+
+
+	utils.CourseContentMutex.Unlock()
+
+	if channel == nil {
+		fmt.Println("channel is nil")
+		response, err := aws.GetTextFromS3("courses/" + courseId + ".txt")
+		// fmt.Println("file reesss", response)
+		if err != nil {
+
+			fmt.Println("Failed to get text from S3:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		var res Response = Response{
+			Data:           &response,
+			Error:          nil,
+			Done:           true,
+			InitailReponse: nil,
+		}
+		var jsonResponse, err2 = json.Marshal(res)
+		if err2 != nil {
+			fmt.Println("error while converting inital res to json", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.Writer.Header().Set("Connection", "close")
+			return
+		}
+
+		client.Write([]byte("data: " + string(jsonResponse) + "\n\n"))
+		client.Flush()
+
+		c.Writer.Header().Set("Connection", "close")
+
+		return
+
+	}
+
 	if utils.CourseContentMap[courseId] != nil {
+		fmt.Println("HEJED")
 		(utils.CourseContentMap[courseId]).ContentMutex.Lock()
 		var res Response = Response{
 			Data:           &utils.CourseContentMap[courseId].Content,
@@ -89,8 +127,6 @@ func handleStreamingRequest(ctx context.Context, c *gin.Context, courseId string
 		client.Flush()
 		utils.CourseContentMap[courseId].ContentMutex.Unlock()
 	}
-
-	utils.CourseContentMutex.Unlock()
 
 	for {
 		select {
@@ -153,7 +189,7 @@ func handleStreamingRequest(ctx context.Context, c *gin.Context, courseId string
 					Error:          nil,
 					Done:           false,
 					InitailReponse: nil,
-					pyqContent:     message.PyqContent,
+					PyqContent:     message.PyqContent,
 				}
 
 				var jsonResponse, err = json.Marshal(res)
@@ -271,8 +307,8 @@ func main() {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
 			return
 		}
-		c.SetCookie("token", tokenString, 3600, "/", "", false, true)
-		c.SetCookie("userId", strconv.Itoa(dbUser.Id), 3600, "/", "", false, true)
+
+		c.SetCookie("jwt", tokenString, 3600, "/", "", false, true)
 		c.JSON(http.StatusOK, gin.H{"token": tokenString})
 	})
 
@@ -458,7 +494,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"message": "File uploaded successfully", "courseId": courseId})
 	})
 
-	r.POST("/courses", auth.AuthMiddleware(), func(c *gin.Context) {
+	r.GET("/courses", auth.AuthMiddleware(), func(c *gin.Context) {
 		userID, _ := c.Get("userId")
 
 		fmt.Println("This is the userID", userID)
@@ -475,11 +511,12 @@ func main() {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-
+		fmt.Println(courses, "coursesseses")
 		c.JSON(http.StatusOK, courses)
 	})
 
 	r.GET("/courses/:courseId/status", auth.AuthMiddleware(), func(c *gin.Context) {
+		fmt.Println("WE ARE HERE IN STATUS")
 		courseId := c.Param("courseId")
 		client := c.Writer
 		client.Header().Set("Content-Type", "text/event-stream")
@@ -531,31 +568,31 @@ func main() {
 		client.Flush()
 
 		// if all processing is done
-		allDone := true
-		for _, data := range course.ProcessingData {
-			if !data.Status {
-				allDone = false
-				break
-			}
-		}
+		// allDone := true
+		// for _, data := range course.ProcessingData {
+		// 	if !data.Status {
+		// 		allDone = false
+		// 		break
+		// 	}
+		// }
 
-		if allDone {
-			var doneResponse ProcessingES
-			doneResponse.Done = true
-			doneResponseString, err := json.Marshal(doneResponse)
-			if err != nil {
-				fmt.Println("error while converting done res to json", err)
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				c.Writer.Header().Set("Connection", "close")
+		// if allDone {
+		// 	var doneResponse ProcessingES
+		// 	doneResponse.Done = true
+		// 	doneResponseString, err := json.Marshal(doneResponse)
+		// 	if err != nil {
+		// 		fmt.Println("error while converting done res to json", err)
+		// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		// 		c.Writer.Header().Set("Connection", "close")
 
-				return
-			}
-			client.Write([]byte("data: " + string(doneResponseString) + "\n\n"))
-			client.Flush()
-			c.Writer.Header().Set("Connection", "close")
+		// 		return
+		// 	}
+		// 	client.Write([]byte("data: " + string(doneResponseString) + "\n\n"))
+		// 	client.Flush()
+		// 	c.Writer.Header().Set("Connection", "close")
 
-			return
-		}
+		// 	return
+		// }
 
 		channel := utils.CourseProcessingChannels[courseId]
 
@@ -629,7 +666,7 @@ func main() {
 	r.GET("/cohere", auth.AuthMiddleware(), func(c *gin.Context) {
 		extracted_json, err := aws.GetTextFromS3("text/c715e1cf-6c59-4130-820f-d42cb154bd79.json")
 		if err != nil {
-			fmt.Println("Failed to get text from S3:", err)
+			fmt.Println("Failed to get text from S3 dcsdfwef:", err)
 		}
 		// fmt.Print(extracted_json)
 
@@ -647,6 +684,35 @@ func main() {
 		ctx, cancel := context.WithCancel(c.Request.Context())
 		defer cancel() // Cancel the context when the handler function returns
 		handleStreamingRequest(ctx, c, courseId)
+	})
+	r.POST("/deleteCourse", auth.AuthMiddleware(), func(c *gin.Context) {
+		var res struct {
+			CourseId string `json:"courseId"`
+		}
+		requestBody, err := io.ReadAll(c.Request.Body)
+		if err != nil {
+			fmt.Println("error while reading request body", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		fmt.Println(string(requestBody))
+		defer c.Request.Body.Close()
+		err = json.Unmarshal(requestBody, &res)
+		if err != nil {
+			fmt.Println("error while decoding request body", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		courseId := res.CourseId
+		fmt.Println("courseId", courseId)
+
+		err = database.DeleteCourse(courseId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Course deleted successfully"})
 	})
 
 	r.Run("localhost:8080")

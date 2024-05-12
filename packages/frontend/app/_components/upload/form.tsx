@@ -40,7 +40,6 @@ export default function UploadForm({
     });
     formData.append("mode", uploadFormData.mode.toString());
     formData.append("title", uploadFormData.title);
-    formData.append("userId", "a1df4b0b-2ed9-4245-b74c-b60728640a93");
 
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/upload`,
@@ -62,7 +61,6 @@ export default function UploadForm({
       console.log("file upload failed");
     }
 
-    console.log(await response.json(), "bodyyyyy");
 
     // router.push("/dashboard",{
 

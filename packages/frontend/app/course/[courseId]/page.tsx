@@ -42,7 +42,14 @@ export default function CoursePage({ params: {
     const [streamText, setStreamText] = useState("")
     const [topicList, setTopicList] = useState<TopicList[]>([])
 
-    const [currentTopicIndex,setCurrentTopicIndex]=useLocalStorage<number>("currentTopicIndex", 0);
+    const [currentTopicIndex,setCurrentTopicIndex]=useLocalStorage<{
+        currentTopicIndex:number
+        curentSubTopicIndex:number
+    }>("currentTopicIndex", {
+        currentTopicIndex:0,
+        curentSubTopicIndex:0
+    
+    });
 
 
 
@@ -53,11 +60,11 @@ export default function CoursePage({ params: {
         function startES() {
             const eventStream = new EventSource('http://localhost:8080/coursecontent/' + courseId)
             eventStream.onmessage = (event) => {
-                // console.log(event.data)
                 const eventSourseData: EventSourceData = JSON.parse(event.data)
+                console.log(eventSourseData.done)
                 if (eventSourseData?.done == true) {
                     eventStream.close()
-                    return
+                    
                 }
                 else if(eventSourseData?.topicList){
                     
@@ -67,8 +74,8 @@ export default function CoursePage({ params: {
                 else if(eventSourseData?.pyqContent){
                     console.log(eventSourseData.pyqContent,"PYQ CONTENT")
                 }
-                else {
-
+                if(eventSourseData?.data) {
+                    console.log("we are here babay")
                     setStreamText((prev) => prev + eventSourseData.data)
                 }
 
@@ -90,7 +97,7 @@ export default function CoursePage({ params: {
 
             if (streamText != "") {
                 setJsonData(parse(streamText))
-                console.log(streamText)
+                console.log(streamText.slice(0,20),"streamText")
             }
         } catch {
             console.log(streamText)
@@ -103,9 +110,14 @@ export default function CoursePage({ params: {
     return (
         <div className="w-full h-full flex  " >
         
-            <Sidebar topicList={topicList} currentTopicIndex={currentTopicIndex} />
+            <Sidebar topicList={topicList} currentTopicIndex={currentTopicIndex.currentTopicIndex} setCurrentTopicIndex={(topic)=>setCurrentTopicIndex((prev:any)=>({...prev,currentTopicIndex:topic}))} 
+                subTopicIndex={currentTopicIndex.curentSubTopicIndex} setSubTopicIndex={(subtopic)=>setCurrentTopicIndex((prev:any)=>({...prev,curentSubTopicIndex:subtopic}))}
+
+            />
             {/* {streamText} */}
-            <ContentComponent data={jsonData}  topicList={topicList} currentTopicIndex={currentTopicIndex} setCurrentTopicIndex={setCurrentTopicIndex} />
+            <ContentComponent data={jsonData}  topicList={topicList} currentTopicIndex={currentTopicIndex.currentTopicIndex} setCurrentTopicIndex={(topic)=>setCurrentTopicIndex((prev:any)=>({...prev,currentTopicIndex:topic}))}
+                setSubTopicIndex={(subtopic)=>setCurrentTopicIndex((prev:any)=>({...prev,curentSubTopicIndex:subtopic}))}
+            />
         </div>
     )
 

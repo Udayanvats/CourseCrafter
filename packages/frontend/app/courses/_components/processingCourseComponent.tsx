@@ -60,13 +60,13 @@ export default function ProcessingCourseComponent({ courseId }: {
         }
 
 
-    }, [])
+    }, [courseId])
 
 
     return (
         <div className="">
             <div id="header" >
-
+                    {courseId}
                 <div className="font-extrabold text-white"  >
                     Processing Files
                 </div>

@@ -7,32 +7,42 @@ import UploadForm from "./form"
 export type UploadProps = {
     docs: Array<File>
     pyqs: Array<File>
-    mode:number
-    title:string
+    mode: number
+    title: string
 
 }
 
-export default function Upload() {
-    const  [uploadFormData, setUploadFormData] = useState<UploadProps>({
+export default function Upload({ className, label }: {
+    className?: string,
+    label?: string
+}) {
+    const [uploadFormData, setUploadFormData] = useState<UploadProps>({
         docs: [],
         pyqs: [],
-        mode:0,
-        title:"New couse"
+        mode: 0,
+        title: "New couse"
     })
-    
+
 
     return (
 
         <div>
-            <button className="btn btn-primary text-white" onClick={() => {
+            <button className={`btn btn-primary text-white ${className}`} onClick={() => {
+             
                 //@ts-ignore
-                document?.getElementById('my_modal_1')?.showModal()
-            }}>Upload</button>
+                document?.getElementById('upload_modal')?.showModal()
+            }}>{label ?? "Upload"}
+            </button>
 
-            <dialog id="my_modal_1" className="modal ">
+            <dialog id="upload_modal" className="modal ">
+              
                 <div className="modal-box  max-w-none w-[60vw] min-w-[500px] m-6">
-                <UploadForm uploadFormData={uploadFormData} setUploadFormData={setUploadFormData} />
-                   
+                <form method="dialog">
+                    {/* if there is a button in form, it will close the modal */}
+                    <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                </form>
+                    <UploadForm uploadFormData={uploadFormData} setUploadFormData={setUploadFormData} />
+
                 </div>
             </dialog>
         </div>

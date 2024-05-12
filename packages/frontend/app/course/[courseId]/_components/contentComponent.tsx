@@ -3,11 +3,12 @@
 import { ContentType, TopicList } from '../page'
 import Content from './content'
 
-export default function ContentComponent({ data, topicList ,currentTopicIndex,setCurrentTopicIndex}: {
+export default function ContentComponent({ data, topicList ,currentTopicIndex,setCurrentTopicIndex,setSubTopicIndex}: {
     data: ContentType[],
     topicList: TopicList[],
     currentTopicIndex:number,
     setCurrentTopicIndex:React.Dispatch<React.SetStateAction<number>>
+    setSubTopicIndex:React.Dispatch<React.SetStateAction<number>>
 }) {
 
 
@@ -25,7 +26,7 @@ export default function ContentComponent({ data, topicList ,currentTopicIndex,se
             </div>
             {
 
-                <Content topic={topicList[currentTopicIndex]} contents={data?.[currentTopicIndex]}  />
+                <Content setSubTopicIndex={setSubTopicIndex} topic={topicList[currentTopicIndex]} contents={data?.[currentTopicIndex]}  />
 
             }
 

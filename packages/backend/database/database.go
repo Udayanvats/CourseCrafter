@@ -114,7 +114,7 @@ func GetCourses(userId int) ([]utils.Course, error) {
 
 	var courses []utils.Course
 	fmt.Println("THIS IS USER ID in courses", userId)
-	rows, err := pool.Query(context.Background(), `SELECT id, title, mode, docs, pyqs FROM course WHERE userId = $1`, userId)
+	rows, err := pool.Query(context.Background(), `SELECT id, title, mode, docs, pyqs FROM course WHERE "userId" = $1`, userId)
 	print("THIS IS ROWS", rows)
 	if err != nil {
 		return nil, err
@@ -123,15 +123,14 @@ func GetCourses(userId int) ([]utils.Course, error) {
 
 	for rows.Next() {
 		var course utils.Course
-		var id string
-		err := rows.Scan(&id, &course.Title, &course.Mode, pq.Array(&course.Docs), pq.Array(&course.Pyqs))
+		err := rows.Scan(&course.Id, &course.Title, &course.Mode, pq.Array(&course.Docs), pq.Array(&course.Pyqs))
 		if err != nil {
 			return nil, err
 		}
 		course.UserId = userId
 		courses = append(courses, course)
 	}
-	fmt.Print(courses)
+	fmt.Println(courses)
 
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -150,4 +149,13 @@ func UpdateProcessingStatus(courseId string, filename string, status bool) error
 
 	return nil
 
+}
+
+
+func DeleteCourse(id string) error {
+	_, err := pool.Exec(context.Background(), `DELETE FROM course WHERE id = $1`, id)
+	if err != nil {
+		return err
+	}
+	return nil
 }

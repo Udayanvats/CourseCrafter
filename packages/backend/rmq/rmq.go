@@ -151,6 +151,7 @@ func ListenToNotification() {
 		}
 		fmt.Println("SENDING MESSAGE", notification.Message)
 		if notification.Message == "done" {
+			fmt.Println("DONE MESSAGE", notification.Message)
 			if utils.CourseContentMap[notification.CourseId] == nil {
 				utils.CourseContentMap[notification.CourseId] = &utils.CourseContent{
 					Content:      "",
@@ -159,12 +160,11 @@ func ListenToNotification() {
 			}
 			extracted_json, err := aws.GetTextFromS3(*notification.Object_path)
 			if err != nil {
-				fmt.Println("Failed to get text from S3:", err)
+				fmt.Println("Failed to get text from S3 asededed:", err)
 			}
 			fmt.Println("starrting topic generation MODE", *notification.Mode)
 			topicList := cohere.StartGenerationTopics(extracted_json, notification.CourseId)
-			// fmt.Println("TOPIC LIST", topicList)
-
+			fmt.Println("TOPIC LIST", topicList)
 
 			// utils.CourseStreamMutex.Lock()
 			channel := utils.CourseStreamChannels[notification.CourseId]
@@ -175,7 +175,7 @@ func ListenToNotification() {
 					TopicList: &topicList,
 				}
 			}()
-			go cohere.PyqsGeneration(extracted_json,topicList, *channel, notification.CourseId)
+			go cohere.PyqsGeneration(extracted_json, topicList, *channel, notification.CourseId)
 			// utils.CourseStreamMutex.Unlock()
 			fmt.Println("done sending to channel")
 			file, err := os.Create(notification.CourseId + ".txt")
@@ -216,7 +216,7 @@ func ListenToNotification() {
 
 			pyqContent, err := aws.GetTextFromS3(filePath)
 			if err != nil {
-				panic("failed to get text from S3: " + err.Error())
+				panic("failed to get text from S3 121212: " + err.Error())
 			}
 			var data utils.Data
 			if err := json.Unmarshal([]byte(pyqContent), &data); err != nil {
@@ -227,14 +227,6 @@ func ListenToNotification() {
 			if err != nil {
 				fmt.Println("Error creating pyqFile", err)
 			}
-
-		
-			
-
-		
-
-			
-		
 
 			if receivedMode == utils.Simple {
 				go cohere.StartGeneration(extracted_json, notification.CourseId, topicList, *channel)
@@ -248,6 +240,7 @@ func ListenToNotification() {
 			// Create goa reader from byte slice.
 
 		} else {
+			fmt.Println("NOT DNONE", notification.Message)
 			courseProcessingChannel <- []byte(notification.Message)
 		}
 
