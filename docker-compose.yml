@@ -1,13 +1,13 @@
 version: "3.8"
 services:
-  extractor:
-    build: ./packages/extractor
-    networks:
-      - network-app
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-    # restart: always
+  # extractor:
+  #   build: ./packages/extractor
+  #   networks:
+  #     - network-app
+  #   depends_on:
+  #     rabbitmq:
+  #       condition: service_healthy
+  #   restart: always
 
   rabbitmq:
     image: rabbitmq:3.13
@@ -16,11 +16,11 @@ services:
       - "15672:15672"
     networks:
       - network-app
-    healthcheck:
-      test: ["CMD", "rabbitmqctl", "status"]
-      # interval: 5s
-      # timeout: 20s
-      # retries: 5
+    # healthcheck:
+    #   test: [ "CMD", "rabbitmqctl", "status"]
+    #   interval: 5s
+    #   timeout: 20s
+    #   retries: 5
 
   database:
     image: postgres:latest

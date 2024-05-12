@@ -55,6 +55,7 @@ type Course struct {
 	Pyqs           []string                  `json:"pyqs"`
 	UserId         int                       `json:"userId"`
 	ProcessingData map[string]ProcessingData `json:"processingData"`
+	Id             string                    `json:"id"`
 }
 
 type ProcessingData struct {
@@ -236,9 +237,10 @@ func DetailedPrompt(courseJson string, topicList TopicListObjectType) string {
 	{	
 		"Introduction": string,
 		"Content":[
-			string,
-			string,
-			...
+			content of subtopic1 [NOTE: should be a string],
+			content of subtopic2 [NOTE: should be a string],
+			content of subtopic3 [NOTE: should be a string],
+			...(so on continue for all subtopics)
 		],
 		"Conclusion": string,
 	}
@@ -246,7 +248,7 @@ func DetailedPrompt(courseJson string, topicList TopicListObjectType) string {
 
 	More Intructions:
 	Introduction -> Detailed description of the topic.
-	Content ->  Should be array , each element should content detailed description of the subtopic, it should be atleast 10 points,around  200 words.
+	Content ->  Should be array, each element represents all the contents of the corresponding subtopic as just a string , each element should contain detailed description of the subtopic.
 	Conclusion -> Summary of all the important parts of the topic.
 
 	You have to only return the json Object , and not an Array , do not return any additional text or symbols or code indicators.

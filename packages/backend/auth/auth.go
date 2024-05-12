@@ -104,7 +104,7 @@ func LoginWithGoogle(c *gin.Context) {
 	// Generate JWT token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": userInfo.Name,
-		"userId":   ID,
+		"id":       ID,
 	})
 
 	// Generate the token string
@@ -115,7 +115,7 @@ func LoginWithGoogle(c *gin.Context) {
 	}
 
 	// Set JWT token in cookie
-	c.SetCookie("jwt", tokenString, 3600, "/", "", false, true)
+	c.SetCookie("jwt", tokenString, 3600*24, "/", "", false, true)
 
 	c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("User %s created", userInfo.Name)})
 }
@@ -141,7 +141,7 @@ func HashPassword(password string) (string, error) {
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		token, err := c.Cookie("token")
+		token, err := c.Cookie("jwt")
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing token"})
 			return
@@ -174,6 +174,7 @@ func VerifyToken(tokenString string) (int, error) {
 
 	// Check if the token is valid
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		fmt.Println(claims["id"], "asdfSAD")
 		userID := int(claims["id"].(float64))
 		return userID, nil
 	} else {
