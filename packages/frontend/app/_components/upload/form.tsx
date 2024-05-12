@@ -46,9 +46,8 @@ export default function UploadForm({
       {
         method: "POST",
         body: formData,
-        credentials:"include",
-        cache:"no-store"
-        
+        credentials: "include",
+        cache: "no-store",
       }
     );
 
@@ -60,7 +59,6 @@ export default function UploadForm({
     } else {
       console.log("file upload failed");
     }
-
 
     // router.push("/dashboard",{
 
