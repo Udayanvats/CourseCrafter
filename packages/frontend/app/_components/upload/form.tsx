@@ -42,13 +42,13 @@ export default function UploadForm({
     formData.append("title", uploadFormData.title);
 
     const response = await fetch(
+    
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/upload`,
       {
         method: "POST",
         body: formData,
-        credentials:"include",
-        cache:"no-store"
-        
+        credentials: "include",
+        cache: "no-store",
       }
     );
 
@@ -60,7 +60,6 @@ export default function UploadForm({
     } else {
       console.log("file upload failed");
     }
-
 
     // router.push("/dashboard",{
 
