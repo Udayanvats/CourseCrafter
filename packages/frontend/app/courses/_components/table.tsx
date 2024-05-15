@@ -36,28 +36,31 @@ export default function Courses() {
 
     console.log(courses)
     return (
-        <div className=" px-9">
+        <div className="">
             {
                 courses.length === 0 ?
-                    <div className="w-full h-full min-h-[500px] flex justify-center items-center flex-col">
+                    <div className="w-full h-full  flex justify-center items-center flex-col">
                         <Image src={"/no-results.png"} alt="" width={100} height={100} />
                         <div className="text-white font-extrabold text-3xl">No courses found</div>
                         <div className="text-white opacity-60 font-bold text-sm">Start exploring by creating new courses</div>
 
                     </div>
                     :
+                    <div className="border border-gray-500 rounded-xl ">
 
-                    <table className="table ">
+                    <table className="table  w-full table-fixed ">
                         {/* head */}
-                        <thead>
+                        <thead className="border border-l-0 border-r-0 border-t-0 border-b-2 border-gray-500 table table-fixed">
                             <tr>
 
                                 <th>Course</th>
                                 <th>Created at</th>
                                 <th>Progress</th>
+                                <th>Other</th>
+
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="overflow overflow-y-auto h-[calc(100vh-350px)] max-h-[calc(100vh-350px)] block w-full  ">
                             <AnimatePresence >
                                 {
                                     courses?.map((course) => {
@@ -77,6 +80,8 @@ export default function Courses() {
 
                         </tbody>
                     </table>
+                    </div>
+
             }
            
         </div>

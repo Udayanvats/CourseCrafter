@@ -80,11 +80,11 @@ const Coursecard = ({ topic, status, id,setCourses }: CoursecardProps) => {
   }
   return (
     <motion.tr
-      className="rounded-xl"
+      className="rounded-xl border border-l-0 border-t-1 border-r-0 border-b-0 border-gray-500 table table-fixed "
 
       whileHover={{
         backgroundColor: "#31363F",
-        borderRadius: 20
+        
 
       }}
       transition={{
@@ -93,6 +93,7 @@ const Coursecard = ({ topic, status, id,setCourses }: CoursecardProps) => {
 
 
       }}
+     
 
     >
       <td onClick={() => {

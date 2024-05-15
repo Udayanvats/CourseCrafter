@@ -3,6 +3,7 @@ import { Open_Sans } from "next/font/google";
 import "./globals.css";
 import { Bounce, ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Navbar from "./_components/navbar";
 const inter = Open_Sans({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -19,6 +20,8 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>{
         <div className="bg-background w-full h-full min-h-screen">
+                <Navbar />
+
           {children}
           <ToastContainer 
           position="bottom-right"

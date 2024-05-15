@@ -115,7 +115,7 @@ func LoginWithGoogle(c *gin.Context) {
 	}
 
 	// Set JWT token in cookie
-	c.SetCookie("jwt", tokenString, 3600*24, "/", "", false, true)
+	c.SetCookie("token", tokenString, 3600*24, "/", "", false, true)
 
 	c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("User %s created", userInfo.Name)})
 }
@@ -141,7 +141,7 @@ func HashPassword(password string) (string, error) {
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		token, err := c.Cookie("jwt")
+		token, err := c.Cookie("token")
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing token"})
 			return

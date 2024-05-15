@@ -53,10 +53,15 @@ const config = {
       },
       
       colors:{
-        background:"#191919",
-        primary:"#00adb5",
-        card:"#31363F"
-      }
+        background:"#0F0F0F",
+        primary:"bg-gradient-to-r from-indigo-500 to-purple-500",
+        secondaryBackground:"#191919"
+
+      },
+      backgroundImage: {
+        'gradient-primary': 'linear-gradient(to right, #6366f1, #a855f7)',
+      },
+
     },
 
 

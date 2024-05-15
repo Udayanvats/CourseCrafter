@@ -1,11 +1,13 @@
 "use client";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 const GetStartedButton = () => {
+  const router =useRouter()
   return (
     <button
       onClick={() => {
-        console.log("clicked");
+        router.push('/courses')
       }}
       className=" z-10 p-[3px] relative"
     >

@@ -14,7 +14,7 @@ export default function Sidebar({ topicList, currentTopicIndex, setCurrentTopicI
     console.log(currentTopicIndex, "currentTopicIndex")
 
     return (
-        <div className=" h-screen left-0 top-0 flex  w-[350px] overflow-y-auto flex-col p-3 ">
+        <div className=" h-[calc(100vh-88px)] left-0 top-0 flex  w-[350px] overflow-y-auto flex-col p-3 ">
 
 
 

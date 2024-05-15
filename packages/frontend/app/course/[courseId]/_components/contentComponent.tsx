@@ -14,7 +14,7 @@ export default function ContentComponent({ data, topicList ,currentTopicIndex,se
 
 
     return (
-        <div className='overflow-y-auto max-h-screen h-screen p-6 flex flex-col w-full'>
+        <div className='overflow-y-auto max-h-screen h-[calc(100vh-88px)] p-6 flex flex-col w-full'>
               <div className='w-full flex justify-between mb-6'>
               <button className='btn ' onClick={()=>{
                     setCurrentTopicIndex(Math.max(currentTopicIndex-1,0))

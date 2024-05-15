@@ -6,11 +6,26 @@ import { Button } from "@/components/ui/button";
 import PocessingModal from "./_components/modal";
 import Table from "./_components/table";
 import Upload from "../_components/upload";
+import { get } from "@/api";
+import { headers } from "next/headers";
+import { toast } from "react-toastify";
+import { redirect } from "next/navigation";
 
-export default function Courses() {
+export default async function Courses() {
+  const res=await get('isLoggedIn',{},new Headers(headers()))
+  console.log("resauth",res)
+  const {auth}=res
+
+  if(!auth){
+    
+    redirect("/auth")
+   
+  }
+
+  
   return (
-    <PocessingModal>
-      <div className="bg-background min-h-screen text-white">
+    <PocessingModal >
+      <div className=" min-h-[calc(100vh-89px)] h-[calc(100vh-89px)] w-full text-white">
         <div className="border-b border-gray-200 p-4">
           <h1 className="text-3xl font-bold">My Courses</h1>
           <div className="flex space-x-2 mt-3">
@@ -49,7 +64,7 @@ export default function Courses() {
             <Table />
           </div>
         </div>
-       <Upload className="absolute right-12 bottom-9  bg-primary  px-6 rounded-xl text-lg font-bold " />
+       <Upload className="fixed right-12 bottom-9  bg-primary  px-6 rounded-xl text-lg font-bold " />
       </div>
    
     </PocessingModal>

@@ -42,7 +42,7 @@ export default function CourseCreator() {
       if (response.ok) {
         const data = await response.json();
         const token = data.token;
-        router.push("/");
+        router.back()
       } else {
         // Handle error response (e.g., display error message)
         console.error("Signup failed");

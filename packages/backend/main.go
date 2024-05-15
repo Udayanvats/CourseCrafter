@@ -71,7 +71,6 @@ func handleStreamingRequest(ctx context.Context, c *gin.Context, courseId string
 	client.Flush()
 	utils.CourseContentMutex.Lock()
 
-
 	utils.CourseContentMutex.Unlock()
 
 	if channel == nil {
@@ -308,7 +307,7 @@ func main() {
 			return
 		}
 
-		c.SetCookie("jwt", tokenString, 3600, "/", "", false, true)
+		c.SetCookie("token", tokenString, 3600, "/", "", false, true)
 		c.JSON(http.StatusOK, gin.H{"token": tokenString})
 	})
 
@@ -360,7 +359,6 @@ func main() {
 		userID, _ := c.Get("userId")
 		userId, _ := userID.(int)
 		fmt.Println(userId, "userId")
-		
 
 		modeInt, err := strconv.Atoi(modeStr)
 		if err != nil {
@@ -714,6 +712,28 @@ func main() {
 		}
 
 		c.JSON(http.StatusOK, gin.H{"message": "Course deleted successfully"})
+	})
+
+	r.GET("/isLoggedIn", func(c *gin.Context) {
+		token, err := c.Cookie("token")
+		if err != nil {
+			fmt.Println("")
+			c.JSON(http.StatusOK, gin.H{"auth": false})
+			return
+		}
+
+		userId, err := auth.VerifyToken(token)
+		fmt.Print(err)
+
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{"auth": false})
+
+			return
+		}
+
+		fmt.Println("USER ID IN MIDDLEWARE", userId)
+		c.JSON(http.StatusOK, gin.H{"auth": true})
+
 	})
 
 	r.Run("localhost:8080")
