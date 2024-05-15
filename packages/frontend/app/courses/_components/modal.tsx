@@ -29,7 +29,7 @@ export default function PocessingModal({ children }: {
         , [searchParams])
 
     return (
-        <div className="h-[calc(100vh-89px)]">
+        <div className="h-full w-full">
 
             {/* You can open the modal using document.getElementById('ID').showModal() method */}
             {children}

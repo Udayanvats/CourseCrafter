@@ -143,7 +143,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		token, err := c.Cookie("token")
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing token"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing token", "authError": true})
 			return
 		}
 
@@ -151,9 +151,15 @@ func AuthMiddleware() gin.HandlerFunc {
 		fmt.Print(err)
 
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token", "authError": true})
 			return
 		}
+
+		exists := database.UserExists(userId)
+		if !exists {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "User not found", "authError": true})
+		}
+
 		fmt.Println("USER ID IN MIDDLEWARE", userId)
 		c.Set("userId", userId)
 
@@ -176,6 +182,7 @@ func VerifyToken(tokenString string) (int, error) {
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		fmt.Println(claims["id"], "asdfSAD")
 		userID := int(claims["id"].(float64))
+
 		return userID, nil
 	} else {
 		return 0, fmt.Errorf("invalid token")

@@ -16,5 +16,9 @@ CREATE TABLE course (
     "isProcessed" BOOLEAN DEFAULT FALSE,
     mode INTEGER NOT NULL,
     "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "isBookmark" BOOLEAN DEFAULT FALSE,
+    progress INTEGER DEFAULT 0,
+    "progressData" JSONB DEFAULT '{}',
+    "totalChapters" INTEGER DEFAULT 0,
     "processingData" JSONB DEFAULT '{}'
 );

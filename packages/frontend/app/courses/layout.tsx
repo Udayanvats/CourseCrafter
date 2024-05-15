@@ -9,9 +9,9 @@ export default function Layout({children}:{
 }){
 
     return (
-        <div className="h-full h-[calc(100vh-89px)]  w-full flex">
+        <div className=" h-[calc(100vh-89px)]  w-full flex">
             <Sidebar/>
-            <div className=" w-full p-5 bg-secondaryBackground">
+            <div className=" w-full h-full bg-secondaryBackground">
 
             {children}
             </div>

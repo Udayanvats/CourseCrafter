@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/gofor-little/env"
 )
@@ -56,6 +57,11 @@ type Course struct {
 	UserId         int                       `json:"userId"`
 	ProcessingData map[string]ProcessingData `json:"processingData"`
 	Id             string                    `json:"id"`
+	IsBookmark     bool                      `json:"isBookmark"`
+	Progress       int                       `json:"progress"`
+	CreatedAt      time.Time                 `json:"createdAt"`
+	TotalChapters  int                       `json:"totalChapters"`
+	ProgressData  map[string]bool            `json:"progressData"`
 }
 
 type ProcessingData struct {

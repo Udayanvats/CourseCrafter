@@ -25,7 +25,7 @@ export default async function Courses() {
   
   return (
     <PocessingModal >
-      <div className=" min-h-[calc(100vh-89px)] h-[calc(100vh-89px)] w-full text-white">
+      <div className="  w-full text-white">
         <div className="border-b border-gray-200 p-4">
           <h1 className="text-3xl font-bold">My Courses</h1>
           <div className="flex space-x-2 mt-3">

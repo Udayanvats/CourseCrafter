@@ -495,16 +495,26 @@ func main() {
 
 	r.GET("/courses", auth.AuthMiddleware(), func(c *gin.Context) {
 		userID, _ := c.Get("userId")
+		bookmark := c.Query("bookmark")
+
+		fmt.Println("BOOKMARK", bookmark)
+		bookMarkBool, _ := strconv.ParseBool(bookmark)
+		fmt.Println("BOOKMARK BOOL", bookMarkBool)
+
+		var bookMarkFinal *bool = &bookMarkBool
+		if bookmark == "" {
+			bookMarkFinal = nil
+		}
 
 		fmt.Println("This is the userID", userID)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "userId is required"})
-			return
-		}
+		// if err != nil {
+		// 	c.JSON(http.StatusBadRequest, gin.H{"error": "userId is required"})
+		// 	return
+		// }
 		userId, _ := userID.(int)
 		// userIdnum, _ := strconv.Atoi(userId)
 		fmt.Print("THIS IS USER ID being sent", userId)
-		courses, err := database.GetCourses(userId)
+		courses, err := database.GetCourses(userId, bookMarkFinal)
 		if err != nil {
 			fmt.Println(err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -730,9 +740,65 @@ func main() {
 
 			return
 		}
+		exists := database.UserExists(userId)
+		if !exists {
+			c.JSON(http.StatusOK, gin.H{"auth": false})
+			return
+
+		}
 
 		fmt.Println("USER ID IN MIDDLEWARE", userId)
 		c.JSON(http.StatusOK, gin.H{"auth": true})
+
+	})
+	r.POST("/updateBookmarkStatus", func(ctx *gin.Context) {
+		var req struct {
+			CouseId  string `json:"courseId"`
+			Bookmark bool   `json:"bookmark"`
+		}
+
+		if err := ctx.ShouldBindJSON(&req); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		err := database.UpdateBookmarkStatus(req.CouseId, req.Bookmark)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{"message": "Bookmark status updated successfully"})
+	})
+	r.POST("/updateProgress", func(ctx *gin.Context) {
+		var req struct {
+			CouseId    string `json:"courseId"`
+			TopicIndex int    `json:"topicIndex"`
+		}
+
+		if err := ctx.ShouldBindJSON(&req); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		fmt.Println(req.TopicIndex, "topicIndex")
+
+		err := database.UpdateProgress(req.CouseId, strconv.Itoa(req.TopicIndex))
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{"message": "Progress updated successfully"})
+	})
+
+	r.GET("/getProgressData", func(ctx *gin.Context) {
+		courseId := ctx.Query("courseId")
+		course,err:=database.GetCourse(courseId)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{"data": course.ProgressData})
+
+		
+
 
 	})
 

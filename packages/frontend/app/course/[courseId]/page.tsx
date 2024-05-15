@@ -5,6 +5,7 @@ import { parse } from 'best-effort-json-parser'
 import Sidebar from "./_components/sidebar"
 import ContentComponent from "./_components/contentComponent"
 import { useLocalStorage } from 'usehooks-ts'
+import { get } from "@/api"
 export type TopicList = {
     topic: string,
     subtopics: string[],
@@ -41,7 +42,9 @@ export default function CoursePage({ params: {
 
     const [streamText, setStreamText] = useState("")
     const [topicList, setTopicList] = useState<TopicList[]>([])
-
+    const [progressData,setProgressData]=useState<{
+        [key:string]:boolean
+    }>([])
     const [currentTopicIndex,setCurrentTopicIndex]=useLocalStorage<{
         currentTopicIndex:number
         curentSubTopicIndex:number
@@ -50,6 +53,8 @@ export default function CoursePage({ params: {
         curentSubTopicIndex:0
     
     });
+
+    console.log(    )
 
 
 
@@ -88,6 +93,21 @@ export default function CoursePage({ params: {
         startES()
     }, [])
 
+    useEffect(() => {
+        async function getProgressData(){
+            const response=await get("getProgressData?courseId="+courseId)
+            console.log(response?.data,"progress data")
+            if(response?.data){
+                setProgressData(response?.data)
+            }
+        } 
+
+        getProgressData()
+
+    },[])
+
+
+
     // console.log(streamText)
 
 
@@ -110,12 +130,12 @@ export default function CoursePage({ params: {
     return (
         <div className="w-full h-full flex  " >
         
-            <Sidebar topicList={topicList} currentTopicIndex={currentTopicIndex.currentTopicIndex} setCurrentTopicIndex={(topic)=>setCurrentTopicIndex((prev:any)=>({...prev,currentTopicIndex:topic}))} 
+            <Sidebar progressData={progressData} topicList={topicList} currentTopicIndex={currentTopicIndex.currentTopicIndex} setCurrentTopicIndex={(topic)=>setCurrentTopicIndex((prev:any)=>({...prev,currentTopicIndex:topic}))} 
                 subTopicIndex={currentTopicIndex.curentSubTopicIndex} setSubTopicIndex={(subtopic)=>setCurrentTopicIndex((prev:any)=>({...prev,curentSubTopicIndex:subtopic}))}
 
             />
             {/* {streamText} */}
-            <ContentComponent data={jsonData}  topicList={topicList} currentTopicIndex={currentTopicIndex.currentTopicIndex} setCurrentTopicIndex={(topic)=>setCurrentTopicIndex((prev:any)=>({...prev,currentTopicIndex:topic}))}
+            <ContentComponent setProgressData={setProgressData} courseId={courseId} data={jsonData}  topicList={topicList} currentTopicIndex={currentTopicIndex.currentTopicIndex} setCurrentTopicIndex={(topic)=>setCurrentTopicIndex((prev:any)=>({...prev,currentTopicIndex:topic}))}
                 setSubTopicIndex={(subtopic)=>setCurrentTopicIndex((prev:any)=>({...prev,curentSubTopicIndex:subtopic}))}
             />
         </div>

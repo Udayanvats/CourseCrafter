@@ -42,6 +42,17 @@ func GetUserByEmail(email string) (utils.User, error) {
 	err := row.Scan(&user.Id, &user.Name, &user.Email, &user.Password)
 	return user, err
 }
+func UserExists(userId int) bool {
+	var user utils.User
+	row := pool.QueryRow(context.Background(), "SELECT id, name, email, password FROM users WHERE id = $1", userId)
+	err := row.Scan(&user.Id, &user.Name, &user.Email, &user.Password)
+	if err == pgx.ErrNoRows {
+		return false
+	} else if err != nil {
+		return false
+	}
+	return true
+}
 func AddCourse(course utils.Course) (string, error) {
 	var id string
 	fmt.Println(course.Docs, "docs", course.Pyqs, "pyqs")
@@ -104,17 +115,28 @@ func UpdateCourse(course utils.Course) error {
 
 func GetCourse(id string) (utils.Course, error) {
 	var course utils.Course
-	err := pool.QueryRow(context.Background(), `SELECT title, mode, docs, pyqs, "userId","processingData" FROM course WHERE id = $1`, id).Scan(&course.Title, &course.Mode, &course.Docs, &course.Pyqs, &course.UserId, &course.ProcessingData)
+	err := pool.QueryRow(context.Background(), `SELECT title, mode, docs, pyqs, "userId","processingData","progressData" FROM course WHERE id = $1`, id).Scan(&course.Title, &course.Mode, &course.Docs, &course.Pyqs, &course.UserId, &course.ProcessingData, &course.ProgressData)
 	if err != nil {
 		return course, err
 	}
 	return course, nil
 }
-func GetCourses(userId int) ([]utils.Course, error) {
+func GetCourses(userId int, bookmark *bool) ([]utils.Course, error) {
 
 	var courses []utils.Course
 	fmt.Println("THIS IS USER ID in courses", userId)
-	rows, err := pool.Query(context.Background(), `SELECT id, title, mode, docs, pyqs FROM course WHERE "userId" = $1`, userId)
+	var query string
+	var args []interface{}
+
+	if bookmark == nil {
+		query = `SELECT id, title, mode, docs, pyqs, "isBookmark", progress, "createdAt","totalChapters","progressData" FROM course WHERE "userId" = $1`
+		args = append(args, userId)
+	} else {
+		query = `SELECT id, title, mode, docs, pyqs, "isBookmark", progress, "createdAt","totalChapters","progressData" FROM course WHERE "userId" = $1 AND "isBookmark" = $2`
+		args = append(args, userId, *bookmark)
+	}
+	rows, err := pool.Query(context.Background(), query, args...)
+
 	print("THIS IS ROWS", rows)
 	if err != nil {
 		return nil, err
@@ -123,7 +145,10 @@ func GetCourses(userId int) ([]utils.Course, error) {
 
 	for rows.Next() {
 		var course utils.Course
-		err := rows.Scan(&course.Id, &course.Title, &course.Mode, pq.Array(&course.Docs), pq.Array(&course.Pyqs))
+		err := rows.Scan(&course.Id, &course.Title, &course.Mode, pq.Array(&course.Docs), pq.Array(&course.Pyqs), &course.IsBookmark, &course.Progress, &course.CreatedAt, &course.TotalChapters, &course.ProgressData)
+		if err == pgx.ErrNoRows {
+			continue
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -151,9 +176,63 @@ func UpdateProcessingStatus(courseId string, filename string, status bool) error
 
 }
 
-
 func DeleteCourse(id string) error {
 	_, err := pool.Exec(context.Background(), `DELETE FROM course WHERE id = $1`, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateBookmarkStatus(courseId string, bookmark bool) error {
+	_, err := pool.Exec(context.Background(), `UPDATE course SET "isBookmark" = $1 WHERE id = $2`, bookmark, courseId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateProgress(courseId string, topicIndex string) error {
+	//get previous progress DATA of a topic
+	fmt.Println(topicIndex, "topicIndex")
+	var prevProgress bool = false
+	existsQuery := `
+    SELECT ("progressData" ? $2) 
+    FROM course
+    WHERE id = $1
+`
+	err := pool.QueryRow(context.Background(), existsQuery, courseId, topicIndex).Scan(&prevProgress)
+
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			fmt.Println("no progress data found for topicIndex", topicIndex)
+			prevProgress = false
+		} else {
+			fmt.Printf("error in getting progress data for topicIndex %d: %v\n", topicIndex, err)
+			return err
+		}
+	}
+
+	if !prevProgress {
+		srin := fmt.Sprintf(`UPDATE course SET "progressData" = ("progressData" || '{"%s":true}' ) WHERE id = $1`, topicIndex)
+		_, err = pool.Exec(context.Background(), srin, courseId)
+		if err != nil {
+			fmt.Println("error in sfsdfsf progress data for topicIndex", topicIndex)
+			return err
+		}
+
+		// increment progress by 1
+
+		_, err = pool.Exec(context.Background(), `UPDATE course SET progress = progress + 1 WHERE id = $1`, courseId)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func UpdateTotalChapters(courseId string, totalChapters int) error {
+	_, err := pool.Exec(context.Background(), `UPDATE course SET "totalChapters" = $2 WHERE id = $1`, courseId, totalChapters)
 	if err != nil {
 		return err
 	}

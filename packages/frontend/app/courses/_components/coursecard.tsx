@@ -8,9 +8,11 @@ import { CircularProgressbar } from "react-circular-progressbar";
 import { useRouter } from "next/navigation";
 import { SlOptionsVertical } from "react-icons/sl";
 import { post } from "@/api";
+import { FaBookmark } from "react-icons/fa";
+import { Course } from "./table";
 
 interface CoursecardProps {
-  topic: string;
+  course: Course;
   status: boolean;
   username: string;
   id: string;
@@ -60,7 +62,7 @@ function Progress({ percentage }: {
   )
 }
 
-const Coursecard = ({ topic, status, id,setCourses }: CoursecardProps) => {
+const Coursecard = ({ course, status, id,setCourses }: CoursecardProps) => {
   const percentage = 70;
   const router = useRouter()
   const getDaysAgo = (date: Date): number => {
@@ -78,9 +80,10 @@ const Coursecard = ({ topic, status, id,setCourses }: CoursecardProps) => {
       }
       )
   }
+  console.log(course.totalChapters,"total Chaptersss")
   return (
     <motion.tr
-      className="rounded-xl border border-l-0 border-t-1 border-r-0 border-b-0 border-gray-500 table table-fixed "
+      className="rounded-none border border-l-0 border-t-1 border-r-0 border-b-0 border-gray-500 table table-fixed "
 
       whileHover={{
         backgroundColor: "#31363F",
@@ -99,23 +102,37 @@ const Coursecard = ({ topic, status, id,setCourses }: CoursecardProps) => {
       <td onClick={() => {
         router.push(`/course/${id}`)
       }}>
-        {topic}
+        {course.title}
       </td>
       <td>
-        {new Date().toLocaleDateString()}
+        {new Date(course.createdAt).toLocaleDateString()}
       </td>
       <td>
-        <Progress percentage={70} />
+        <Progress percentage={Number((course.progress/course.totalChapters)*100).toFixed(0)} />
       </td>
 
 
-      <td>
+      <td className="flex items-center">
         <div className="dropdown">
           <div tabIndex={0} role="button" className="btn m-1"> <SlOptionsVertical /></div>
           <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
             <li><a onClick={deleteCourse}>Delete</a></li>
             <li><a>Item 2</a></li>
           </ul>
+        </div>
+        <div>
+          <FaBookmark onClick={async()=>{
+            await post("updateBookmarkStatus", JSON.stringify({ courseId: id ,bookmark:!course.isBookmark }))
+            setCourses((prev: any) => {
+              return prev.map((course: any) => {
+                if (course.id === id) {
+                  return { ...course, isBookmark: !course.isBookmark }
+                }
+                return course
+              })
+            }
+            )
+          }} size={25} className={`${course.isBookmark&& "fill-primary"} `} />
         </div>
 
 

@@ -6,12 +6,17 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 
 
-type Course = {
+export type Course = {
 
-    created_at: string;
+    createdAt: string;
     progress: number;
     title: string;
     id: string
+    isBookmark: boolean
+    totalChapters: number
+
+
+
 }
 
 export default function Courses() {
@@ -36,7 +41,7 @@ export default function Courses() {
 
     console.log(courses)
     return (
-        <div className="">
+        <div className="h-full min-h-[300px]">
             {
                 courses.length === 0 ?
                     <div className="w-full h-full  flex justify-center items-center flex-col">
@@ -57,6 +62,7 @@ export default function Courses() {
                                 <th>Created at</th>
                                 <th>Progress</th>
                                 <th>Other</th>
+                                
 
                             </tr>
                         </thead>
@@ -67,10 +73,11 @@ export default function Courses() {
                                         return (
                                             <Coursecard
                                                 username="sd"
-                                                topic={course.title}
+                                                
                                                 status={true}
                                                 id={course.id}
                                                 setCourses={setCourses}
+                                                course={course}
                                             />
                                         )
                                     })

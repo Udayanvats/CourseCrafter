@@ -2,12 +2,15 @@ import { TopicList } from "../page"
 
 
 
-export default function Sidebar({ topicList, currentTopicIndex, setCurrentTopicIndex ,subTopicIndex,setSubTopicIndex}: {
+export default function Sidebar({progressData, topicList, currentTopicIndex, setCurrentTopicIndex ,subTopicIndex,setSubTopicIndex}: {
     topicList: TopicList[],
     currentTopicIndex: number,
     setCurrentTopicIndex: React.Dispatch<React.SetStateAction<number>>
     subTopicIndex: number
     setSubTopicIndex: React.Dispatch<React.SetStateAction<number>>
+    progressData:Array<{
+        [key:string]:boolean
+    }>
 
 
 }) {
@@ -31,7 +34,7 @@ export default function Sidebar({ topicList, currentTopicIndex, setCurrentTopicI
 
 
                             <li
-                                className="relative"
+                                className={`relative ${progressData[index]&&" text-green-400"}`}
                                
                             >
                                 <input  onClick={() => {
@@ -55,7 +58,7 @@ export default function Sidebar({ topicList, currentTopicIndex, setCurrentTopicI
                                                         block: 'center',
                                                         inline: 'center'
                                                     })
-                                                }} className="w-full active "> <a className={`${subTopicIndex===subindex&&"active"}`}>{subtopic}</a></li>
+                                                }} className="w-full active  "> <a className={`${subTopicIndex===subindex&&" bg-gradient-primary hover:bg-gradient-secondary text-white"}`}>{subtopic}</a></li>
                                             ))
                                         }
                                     </ul>

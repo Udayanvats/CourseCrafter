@@ -54,12 +54,14 @@ const config = {
       
       colors:{
         background:"#0F0F0F",
-        primary:"bg-gradient-to-r from-indigo-500 to-purple-500",
+        primary:"#6366f1",
         secondaryBackground:"#191919"
 
       },
       backgroundImage: {
-        'gradient-primary': 'linear-gradient(to right, #6366f1, #a855f7)',
+        'gradient-primary': 'linear-gradient(to right, rgba(99, 102, 241, 0.3), rgba(168, 85, 247, 0.3))',
+        'gradient-secondary': 'linear-gradient(to right, rgba(99, 102, 241, 0.4), rgba(168, 85, 247, 0.4))',
+
       },
 
     },

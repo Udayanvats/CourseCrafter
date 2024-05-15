@@ -3,6 +3,7 @@ package cohere
 import (
 	// "CourseCrafter/aws"
 	"CourseCrafter/aws"
+	"CourseCrafter/database"
 	"CourseCrafter/utils"
 	"context"
 	"encoding/json"
@@ -233,6 +234,19 @@ func StartGenerationTopics(extracted_json string, courseId string) string {
 		fmt.Println("error while starting generation", err)
 		panic("failed to generate content: " + err.Error())
 	}
+	var topicsLists []struct {
+		Topic     string   `json:"topic"`
+		SubTopics []string `json:"subtopics"`
+	}
+	json.Unmarshal([]byte(topicsList.Text), &topicsLists)
+
+	fmt.Println(len(topicsLists), "topics list")
+	err = database.UpdateTotalChapters(courseId, len(topicsLists))
+
+	if err != nil {
+		fmt.Println("error while updating total chapters", err)
+	}
+
 	return topicsList.Text
 
 }

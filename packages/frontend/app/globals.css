@@ -2,3 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
+.menu li > *:not(ul):not(.menu-title):not(details):active{
+    @apply bg-primary;
+}
