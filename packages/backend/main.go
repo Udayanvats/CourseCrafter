@@ -558,6 +558,7 @@ func main() {
 			ProcessingData string `json:"processingData"`
 			Error          string `json:"error"`
 			Done           bool   `json:"done"`
+			DocsDone       bool   `json:"docsDone"`
 		}
 
 		var initailReponse ProcessingES
@@ -577,37 +578,38 @@ func main() {
 		client.Flush()
 
 		// if all processing is done
-		// allDone := true
-		// for _, data := range course.ProcessingData {
-		// 	if !data.Status {
-		// 		allDone = false
-		// 		break
-		// 	}
-		// }
+		allDone := true
+		for _, data := range course.ProcessingData {
+			if !data.Status {
+				allDone = false
+				break
+			}
+		}
 
-		// if allDone {
-		// 	var doneResponse ProcessingES
-		// 	doneResponse.Done = true
-		// 	doneResponseString, err := json.Marshal(doneResponse)
-		// 	if err != nil {
-		// 		fmt.Println("error while converting done res to json", err)
-		// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		// 		c.Writer.Header().Set("Connection", "close")
+		if allDone {
+			var doneResponse ProcessingES
+			doneResponse.DocsDone = true
+			doneResponseString, err := json.Marshal(doneResponse)
+			if err != nil {
+				fmt.Println("error while converting done res to json", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				c.Writer.Header().Set("Connection", "close")
 
-		// 		return
-		// 	}
-		// 	client.Write([]byte("data: " + string(doneResponseString) + "\n\n"))
-		// 	client.Flush()
-		// 	c.Writer.Header().Set("Connection", "close")
+				return
+			}
+			client.Write([]byte("data: " + string(doneResponseString) + "\n\n"))
+			client.Flush()
 
-		// 	return
-		// }
+		}
+
+		fmt.Println("Listening ")
 
 		channel := utils.CourseProcessingChannels[courseId]
 
 		for message := range channel {
-			// fmt.Println("messageeeee", string(message))
-			if string(message) == "done" {
+			fmt.Println("messageeeee", string(message))
+			if string(message) == "[DONE]" {
+				fmt.Println("DONE RECEIVED")
 				var doneResponse ProcessingES
 				doneResponse.Done = true
 				doneResponseString, err := json.Marshal(doneResponse)
@@ -620,7 +622,20 @@ func main() {
 				client.Flush()
 				break
 
+			} else if string(message) == "[DOCS_DONE]" {
+				var doneResponse ProcessingES
+				doneResponse.DocsDone = true
+				doneResponseString, err := json.Marshal(doneResponse)
+				if err != nil {
+					fmt.Println("error while converting done res to json", err)
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					return
+				}
+				client.Write([]byte("data: " + string(doneResponseString) + "\n\n"))
+				client.Flush()
+
 			}
+
 			var response ProcessingES
 			response.Data = string(message)
 
@@ -790,15 +805,12 @@ func main() {
 
 	r.GET("/getProgressData", func(ctx *gin.Context) {
 		courseId := ctx.Query("courseId")
-		course,err:=database.GetCourse(courseId)
+		course, err := database.GetCourse(courseId)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 		ctx.JSON(http.StatusOK, gin.H{"data": course.ProgressData})
-
-		
-
 
 	})
 

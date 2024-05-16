@@ -10,7 +10,7 @@ import Video from "./_components/landingpage/video";
 const LandingPage = () => {
   return (
     <div className="h-full w-full">
-      {/* <Navbar /> */}
+      <Navbar />
       <div className="bg-background">
         <div className="h-[40rem] w-full  bg-background relative flex flex-col items-center justify-center antialiased">
           <Hero />

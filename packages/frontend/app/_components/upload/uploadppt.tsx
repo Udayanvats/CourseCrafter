@@ -72,9 +72,7 @@ export default function UploadPPTs({ docs, setDocs }: {
                         {
                             docs.length > 0 ? <div className="flex flex-col gap-2">
                                 {docs.map((doc: File, index: number) => (
-                                    <motion.div whileHover={{
-                                        className: "bg-gray-600",
-                                    }} key={index} className=" p-2 bg-card rounded-lg flex justify-between mt-2 max-h-full overflow overflow-y-auto">
+                                    <motion.div  key={index} className=" p-2 bg-gray-700 hover:bg-gray-600 transition-all duration-400 rounded-lg flex justify-between mt-2 max-h-full overflow overflow-y-auto">
                                         <div className="flex justify-center">
 
                                             <IoDocumentText size={22} opacity={0.6} />

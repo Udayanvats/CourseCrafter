@@ -61,6 +61,8 @@ const config = {
       backgroundImage: {
         'gradient-primary': 'linear-gradient(to right, rgba(99, 102, 241, 0.3), rgba(168, 85, 247, 0.3))',
         'gradient-secondary': 'linear-gradient(to right, rgba(99, 102, 241, 0.4), rgba(168, 85, 247, 0.4))',
+        'gradient-full': 'linear-gradient(to right, rgba(99, 102, 241, 1), rgba(168, 85, 247, 1))',
+
 
       },
 

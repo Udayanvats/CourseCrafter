@@ -20,7 +20,6 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>{
         <div className="bg-background w-full h-full min-h-screen">
-                <Navbar />
 
           {children}
           <ToastContainer 

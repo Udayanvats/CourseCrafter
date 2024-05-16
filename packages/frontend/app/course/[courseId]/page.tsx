@@ -6,20 +6,21 @@ import Sidebar from "./_components/sidebar"
 import ContentComponent from "./_components/contentComponent"
 import { useLocalStorage } from 'usehooks-ts'
 import { get } from "@/api"
+import Navbar from "@/app/courses/_components/navbar"
 export type TopicList = {
     topic: string,
     subtopics: string[],
 
 }
 
-export type ContentType={
-    Introduction:String,
-    Content:[String],
-    Conclusion:String,
+export type ContentType = {
+    Introduction: String,
+    Content: [String],
+    Conclusion: String,
 
 }
 
-type EventSourceData={
+type EventSourceData = {
     data: string | null;
     error: string | null;
     done: boolean;
@@ -42,19 +43,19 @@ export default function CoursePage({ params: {
 
     const [streamText, setStreamText] = useState("")
     const [topicList, setTopicList] = useState<TopicList[]>([])
-    const [progressData,setProgressData]=useState<{
-        [key:string]:boolean
-    }>([])
-    const [currentTopicIndex,setCurrentTopicIndex]=useLocalStorage<{
-        currentTopicIndex:number
-        curentSubTopicIndex:number
+    const [progressData, setProgressData] = useState<{
+        [key: string]: boolean
+    }>({})
+    const [currentTopicIndex, setCurrentTopicIndex] = useLocalStorage<{
+        currentTopicIndex: number
+        curentSubTopicIndex: number
     }>("currentTopicIndex", {
-        currentTopicIndex:0,
-        curentSubTopicIndex:0
-    
+        currentTopicIndex: 0,
+        curentSubTopicIndex: 0
+
     });
 
-    console.log(    )
+    console.log()
 
 
 
@@ -69,17 +70,17 @@ export default function CoursePage({ params: {
                 console.log(eventSourseData.done)
                 if (eventSourseData?.done == true) {
                     eventStream.close()
-                    
+
                 }
-                else if(eventSourseData?.topicList){
-                    
+                else if (eventSourseData?.topicList) {
+
                     setTopicList(JSON.parse(eventSourseData.topicList))
-                    
+
                 }
-                else if(eventSourseData?.pyqContent){
-                    console.log(eventSourseData.pyqContent,"PYQ CONTENT")
+                else if (eventSourseData?.pyqContent) {
+                    console.log(eventSourseData.pyqContent, "PYQ CONTENT")
                 }
-                if(eventSourseData?.data) {
+                if (eventSourseData?.data) {
                     console.log("we are here babay")
                     setStreamText((prev) => prev + eventSourseData.data)
                 }
@@ -94,17 +95,17 @@ export default function CoursePage({ params: {
     }, [])
 
     useEffect(() => {
-        async function getProgressData(){
-            const response=await get("getProgressData?courseId="+courseId)
-            console.log(response?.data,"progress data")
-            if(response?.data){
+        async function getProgressData() {
+            const response = await get("getProgressData?courseId=" + courseId)
+            console.log(response?.data, "progress data")
+            if (response?.data) {
                 setProgressData(response?.data)
             }
-        } 
+        }
 
         getProgressData()
 
-    },[])
+    }, [])
 
 
 
@@ -117,7 +118,7 @@ export default function CoursePage({ params: {
 
             if (streamText != "") {
                 setJsonData(parse(streamText))
-                console.log(streamText.slice(0,20),"streamText")
+                console.log(streamText.slice(0, 20), "streamText")
             }
         } catch {
             console.log(streamText)
@@ -128,16 +129,20 @@ export default function CoursePage({ params: {
 
 
     return (
-        <div className="w-full h-full flex  " >
-        
-            <Sidebar progressData={progressData} topicList={topicList} currentTopicIndex={currentTopicIndex.currentTopicIndex} setCurrentTopicIndex={(topic)=>setCurrentTopicIndex((prev:any)=>({...prev,currentTopicIndex:topic}))} 
-                subTopicIndex={currentTopicIndex.curentSubTopicIndex} setSubTopicIndex={(subtopic)=>setCurrentTopicIndex((prev:any)=>({...prev,curentSubTopicIndex:subtopic}))}
+        <div>
+            <Navbar />
 
-            />
-            {/* {streamText} */}
-            <ContentComponent setProgressData={setProgressData} courseId={courseId} data={jsonData}  topicList={topicList} currentTopicIndex={currentTopicIndex.currentTopicIndex} setCurrentTopicIndex={(topic)=>setCurrentTopicIndex((prev:any)=>({...prev,currentTopicIndex:topic}))}
-                setSubTopicIndex={(subtopic)=>setCurrentTopicIndex((prev:any)=>({...prev,curentSubTopicIndex:subtopic}))}
-            />
+            <div className="w-full h-full flex  " >
+
+                <Sidebar progressData={progressData} topicList={topicList} currentTopicIndex={currentTopicIndex.currentTopicIndex} setCurrentTopicIndex={(topic) => setCurrentTopicIndex((prev: any) => ({ ...prev, currentTopicIndex: topic }))}
+                    subTopicIndex={currentTopicIndex.curentSubTopicIndex} setSubTopicIndex={(subtopic) => setCurrentTopicIndex((prev: any) => ({ ...prev, curentSubTopicIndex: subtopic }))}
+
+                />
+
+                <ContentComponent setProgressData={setProgressData} courseId={courseId} data={jsonData} topicList={topicList} currentTopicIndex={currentTopicIndex.currentTopicIndex} setCurrentTopicIndex={(topic) => setCurrentTopicIndex((prev: any) => ({ ...prev, currentTopicIndex: topic }))}
+                    setSubTopicIndex={(subtopic) => setCurrentTopicIndex((prev: any) => ({ ...prev, curentSubTopicIndex: subtopic }))}
+                />
+            </div>
         </div>
     )
 

@@ -11,7 +11,7 @@ export default function Sidebar(){
     const previousPath=pathname.split('/').slice(0,pathIndex).join('/')
     console.log("currentPath",currentPath)
     return (
-        <div className="  w-[300px] min-h-full h-full  left-0 flex flex-col      ">
+        <div className="  w-[300px] min-h-full h-full  left-0 flex flex-col  mt-9     ">
 
             <Link className={` p-3   rounded-l-lg ${currentPath===""&&"border-l-[6px] border-l-purple-500 bg-indigo-950"}  w-full text-white font-bold hover:bg-[#290924] transition-all duration-200 `} href={'/courses'}> All Courses</Link>
 
