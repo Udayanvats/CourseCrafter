@@ -19,9 +19,12 @@ const LandingPage = () => {
           <Hero />
           <GetStartedButton />
         </div>
+        {/* <div data-sticky-container > */}
+
         <Buildup />
-        <UploadContent/>
-        <ConvertContent/>
+        {/* </div> */}
+        {/* <UploadContent/>
+        <ConvertContent/> */}
 
         <Video />
       </div>

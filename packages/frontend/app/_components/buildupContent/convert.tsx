@@ -1,13 +1,35 @@
+"use client"
 
 import Image from "next/image";
 import { AiOutlineFilePpt } from "react-icons/ai";
 import { FaRegFilePdf } from "react-icons/fa";
 import { RiBardLine } from "react-icons/ri";
-
+import {motion} from "framer-motion"
 
 export default function ConvertContent() {
     return (
-        <div className="px-20 pb-6 pt-6 shadow-lg shadow-gray-50  border rounded-lg mx-12 border-gray mt-16 ">
+        <motion.div 
+        exit={{
+            x: -700,
+            // scale:0.7,
+            opacity: 0,
+          }}
+          key={"upload-ppts"}
+          initial={{
+            x: 700,
+            // scale:0.7,
+            opacity: 0,
+          }}
+          animate={{
+            x: 0,
+            // scale:1,
+            opacity: 1,
+            //
+          }}
+          transition={{
+            duration: 0.5,
+          }}
+        className="px-20 pb-6 pt-6 shadow-lg shadow-gray-50  border rounded-lg mx-12 border-gray mt-16 ">
             <div className="h-[500px] border p-3">
                 <div className="text-2xl  font-bold tracking-wide text-gray-500">
                     <span className="text-white">CONVERT. </span>
@@ -44,6 +66,6 @@ export default function ConvertContent() {
                 </div>
 
             </div>
-        </div>
+        </motion.div>
     )
 }
