@@ -53,9 +53,9 @@ export const get = async (url: string, headers = {}, serverHeaders: any = null) 
             cache: "no-cache"
         })
         const resp= await res.json()
-        if(resp?.authError){
-            redirect("/auth")
-        }
+        // if(resp?.authError){
+        //     redirect("/auth")
+        // }
         if(resp?.error){
             throw new Error(resp.error)
         }

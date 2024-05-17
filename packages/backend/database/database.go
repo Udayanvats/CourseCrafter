@@ -42,16 +42,16 @@ func GetUserByEmail(email string) (utils.User, error) {
 	err := row.Scan(&user.Id, &user.Name, &user.Email, &user.Password)
 	return user, err
 }
-func UserExists(userId int) bool {
+func UserExists(userId int) (bool,utils.User) {
 	var user utils.User
-	row := pool.QueryRow(context.Background(), "SELECT id, name, email, password FROM users WHERE id = $1", userId)
-	err := row.Scan(&user.Id, &user.Name, &user.Email, &user.Password)
+	row := pool.QueryRow(context.Background(), `SELECT id, name, email, password,"profileImage" FROM users WHERE id = $1`, userId)
+	err := row.Scan(&user.Id, &user.Name, &user.Email, &user.Password,&user.ProfileImage)
 	if err == pgx.ErrNoRows {
-		return false
+		return false,user
 	} else if err != nil {
-		return false
+		return false,user
 	}
-	return true
+	return true,user
 }
 func AddCourse(course utils.Course) (string, error) {
 	var id string

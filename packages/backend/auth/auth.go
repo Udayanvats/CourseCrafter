@@ -56,6 +56,7 @@ func LoginWithGoogle(c *gin.Context) {
 		RedirectURL:  "http://localhost:3000/loggedIn",
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.profile",
+			"https://www.googleapis.com/auth/userinfo.email",
 		},
 		Endpoint: google.Endpoint,
 	}
@@ -84,8 +85,8 @@ func LoginWithGoogle(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to get user info"})
 		return
 	}
-
-	user := utils.User{Name: userInfo.Name, Email: userInfo.Email, Password: userInfo.Email}
+	fmt.Println(userInfo.Email, "UserInfo.emmail")
+	user := utils.User{Name: userInfo.Name, Email: userInfo.Email, Password: userInfo.Email, ProfileImage: &userInfo.Picture}
 
 	// Assuming you have a function AddUser in your database package
 	loggedUser, err := database.GetUserByEmail(userInfo.Email)
@@ -155,7 +156,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		exists := database.UserExists(userId)
+		exists, _ := database.UserExists(userId)
 		if !exists {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "User not found", "authError": true})
 		}

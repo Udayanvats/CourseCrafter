@@ -755,7 +755,7 @@ func main() {
 
 			return
 		}
-		exists := database.UserExists(userId)
+		exists,user := database.UserExists(userId)
 		if !exists {
 			c.JSON(http.StatusOK, gin.H{"auth": false})
 			return
@@ -763,7 +763,7 @@ func main() {
 		}
 
 		fmt.Println("USER ID IN MIDDLEWARE", userId)
-		c.JSON(http.StatusOK, gin.H{"auth": true})
+		c.JSON(http.StatusOK, gin.H{"auth": true,"user":user})
 
 	})
 	r.POST("/updateBookmarkStatus", func(ctx *gin.Context) {
@@ -813,6 +813,11 @@ func main() {
 		ctx.JSON(http.StatusOK, gin.H{"data": course.ProgressData})
 
 	})
+	r.GET("/logout", func(c *gin.Context) {
+		c.SetCookie("token", "", -1, "/", "", false, true)
+		c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
+	})
+	
 
 	r.Run("localhost:8080")
 }

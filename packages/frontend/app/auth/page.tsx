@@ -8,6 +8,7 @@ import { AnimatePresence, LayoutGroup } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion"
 import React, { useEffect, useState } from "react";
+import { FcGoogle } from "react-icons/fc";
 
 export default function Auth() {
   const router = useRouter();
@@ -106,7 +107,7 @@ export default function Auth() {
             Convert your PowerPoint presentations into easy-to-understand notes.
           </p>
         </div>
-        <div className="rounded-lg  px-10  ">
+        <div className="rounded-lg  px-10 ">
           <div className="flex" >
             <div key={"asd"} onClick={() => {
               setIsLogin(true)
@@ -130,67 +131,10 @@ export default function Auth() {
 
 
 
-          {/* </div> */}
-          {
-            isLogin ? <div >
-              <div className="space-y-6">
-                <div>
-                  <Label htmlFor="email">Email address</Label>
-                  <Input
-                    autoComplete="email"
-                    id="email"
-                    placeholder="name@example.com"
-                    required
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    autoComplete="current-password"
-                    id="password"
-                    placeholder="Password"
-                    required
-                    value={password}
-                    type="password"
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Button
-                    className="btn text-white py-2 bg-black w-full"
-                    type="submit"
-                    onClick={handleLogin}
-                  >
-                    Sign in
-                  </Button>
-                  <Button
-                    className="btn bg-black text-white py-2 w-full"
-                    type="submit"
-                    onClick={loginWithGoogle}
-                  >
-                    Google Login
-                  </Button>
-                </div>
-              </div>
-            </div>
-              :
-              <div >
+          <div className=" mt-3">
+            {
+              isLogin ? <div className="  flex flex-col  " >
                 <div className="space-y-6">
-                  <div>
-                    <Label htmlFor="name">Name</Label>
-                    <Input
-                      autoComplete="name"
-                      id="name"
-                      placeholder="John Doe"
-                      required
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                    />
-                  </div>
                   <div>
                     <Label htmlFor="email">Email address</Label>
                     <Input
@@ -206,32 +150,94 @@ export default function Auth() {
                   <div>
                     <Label htmlFor="password">Password</Label>
                     <Input
-                      autoComplete="new-password"
+                      autoComplete="current-password"
                       id="password"
                       placeholder="Password"
                       required
-                      type="password"
                       value={password}
+                      type="password"
                       onChange={(e) => setPassword(e.target.value)}
                     />
                   </div>
                   <div>
                     <Button
-                      className="btn bg-black text-white py-2 w-full"
+                      className="btn text-white py-2 bg-black w-full"
                       type="submit"
-                      onClick={handleRegister}
+                      onClick={handleLogin}
                     >
-                      Sign up
+                      Sign in
+                    </Button>
+                    <div className="divider">OR</div>
+                    <Button
+                      className="btn bg-gray-200 text-black font-bold py-2 w-full flex space-around hover:bg-gray-700 hover:text-white transition-all duration-500"
+                      type="submit"
+                      onClick={loginWithGoogle}
+                    >
+                      <FcGoogle size={25} className="mr-3" />
+                
+                      Login with Google
                     </Button>
                   </div>
                 </div>
               </div>
-          }
+                :
+                <div >
+                  <div className="space-y-6">
+                    <div>
+                      <Label htmlFor="name">Name</Label>
+                      <Input
+                        autoComplete="name"
+                        id="name"
+                        placeholder="John Doe"
+                        required
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="email">Email address</Label>
+                      <Input
+                        autoComplete="email"
+                        id="email"
+                        placeholder="name@example.com"
+                        required
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="password">Password</Label>
+                      <Input
+                        autoComplete="new-password"
+                        id="password"
+                        placeholder="Password"
+                        required
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Button
+                        className="btn bg-black text-white py-2 w-full"
+                        type="submit"
+                        onClick={handleRegister}
+                      >
+                        Sign up
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+            }
+          </div>
 
         </div>
-      </div>
+      </div >
 
-    </div>
+
+    </div >
   );
 }
 function userRouter() {
