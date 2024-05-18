@@ -10,13 +10,13 @@ export default function UploadContent() {
     return (
         <motion.div
         exit={{
-            x: -700,
+            x: -1000,
             // scale:0.7,
             opacity: 0,
           }}
-          key={"upload-ppts"}
+          key="green"
           initial={{
-            x: 700,
+            x: 1000,
             // scale:0.7,
             opacity: 0,
           }}
@@ -27,10 +27,10 @@ export default function UploadContent() {
             //
           }}
           transition={{
-            duration: 0.5,
+            duration: 0.3,
           }}
-        className="px-20 pb-6 pt-6 shadow-lg shadow-gray-50  border rounded-lg mx-12 border-gray mt-16 ">
-            <div className="h-[500px] border p-3">
+        className="px-20 pb-6 pt-6 shadow-lg    rounded-lg mx-12  mt-16 ">
+            <div className="h-[500px] ">
                 <div className="text-2xl  font-bold tracking-wide text-gray-500">
                     <span className="text-white">BUILD.</span>
                     STREAMLINE YOUR DEVELOPMENT
