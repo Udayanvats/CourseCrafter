@@ -9,7 +9,7 @@ jobs:
    
 
       - name: install go dependencies
-        run: cd packages/backend && go mod download
+        run: yarn install
       - name: runnng go backend
         run: cd packages/backend go run main.go
       - name: install python dependencies
