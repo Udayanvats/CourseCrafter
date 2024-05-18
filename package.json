@@ -27,5 +27,11 @@
   "license": "ISC",
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "@tabler/icons-react": "^3.4.0",
+    "clsx": "^2.1.1",
+    "framer-motion": "^11.2.2",
+    "tailwind-merge": "^2.3.0"
   }
 }

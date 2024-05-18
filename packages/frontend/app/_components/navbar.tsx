@@ -7,7 +7,9 @@ const Navbar = () => {
     <nav className=" relative  w-full z-50  py-4 border-gray-300 shadow-md dark:bg-gray-900 dark:border-gray-700 dark:shadow-lg">
       <div className="container mx-auto px-4 flex justify-between items-center">
         <div className="flex items-center">
-          <Link href={"/"} className="font-bold text-xl text-white">COURSECRAFTER</Link>
+          <Link href={"/"} className="font-bold text-xl text-white">
+            COURSECRAFTER
+          </Link>
           <ul className=" z-10 flex items-center space-x-8 ml-8">
             <li>
               <a
