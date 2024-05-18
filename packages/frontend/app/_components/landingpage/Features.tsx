@@ -12,7 +12,7 @@ const Features = () => {
           <p className="text-gray font-semibold">
             Empower users to effortlessly transform their presentations into
             fully-fledged courses with our platform. Streamline the process and
-            unlock a seamless experience, making it easy for individuals to
+        z    unlock a seamless experience, making it easy for individuals to
             convert their PPTs into engaging learning modules.
           </p>
           <div className="mt-10">

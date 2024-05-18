@@ -61,7 +61,7 @@ export default function Content({ contents, topic, setSubTopicIndex }: ContentPr
     console.log(contents, "contents")
 
     return (
-        <div className="w-full">\
+        <div className="w-full">
             <div className='text-4xl font-extrabold text-white mb-8'>
                 {topic?.topic}
             </div>

@@ -3,6 +3,7 @@
 
 import { useState } from "react"
 import UploadForm from "./form"
+import { MdFileUpload } from "react-icons/md";
 
 export type UploadProps = {
     docs: Array<File>
@@ -27,11 +28,12 @@ export default function Upload({ className, label }: {
     return (
 
         <div>
-            <button className={`btn btn-primary text-white ${className}`} onClick={() => {
+            <button className={`flex py-1.5  bg-gradient-full  text-white text-md p-0 hover:bg-gradient-secondary ${className}`} onClick={() => {
              
                 //@ts-ignore
                 document?.getElementById('upload_modal')?.showModal()
-            }}>{label ?? "Upload"}
+            }}> {label ?? "Upload"}<MdFileUpload size={30} />
+
             </button>
 
             <dialog id="upload_modal" className="modal ">

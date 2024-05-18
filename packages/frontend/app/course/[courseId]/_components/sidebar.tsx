@@ -1,4 +1,5 @@
 import { TopicList } from "../page"
+import { FaCheckCircle } from "react-icons/fa";
 
 
 
@@ -8,9 +9,9 @@ export default function Sidebar({progressData, topicList, currentTopicIndex, set
     setCurrentTopicIndex: React.Dispatch<React.SetStateAction<number>>
     subTopicIndex: number
     setSubTopicIndex: React.Dispatch<React.SetStateAction<number>>
-    progressData:Array<{
+    progressData:{
         [key:string]:boolean
-    }>
+    }
 
 
 }) {
@@ -34,7 +35,7 @@ export default function Sidebar({progressData, topicList, currentTopicIndex, set
 
 
                             <li
-                                className={`relative ${progressData[index]&&" text-green-400"}`}
+                                className={`relative flex`}
                                
                             >
                                 <input  onClick={() => {
@@ -46,7 +47,7 @@ export default function Sidebar({progressData, topicList, currentTopicIndex, set
                                 <details open={currentTopicIndex === index} >
                                     <summary onClick={() => {
 
-                                    }}>{topic.topic}</summary>
+                                    }}>{topic.topic} {progressData[index]&&<FaCheckCircle size={16} color="green" />}</summary>
                                     <ul className="border-slate-600 border-l ">
 
                                         {
@@ -62,7 +63,11 @@ export default function Sidebar({progressData, topicList, currentTopicIndex, set
                                             ))
                                         }
                                     </ul>
+
                                 </details>
+                                
+
+
                             </li>
 
                         ))

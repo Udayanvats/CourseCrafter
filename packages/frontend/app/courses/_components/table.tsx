@@ -19,26 +19,8 @@ export type Course = {
 
 }
 
-export default function Courses() {
-    const [courses, setCourses] = useState<Course[]>([])
-
-    useEffect(() => {
-        async function getCourses() {
-
-
-
-            const data = await get("courses", {})
-
-            if (data) {
-                console.log(data, "asdasd")
-                setCourses(data)
-            }
-
-
-        }
-        getCourses()
-    }, [])
-
+export default function Table({courses,setCourses}:{courses:Course[],setCourses:Function}) {
+    
     console.log(courses)
     return (
         <div className="h-full min-h-[300px]">

@@ -3,17 +3,23 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, div, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AnimatePresence, LayoutGroup } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
-
+import { motion } from "framer-motion"
 import React, { useEffect, useState } from "react";
+import { FcGoogle } from "react-icons/fc";
 
-export default function CourseCreator() {
+export default function Auth() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLogin, setIsLogin] = useState(true);
   const searchParams = useSearchParams();
+  const tabs = ["login", "signup"];
+  const [selectedTab, setSelectedTab] = useState(tabs[0]);
+
   // useEffect(() => {
   //     const code = searchParams.get('code')
   //     async function loginWithGoogle() {
@@ -91,132 +97,147 @@ export default function CourseCreator() {
   };
 
   return (
-    <div className="flex min-h-[100dvh] flex-col items-center justify-center shadow-lg bg-gray-100 px-4 py-12 dark:bg-gray-950">
-      <div className="mx-auto w-full max-w-md space-y-8">
+    <div className="flex  flex-col items-center justify-start shadow-lg  px-4 py-6  h-[550px]">
+      <div className="mx-auto w-full max-w-md  space-y-8 ">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-50">
+          <h2 className=" text-center text-3xl font-bold tracking-tight text-white dark:text-gray-50">
             Welcome to CourseCrafter
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-center text-sm text-gray-400 ">
             Convert your PowerPoint presentations into easy-to-understand notes.
           </p>
         </div>
-        <div className="rounded-lg bg-white px-10 py-8 shadow-md dark:bg-gray-900 dark:text-gray-50">
-          <Tabs className="w-full " defaultValue="login">
-            {/* <div className="bg-gray-200 p-2 rounded-lg"> */}
-            <TabsList className="grid w-full  grid-cols-2">
-              <TabsTrigger
-                className="data-[state=active]:bg-white"
-                value="login"
-              >
+        <div className="rounded-lg  px-10 ">
+          <div className="flex" >
+            <div key={"asd"} onClick={() => {
+              setIsLogin(true)
+            }} className=" w-full mr-3 flex rounded-lg relative  h-12">
+              <div className="flex z-10 text-white w-full h-full justify-center items-center ">
                 Login
-              </TabsTrigger>
-              <TabsTrigger
-                className="data-[state=active]:bg-white"
-                value="signup"
-              >
-                Sign Up
-              </TabsTrigger>
-            </TabsList>
-            {/* </div> */}
+              </div>
+              {isLogin && <motion.div layoutId="tab" className="absolute bg-gradient-secondary h-full w-full rounded-xl" />}
+            </div>
+            <div key={"sdf"} onClick={() => {
+              setIsLogin(false)
+            }} className=" w-full mr-3 flex rounded-lg relative  h-12">
+              <div className="flex z-10 text-white w-full h-full justify-center items-center  ">
+                Sign up
+              </div>
 
-            <TabsContent value="login">
-              <div className="space-y-6">
-                <div>
-                  <Label htmlFor="email">Email address</Label>
-                  <Input
-                    autoComplete="email"
-                    id="email"
-                    placeholder="name@example.com"
-                    required
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    autoComplete="current-password"
-                    id="password"
-                    placeholder="Password"
-                    required
-                    value={password}
-                    type="password"
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Button
-                    className="btn text-white py-2 bg-black w-full"
-                    type="submit"
-                    onClick={handleLogin}
-                  >
-                    Sign in
-                  </Button>
-                  <Button
-                    className="btn bg-black text-white py-2 w-full"
-                    type="submit"
-                    onClick={loginWithGoogle}
-                  >
-                    Google Login
-                  </Button>
-                </div>
-              </div>
-            </TabsContent>
-            <TabsContent value="signup">
-              <div className="space-y-6">
-                <div>
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    autoComplete="name"
-                    id="name"
-                    placeholder="John Doe"
-                    required
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="email">Email address</Label>
-                  <Input
-                    autoComplete="email"
-                    id="email"
-                    placeholder="name@example.com"
-                    required
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    autoComplete="new-password"
-                    id="password"
-                    placeholder="Password"
-                    required
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Button
-                    className="btn bg-black text-white py-2 w-full"
-                    type="submit"
-                    onClick={handleRegister}
-                  >
-                    Sign up
-                  </Button>
+              {!isLogin && <motion.div layoutId="tab" className="absolute bg-gradient-secondary h-full w-full rounded-xl " />}
+            </div>
+          </div>
+
+
+
+
+          <div className=" mt-3">
+            {
+              isLogin ? <div className="  flex flex-col  " >
+                <div className="space-y-6">
+                  <div>
+                    <Label htmlFor="email">Email address</Label>
+                    <Input
+                      autoComplete="email"
+                      id="email"
+                      placeholder="name@example.com"
+                      required
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      autoComplete="current-password"
+                      id="password"
+                      placeholder="Password"
+                      required
+                      value={password}
+                      type="password"
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Button
+                      className="btn text-white py-2 bg-black w-full"
+                      type="submit"
+                      onClick={handleLogin}
+                    >
+                      Sign in
+                    </Button>
+                    <div className="divider">OR</div>
+                    <Button
+                      className="btn bg-gray-200 text-black font-bold py-2 w-full flex space-around hover:bg-gray-700 hover:text-white transition-all duration-500"
+                      type="submit"
+                      onClick={loginWithGoogle}
+                    >
+                      <FcGoogle size={25} className="mr-3" />
+                
+                      Login with Google
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </TabsContent>
-          </Tabs>
+                :
+                <div >
+                  <div className="space-y-6">
+                    <div>
+                      <Label htmlFor="name">Name</Label>
+                      <Input
+                        autoComplete="name"
+                        id="name"
+                        placeholder="John Doe"
+                        required
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="email">Email address</Label>
+                      <Input
+                        autoComplete="email"
+                        id="email"
+                        placeholder="name@example.com"
+                        required
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="password">Password</Label>
+                      <Input
+                        autoComplete="new-password"
+                        id="password"
+                        placeholder="Password"
+                        required
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Button
+                        className="btn bg-black text-white py-2 w-full"
+                        type="submit"
+                        onClick={handleRegister}
+                      >
+                        Sign up
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+            }
+          </div>
+
         </div>
-      </div>
-    </div>
+      </div >
+
+
+    </div >
   );
 }
 function userRouter() {

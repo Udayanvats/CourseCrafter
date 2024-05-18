@@ -199,7 +199,7 @@ def process_documents(ch, method, properties, body):
             "status": True,
             "object_path": "text/" + courseId + ".json",
             "error": "",
-            "message": "done",
+            "message": "[DONE]",
             "courseId": courseId,
             "mode": mode
         }))

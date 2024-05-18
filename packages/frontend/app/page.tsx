@@ -6,23 +6,26 @@ import GetStartedButton from "./_components/landingpage/button";
 import Buildup from "./_components/landingpage/buildup";
 import Features from "./_components/landingpage/Features";
 import Video from "./_components/landingpage/video";
+import { AiOutlineFilePpt } from "react-icons/ai";
+import UploadContent from "./_components/buildupContent/upload";
+import ConvertContent from "./_components/buildupContent/convert";
 
 const LandingPage = () => {
   return (
     <div className="h-full w-full">
-      {/* <Navbar /> */}
+      <Navbar />
       <div className="bg-background">
-        <div className="h-[40rem] w-full  bg-background relative flex flex-col items-center justify-center antialiased">
+        <div className="h-[45rem] w-full  bg-background relative flex flex-col items-center justify-center antialiased">
           <Hero />
           <GetStartedButton />
         </div>
-        <div className="mt-10">
-          <Buildup />
-        </div>
-        <div className="px-20 pb-6 pt-6 shadow-lg shadow-gray-50  border rounded-lg mx-12 border-gray mt-16 ">
-          <Features />
-        </div>
-        {/* Hello */}
+        {/* <div data-sticky-container > */}
+
+        <Buildup />
+        {/* </div> */}
+        {/* <UploadContent/>
+        <ConvertContent/> */}
+
         <Video />
       </div>
       <BackgroundBeams />
