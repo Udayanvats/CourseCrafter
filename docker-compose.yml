@@ -1,12 +1,26 @@
 version: "3.8"
 services:
+  # extractor:
+  #   build: ./packages/extractor
+  #   networks:
+  #     - network-app
+  #   depends_on:
+  #     rabbitmq:
+  #       condition: service_healthy
+  #   restart: always
+
   rabbitmq:
-    image: rabbitmq:3.13-management
+    image: rabbitmq:3.13
     ports:
       - "5672:5672"
       - "15672:15672"
     networks:
       - network-app
+    # healthcheck:
+    #   test: [ "CMD", "rabbitmqctl", "status"]
+    #   interval: 5s
+    #   timeout: 20s
+    #   retries: 5
 
   database:
     image: postgres:latest
@@ -18,9 +32,8 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=coursecrafter
     volumes:
-    - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    # restart: always
+
 networks:
   network-app:
-  
-  

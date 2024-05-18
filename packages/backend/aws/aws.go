@@ -65,7 +65,7 @@ func GetTextFromS3(object_path string) (string, error) {
 		return "", err
 	}
 
-	fmt.Println("Extracted text:", string(textBytes))
+	// fmt.Println("Extracted text:", string(textBytes))
 	return string(textBytes), nil
 
 }
