@@ -9,6 +9,8 @@ import Video from "./_components/landingpage/video";
 import { AiOutlineFilePpt } from "react-icons/ai";
 import UploadContent from "./_components/buildupContent/upload";
 import ConvertContent from "./_components/buildupContent/convert";
+import AboutUs from "./_components/landingpage/aboutus";
+import Footer from "./_components/landingpage/footer";
 
 const LandingPage = () => {
   return (
@@ -19,14 +21,11 @@ const LandingPage = () => {
           <Hero />
           <GetStartedButton />
         </div>
-        {/* <div data-sticky-container > */}
-
         <Buildup />
-        {/* </div> */}
-        {/* <UploadContent/>
-        <ConvertContent/> */}
-
+        {/* Hello */}
         <Video />
+        <AboutUs />
+        <Footer />
       </div>
       <BackgroundBeams />
     </div>
