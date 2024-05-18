@@ -6,7 +6,7 @@
   "scripts": {
     "get": "go get -u",
     "start": "go run main.go",
-    "install": "go mod tidy"
+    "install": "go mod download && go mod tidy"
   },
   "keywords": [],
   "author": "",
