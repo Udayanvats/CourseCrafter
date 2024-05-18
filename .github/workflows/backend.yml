@@ -1,0 +1,19 @@
+name: backend
+on: push
+jobs:
+  test:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+
+   
+    
+      - name: install go dependencies
+        run: go mod download
+      - name: runnng go backend
+        run: go run main.go
+      - name: install python dependencies
+        run: pip install -r requirements.txt
+      - name: running python backend
+        run: python3 app.py
+     
