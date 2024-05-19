@@ -9,10 +9,14 @@ jobs:
       - name: add venv
         run: python3 -m venv .venv
       - name: python venv
-        run: source .venv/bin/activate
+        run: |
+          . .venv/bin/activate
+          source .venv/bin/activate
       - name: install dependencies
-        run: yarn deploy:install
+        run: |
+          . .venv/bin/activate
+            yarn deploy:install
       - name: start
         run: yarn deploy:start
-        
+
      
