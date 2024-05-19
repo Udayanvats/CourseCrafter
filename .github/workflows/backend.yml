@@ -12,10 +12,7 @@ jobs:
         run: source .venv/bin/activate
       - name: install dependencies
         run: yarn deploy:install
-      - name: runnng go backend
-        run: cd packages/backend go run main.go
-      # - name: install python dependencies
-      #   run: cd packages/extractor && pip install -r requirements.txt
-      - name: running python backend
-        run: cd packages/extractor && python3 app.py
+      - name: start
+        run: yarn deploy:start
+        
      
