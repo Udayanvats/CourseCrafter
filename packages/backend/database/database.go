@@ -18,7 +18,7 @@ var pool *pgxpool.Pool
 
 func Connect() error {
 	var err error
-	pool, err = pgxpool.Connect(context.Background(), "host=localhost user=postgres password=postgres dbname=coursecrafter sslmode=disable")
+	pool, err = pgxpool.Connect(context.Background(), "host=43.205.59.104 user=postgres password=postgres dbname=coursecrafter sslmode=disable")
 	if err != nil {
 		fmt.Printf("Unable to connect to database: %v\n", err)
 		return err
@@ -42,16 +42,16 @@ func GetUserByEmail(email string) (utils.User, error) {
 	err := row.Scan(&user.Id, &user.Name, &user.Email, &user.Password)
 	return user, err
 }
-func UserExists(userId int) (bool,utils.User) {
+func UserExists(userId int) (bool, utils.User) {
 	var user utils.User
 	row := pool.QueryRow(context.Background(), `SELECT id, name, email, password,"profileImage" FROM users WHERE id = $1`, userId)
-	err := row.Scan(&user.Id, &user.Name, &user.Email, &user.Password,&user.ProfileImage)
+	err := row.Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.ProfileImage)
 	if err == pgx.ErrNoRows {
-		return false,user
+		return false, user
 	} else if err != nil {
-		return false,user
+		return false, user
 	}
-	return true,user
+	return true, user
 }
 func AddCourse(course utils.Course) (string, error) {
 	var id string
