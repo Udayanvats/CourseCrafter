@@ -7,9 +7,6 @@ import (
 	"context"
 	"io"
 	"runtime"
-
-	// "CourseCrafter/cohere"
-	// "CourseCrafter/cohere"
 	"CourseCrafter/database"
 	"CourseCrafter/rmq"
 	"CourseCrafter/utils"
