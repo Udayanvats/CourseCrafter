@@ -12,7 +12,7 @@ const Accordion = ({ title, content }: AccordionProps) => {
   };
 
   return (
-    <div className=" rounded-md overflow-hidden">
+    <div className=" rounded-lg overflow-hidden shadow-md border-gray-50 ">
       <div
         className={`flex justify-between items-center  py-3 cursor-pointer ${
           isOpen ? "bg-transparent" : "bg-transparent"
