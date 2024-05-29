@@ -16,6 +16,12 @@ jobs:
         run: |
           . .venv/bin/activate
             yarn deploy:install
+      - name: Add .env file
+        run: |
+          touch ./packages/backend/.env
+          echo "BACKEND_SECRET=${{ secrets.BACKEND_SECRET }}" >> ./packages/backend/.env
+          echo "EXTRACTOR_SECRET=${{ secrets.EXTRACTOR_SECRET }}" >> ./packages/extractor/.env
+        
       - name: start
         run: yarn deploy:start
 
