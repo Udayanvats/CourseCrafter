@@ -4,7 +4,7 @@ import { post } from '@/api'
 import { ContentType, TopicList } from '../page'
 import Content from './content'
 
-export default function ContentComponent({courseId, data, topicList, currentTopicIndex, setCurrentTopicIndex, setSubTopicIndex,setProgressData }: {
+export default function ContentComponent({courseId, data, topicList, currentTopicIndex, setCurrentTopicIndex, setSubTopicIndex,setProgressData ,pyqContent}: {
     data: ContentType[],
     topicList: TopicList[],
     currentTopicIndex: number,
@@ -12,16 +12,17 @@ export default function ContentComponent({courseId, data, topicList, currentTopi
     setSubTopicIndex: React.Dispatch<React.SetStateAction<number>>
     courseId: string
     setProgressData: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>
+    pyqContent: any
 }) {
 
-
+    console.log(pyqContent, "pyqContent")
 
     return (
         <div className='overflow-y-auto max-h-screen h-[calc(100vh-88px)] p-6 flex flex-col w-full'>
 
             {
 
-                <Content setSubTopicIndex={setSubTopicIndex} topic={topicList[currentTopicIndex]} contents={data?.[currentTopicIndex]} />
+                <Content pyqContent={pyqContent[currentTopicIndex]} setSubTopicIndex={setSubTopicIndex} topic={topicList[currentTopicIndex]} contents={data?.[currentTopicIndex]} />
 
             }
 
