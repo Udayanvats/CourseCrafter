@@ -8,7 +8,10 @@ jobs:
       
 
       - name: add venv
-        run: python3 -m venv .venv
+        run: |
+          python3 -m venv .venv
+          
+
       - name: python venv
         run: |
           . .venv/bin/activate
@@ -19,6 +22,7 @@ jobs:
             yarn deploy:install
       - name: Add .env file
         run: |
+          . .venv/bin/activate
           touch ./packages/backend/.env
           echo "BACKEND_SECRET=${{ secrets.BACKEND_SECRET }}" >> ./packages/backend/.env
           echo "EXTRACTOR_SECRET=${{ secrets.EXTRACTOR_SECRET }}" >> ./packages/extractor/.env
