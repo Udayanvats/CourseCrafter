@@ -72,7 +72,7 @@ func handleStreamingRequest(ctx context.Context, c *gin.Context, courseId string
 
 		if err != nil {
 			fmt.Println("Failed to get text from S3 pyqs:", err)
-			return 
+			return
 		}
 		var pyqResponse Response = Response{
 			Data:           nil,
@@ -839,5 +839,5 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
 	})
 
-	r.Run("localhost:8080")
+	r.Run("localhost:80")
 }
