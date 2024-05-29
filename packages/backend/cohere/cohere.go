@@ -253,6 +253,7 @@ func StartGenerationTopics(extracted_json string, courseId string) string {
 
 func PyqsGeneration(extracted_json string, topicListString string, channel chan utils.StreamResponse, courseId string) {
 	var cohereToken = env.Get("COHERE_API_KEY", "")
+	fmt.Println("STARTING PYQS GENERATION")
 	inputPrompt := utils.GeneratePYQanalaysis(extracted_json, topicListString)
 	// fmt.Println("input prompt")
 	pyqAnalaysis, err := CallCohere(cohereToken, inputPrompt)
@@ -261,14 +262,22 @@ func PyqsGeneration(extracted_json string, topicListString string, channel chan 
 		panic("failed to generate content: " + err.Error())
 	}
 	pyqContent := pyqAnalaysis.Text
+	fmt.Println("pyq content", pyqContent)
 
-	file, err := os.CreateTemp("", "pyqs"+courseId+".json")
+	file, err := os.CreateTemp("", "pyqs"+courseId+".txt")
 	if err != nil {
 		fmt.Println("Error creating temporary file:", err)
 		panic("Error creating temporary: " + err.Error())
 	}
+	file.Write([]byte(pyqContent))
+	_, err = file.Seek(0, 0)
+	if err != nil {
+		fmt.Println("Error seeking file:", err)
+		panic("Error seeking file: " + err.Error())
+	}
 	defer os.Remove(file.Name())
-	aws.UploadFileToS3("pyqs/"+courseId+".json", file)
+	aws.UploadFileToS3("pyqs/"+courseId+".txt", file)
+	fmt.Println("file uploaded to s3")
 	channel <- utils.StreamResponse{
 		PyqContent: &pyqContent,
 	}

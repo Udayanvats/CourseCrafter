@@ -43,6 +43,7 @@ export default function CoursePage({ params: {
 
     const [streamText, setStreamText] = useState("")
     const [topicList, setTopicList] = useState<TopicList[]>([])
+    const  [pyqContent, setPyqContent] = useState<any>([])
     const [progressData, setProgressData] = useState<{
         [key: string]: boolean
     }>({})
@@ -79,6 +80,7 @@ export default function CoursePage({ params: {
                 }
                 else if (eventSourseData?.pyqContent) {
                     console.log(eventSourseData.pyqContent, "PYQ CONTENT")
+                    setPyqContent(JSON.parse(eventSourseData.pyqContent))
                 }
                 if (eventSourseData?.data) {
                     console.log("we are here babay")
@@ -139,7 +141,7 @@ export default function CoursePage({ params: {
 
                 />
 
-                <ContentComponent setProgressData={setProgressData} courseId={courseId} data={jsonData} topicList={topicList} currentTopicIndex={currentTopicIndex.currentTopicIndex} setCurrentTopicIndex={(topic) => setCurrentTopicIndex((prev: any) => ({ ...prev, currentTopicIndex: topic }))}
+                <ContentComponent pyqContent={pyqContent} setProgressData={setProgressData} courseId={courseId} data={jsonData} topicList={topicList} currentTopicIndex={currentTopicIndex.currentTopicIndex} setCurrentTopicIndex={(topic) => setCurrentTopicIndex((prev: any) => ({ ...prev, currentTopicIndex: topic }))}
                     setSubTopicIndex={(subtopic) => setCurrentTopicIndex((prev: any) => ({ ...prev, curentSubTopicIndex: subtopic }))}
                 />
             </div>

@@ -23,6 +23,8 @@ jobs:
           echo "EXTRACTOR_SECRET=${{ secrets.EXTRACTOR_SECRET }}" >> ./packages/extractor/.env
         
       - name: start
-        run: yarn deploy:start
+        run: |
+          . .venv/bin/activate
+            yarn deploy:start
 
      

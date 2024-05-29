@@ -17,10 +17,11 @@ interface ContentProps {
     topic: TopicList;
     contents?: ContentType | null;
     setSubTopicIndex: React.Dispatch<React.SetStateAction<number>>;
+    pyqContent: any
 
 }
 
-export default function Content({ contents, topic, setSubTopicIndex }: ContentProps) {
+export default function Content({ contents, topic, setSubTopicIndex ,pyqContent}: ContentProps) {
     const divRefs = useRef<(HTMLDivElement | null)[]>([]);
 
     useEffect(() => {
@@ -58,7 +59,7 @@ export default function Content({ contents, topic, setSubTopicIndex }: ContentPr
 
     };
 
-    console.log(contents, "contents")
+    console.log(pyqContent, "pyqcontents")
 
     return (
         <div className="w-full">
@@ -126,6 +127,33 @@ export default function Content({ contents, topic, setSubTopicIndex }: ContentPr
                                 </div>
                                 <div className="my-2 pl-3">
                                     {contents?.Conclusion}
+                                </div>
+                            </div>
+                        }
+
+                        {
+                            pyqContent && <div className="mb-3">
+                                <div className="font-bold text-white text-xl">
+                                    Previous Year Questions :-
+                                </div>
+                                <div className="my-2 pl-3">
+                                    {pyqContent.pyqcontent.map(({question}: any, index: number) => {
+
+
+                                        return (
+                                            <div>
+                                                <div className="text-lg font-bold mb-3 ">
+                                                    Question {index + 1}
+                                                </div>
+                                                <div className={`my-2 pl-3 text-base`}>
+                                                    {question}
+                                                </div>
+                                            </div>
+                                        )
+
+                                    })} 
+
+                                    
                                 </div>
                             </div>
                         }
