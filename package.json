@@ -17,7 +17,7 @@
     "extractor:start": "yarn workspace extractor start",
     "boot": "concurrently  \"yarn extractor:start\" \"yarn backend:start\" \"yarn dev\"  ",
     "deploy:install": "yarn backend:install && yarn workspace extractor install",
-    "deploy:start": "pm2 start ecosystem.config.js  "
+    "deploy:start": "nohup yarn extractor:start && yarn backend:start &  "
   },
   "workspaces": {
     "packages": [
