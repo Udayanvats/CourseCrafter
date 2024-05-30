@@ -72,7 +72,7 @@ func handleStreamingRequest(ctx context.Context, c *gin.Context, courseId string
 
 		if err != nil {
 			fmt.Println("Failed to get text from S3 pyqs:", err)
-			return 
+			return
 		}
 		var pyqResponse Response = Response{
 			Data:           nil,
