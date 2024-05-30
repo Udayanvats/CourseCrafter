@@ -839,5 +839,5 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
 	})
 
-	r.Run("localhost:8080")
+	r.Run("0.0.0.0:8080")
 }
