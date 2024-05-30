@@ -839,5 +839,9 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
 	})
 
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"message": "Hello World"})
+	})
+
 	r.Run("0.0.0.0:8080")
 }
