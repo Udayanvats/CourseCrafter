@@ -30,6 +30,6 @@ jobs:
       - name: start
         run: |
           . .venv/bin/activate
-            yarn deploy:start &
+            RUNNER_TRACKING_ID="" && yarn deploy:start &
 
      
