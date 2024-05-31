@@ -280,7 +280,7 @@ func main() {
 
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{ "https://backend.coursecrafter.site"},
+		AllowOrigins:     []string{"https://coursecrafter.site","http://localhost:3000"},
 		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
 		AllowHeaders:     []string{"Content-Type"},
 		AllowCredentials: true,
@@ -334,7 +334,7 @@ func main() {
 			return
 		}
 
-		c.SetCookie("token", tokenString, 3600, "/",domain, false, true)
+		c.SetCookie("token", tokenString, 3600, "/", domain, false, true)
 		c.JSON(http.StatusOK, gin.H{"token": tokenString})
 	})
 
