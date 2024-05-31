@@ -9,10 +9,10 @@ const Laptop = () => {
             width="w-[100%]"
             src="https://www.youtube.com/embed/HrSm2F-2O5Y"
             title='"He Was In My Mud" | Suits'
-            frameborder="0"
+            frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerpolicy="strict-origin-when-cross-origin"
-            allowfullscreen
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
           ></iframe>
         </div>
         <div className="before:block before:pt-[67%] before:border-[2px] before:border-[#cacacc] before:rounded-[3%_3%_0.5%_0.5%/5%] before:shadow-[0_0_0_1px_rgba(0,0,0,0.8)_inset,0_0_1px_2px_rgba(255,255,255,0.3)_inset]"></div>

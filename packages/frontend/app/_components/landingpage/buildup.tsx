@@ -21,7 +21,7 @@ const Buildup = () => {
   const [progressWidth1, setProgressWidth1] = useState(0);
   const [progressWidth2, setProgressWidth2] = useState(0);
   const [breakpoint, setBreakpoint] = useState(0);
-  const containerRef = useRef(null); // New ref for container
+  const containerRef = useRef<any>(null); // New ref for container
 
   useEffect(() => {
     const handleScroll = () => {
