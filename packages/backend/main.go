@@ -845,7 +845,7 @@ func main() {
 	})
 
 	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"message": "Hello World"})
+		c.JSON(http.StatusOK, gin.H{"message": "Hello test"})
 	})
 
 	r.Run("0.0.0.0:8080")
