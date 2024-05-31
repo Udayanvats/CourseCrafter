@@ -2,10 +2,15 @@ import pika
 from pptx import Presentation      
 import boto3
 import os
-import uuid
 from dotenv import load_dotenv,dotenv_values
 import tempfile 
 import json
+from PyPDF2 import PdfReader
+import pytesseract
+from PIL import Image
+import io
+
+
 
 load_dotenv()
 
@@ -34,6 +39,7 @@ parameters = pika.ConnectionParameters(host=RABBITMQ_HOST, port=RABBITMQ_PORT, c
 
 connection = pika.BlockingConnection(parameters)
 channel = connection.channel()
+
 
 channel.queue_declare(queue='extract')
 channel.queue_declare(queue='notification',durable=True)
@@ -74,22 +80,69 @@ def get_file_from_s3(filepath):
 
 
 
-def extract_text(ch, method, properties, body):
+def extract_text_from_ppt(ppt_path):
+    ppt = Presentation(ppt_path)
+    text =""
+    for slide in ppt.slides:
+        for shape in slide.shapes:
+            if hasattr(shape, "text"):
+                text+=shape.text
+                text+="\n"
+
+    
+    return text
+
+def extract_text_from_pdf(filepath):
+    reader = PdfReader(filepath)
+    number_of_pages = len(reader.pages)
+    text=""
+    for i in range(number_of_pages):
+        page = reader.pages[i]
+        text += page.extract_text()
+        for image in page.images:
+            # file=os.write(tempfile.NamedTemporaryFile(suffix=".png",delete=False),image.data)
+
+            text+=extract_text_from_image(Image.open(io.BytesIO(image.data)))
+    
+    print(text,"text")
+    return text
+
+
+def extract_text_from_image(image):
+    text = pytesseract.image_to_string(image)
+    return text
+
+
+
+def extract_text(filepath):
+    if filepath.endswith(".pptx"):
+        return extract_text_from_ppt(filepath)
+    elif filepath.endswith(".pdf"):
+        return extract_text_from_pdf(filepath)
+    else:
+        return None
+    
+
+
+
+def process_documents(ch, method, properties, body):
     try:
         reqObject = body.decode('utf-8')
         print(reqObject)
         json_object = json.loads(reqObject)
         docs = json_object["docs"]
         courseId = json_object["courseId"]
+        mode= json_object["mode"]
         print("GOt course id", courseId)
         pyqs = json_object["pyqs"]
         print(f"docs: {docs}")
         print(f"pyqs: {pyqs}")
         print(f"courseId: {courseId}")
         json_data = {
-            "pyqs": "",
+            "pyqs": [],
             "docs": []
         }
+
 
         if docs:
             for doc in docs:
@@ -97,21 +150,17 @@ def extract_text(ch, method, properties, body):
                 filepath = get_file_from_s3(s3ObjPath)
                 fileid = s3ObjPath.split("/")[-1].split(".")[0]
                 filename = s3ObjPath.split("/")[-1]
-                ppt = Presentation(filepath)
-                text = []
-                for slide in ppt.slides:
-                    for shape in slide.shapes:
-                        if hasattr(shape, "text"):
-                            text.append(shape.text)
+                text = extract_text(filepath)
+                os.remove(filepath)
                 json_data["docs"].append({
                     "filename": filename,
-                    "contents": [{"page": i + 1, "text": t} for i, t in enumerate(text)]
+                    "contents": text
                 })
                 notify_user(json.dumps({
                     "status": True,
                     "error": "",
                     "courseId": courseId,
-                    "message": filename
+                    "message": filename,
                 }))
 
           
@@ -122,19 +171,21 @@ def extract_text(ch, method, properties, body):
                 filepath = get_file_from_s3(s3ObjPath)
                 print(f"file path: {filepath}")
                 fileid = s3ObjPath.split("/")[-1].split(".")[0]
-                ppt = Presentation(filepath)
-                text = []
-                for slide in ppt.slides:
-                    for shape in slide.shapes:
-                        if hasattr(shape, "text"):
-                            text.append(shape.text)
+                text = extract_text(filepath)
+                os.remove(filepath)
+
                 notify_user(json.dumps({
                     "status": True,
                     "error": "",
                     "courseId": courseId,
-                    "message": pyq
+                    "message": pyq,
+    
                 }))
-                json_data["pyqs"]+= "\n".join(text)
+                json_data["pyqs"].append({
+                    "filename": pyq,
+                    "contents": text
+                })
+
         
 
         with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False) as temp_file:
@@ -142,7 +193,7 @@ def extract_text(ch, method, properties, body):
             temp_file_name = temp_file.name
         print(f"Temp file created: {temp_file_name}")
         upload_file_to_s3(open(temp_file_name, "rb"), "text/" + courseId + ".json")
-        os.unlink(temp_file_name)  # Remove the temporary file
+        os.unlink(temp_file_name)  
 
         notify_user(json.dumps({
             "status": True,
@@ -150,6 +201,7 @@ def extract_text(ch, method, properties, body):
             "error": "",
             "message": "done",
             "courseId": courseId,
+            "mode": mode
         }))
 
     except Exception as e:
@@ -161,11 +213,12 @@ def extract_text(ch, method, properties, body):
         print(f"Error extracting text: {e}")
 
 
-channel.basic_consume(queue='extract', on_message_callback=extract_text, auto_ack=True)
+channel.basic_consume(queue='extract', on_message_callback=process_documents, auto_ack=True)
 
 print('Waiting for messages')
 
 if __name__ == '__main__':
+    print("Starting extractor")
     channel.start_consuming()
     
 
