@@ -2,11 +2,11 @@
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import ProcessingDataTable from "./processingDataTable"
-import { quantum } from 'ldrs'
+// import { quantum } from 'ldrs'
 import { AnimatePresence } from "framer-motion"
 import { motion } from "framer-motion"
 
-quantum.register()
+// quantum.register()
 
 // Default values shown
 
@@ -20,7 +20,12 @@ export type ProcessingData = {
 export default function ProcessingCourseComponent({ courseId }: {
     courseId: string | null
 }) {
+    import('ldrs').then(ldrs => {
+        const { quantum } = ldrs;
 
+        // Register components
+        quantum.register();
+    });
     const [processingData, setProcessingData] = useState<ProcessingData>({})
     const [processingStage, setProcessingStage] = useState<number>(0)
     const router = useRouter()
@@ -149,11 +154,11 @@ export default function ProcessingCourseComponent({ courseId }: {
                             </div>
 
                             <div className="my-7 flex justify-center item-center">
-                                <l-quantum
+                                {/* <l-quantum
                                     size="55"
                                     speed="2"
                                     color="rgba(168, 85, 247, 1)"
-                                ></l-quantum>
+                                ></l-quantum> */}
                             </div>
                         </motion.div>
                 }

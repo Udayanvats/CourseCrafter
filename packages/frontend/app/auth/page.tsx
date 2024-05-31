@@ -3,12 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, div, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AnimatePresence, LayoutGroup } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion"
 import React, { useEffect, useState } from "react";
 import { FcGoogle } from "react-icons/fc";
+import { Suspense } from 'react'
+
 
 export default function Auth() {
   const router = useRouter();
@@ -16,7 +17,7 @@ export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLogin, setIsLogin] = useState(true);
-  const searchParams = useSearchParams();
+  // const searchParams = useSearchParams();
   const tabs = ["login", "signup"];
   const [selectedTab, setSelectedTab] = useState(tabs[0]);
 
