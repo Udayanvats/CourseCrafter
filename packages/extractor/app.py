@@ -28,10 +28,10 @@ s3 = boto3.client('s3',
     region_name="ap-south-1"
 )
 
-RABBITMQ_HOST = 'localhost'
+RABBITMQ_HOST = '43.205.59.104'
 RABBITMQ_PORT = 5672
-RABBITMQ_USERNAME = 'guest'
-RABBITMQ_PASSWORD = 'guest'
+RABBITMQ_USERNAME = 'test'
+RABBITMQ_PASSWORD = 'test'
 bucket_name = 'coursecrafter'
 
 credentials = pika.PlainCredentials(RABBITMQ_USERNAME, RABBITMQ_PASSWORD)

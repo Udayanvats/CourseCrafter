@@ -4,15 +4,12 @@ import (
 	"CourseCrafter/auth"
 	"CourseCrafter/aws"
 	"CourseCrafter/cohere"
-	"context"
-	"io"
-	"runtime"
-
-	// "CourseCrafter/cohere"
-	// "CourseCrafter/cohere"
 	"CourseCrafter/database"
 	"CourseCrafter/rmq"
 	"CourseCrafter/utils"
+	"context"
+	"io"
+	"runtime"
 
 	"encoding/json"
 	"fmt"
@@ -22,6 +19,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/gofor-little/env"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -69,9 +67,33 @@ func handleStreamingRequest(ctx context.Context, c *gin.Context, courseId string
 	client.Write([]byte("data: " + string(topicJsonResponse) + "\n\n"))
 
 	client.Flush()
-	utils.CourseContentMutex.Lock()
 
-	utils.CourseContentMutex.Unlock()
+	go func() {
+		pyqs, err := aws.GetTextFromS3("pyqs/" + courseId + ".txt")
+
+		if err != nil {
+			fmt.Println("Failed to get text from S3 pyqs:", err)
+			return
+		}
+		var pyqResponse Response = Response{
+			Data:           nil,
+			Error:          nil,
+			Done:           false,
+			InitailReponse: nil,
+			TopicList:      nil,
+			PyqContent:     &pyqs,
+		}
+		pyqJsonResponse, err := json.Marshal(pyqResponse)
+		if err != nil {
+			fmt.Println("error while converting inital res to json", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.Writer.Header().Set("Connection", "close")
+			return
+		}
+		client.Write([]byte("data: " + string(pyqJsonResponse) + "\n\n"))
+		fmt.Println("done pyq")
+		client.Flush()
+	}()
 
 	if channel == nil {
 		fmt.Println("channel is nil")
@@ -232,6 +254,10 @@ func handleStreamingRequest(ctx context.Context, c *gin.Context, courseId string
 func main() {
 
 	// Create S3 client
+
+	if err := env.Load(".env"); err != nil {
+		panic(err)
+	}
 	err := aws.LoadS3()
 	if err != nil {
 		panic("Failed to load S3: " + err.Error())
@@ -755,7 +781,7 @@ func main() {
 
 			return
 		}
-		exists,user := database.UserExists(userId)
+		exists, user := database.UserExists(userId)
 		if !exists {
 			c.JSON(http.StatusOK, gin.H{"auth": false})
 			return
@@ -763,7 +789,7 @@ func main() {
 		}
 
 		fmt.Println("USER ID IN MIDDLEWARE", userId)
-		c.JSON(http.StatusOK, gin.H{"auth": true,"user":user})
+		c.JSON(http.StatusOK, gin.H{"auth": true, "user": user})
 
 	})
 	r.POST("/updateBookmarkStatus", func(ctx *gin.Context) {
@@ -817,7 +843,10 @@ func main() {
 		c.SetCookie("token", "", -1, "/", "", false, true)
 		c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
 	})
-	
 
-	r.Run("localhost:8080")
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"message": "Hello World"})
+	})
+
+	r.Run("0.0.0.0:8080")
 }

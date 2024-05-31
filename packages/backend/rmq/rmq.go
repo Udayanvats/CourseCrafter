@@ -21,7 +21,7 @@ import (
 var conn *amqp.Connection
 
 func Connect() error {
-	rabbitMQURL := "amqp://guest:guest@localhost:5672/"
+	rabbitMQURL := "amqp://test:test@43.205.59.104:5672/"
 	conection, err := amqp.Dial(rabbitMQURL)
 	conn = conection
 	if err != nil {
@@ -152,7 +152,7 @@ func ListenToNotification() {
 		fmt.Println("SENDING MESSAGE", notification.Message)
 		if notification.Message == "[DONE]" {
 			fmt.Println("DONE MESSAGE", notification.Message)
-			go func (){
+			go func() {
 				courseProcessingChannel <- []byte("[DOCS_DONE]")
 			}()
 			if utils.CourseContentMap[notification.CourseId] == nil {
@@ -205,9 +205,9 @@ func ListenToNotification() {
 
 			file.Close()
 			os.Remove(notification.CourseId + ".txt")
-			go func (){
+			go func() {
 				fmt.Println("SENDING MESSAGE TO CHANNEL")
-			courseProcessingChannel <- []byte(notification.Message)
+				courseProcessingChannel <- []byte(notification.Message)
 			}()
 
 			var receivedMode utils.Mode

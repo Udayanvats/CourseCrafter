@@ -1,0 +1,3 @@
+$ yarn workspace extractor start
+$ python3 app.py
+[GIN] 2024/05/30 - 22:42:18 | 200 |      51.127µs |       127.0.0.1 | GET      "/"
