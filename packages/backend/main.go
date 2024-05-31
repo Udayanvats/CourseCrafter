@@ -252,6 +252,7 @@ func handleStreamingRequest(ctx context.Context, c *gin.Context, courseId string
 }
 
 func main() {
+	var domain = env.Get("DOMAIN", "localhost")
 
 	// Create S3 client
 
@@ -279,7 +280,7 @@ func main() {
 
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000", "https://backend.coursecrafter.site"},
+		AllowOrigins:     []string{ "https://backend.coursecrafter.site"},
 		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
 		AllowHeaders:     []string{"Content-Type"},
 		AllowCredentials: true,
@@ -333,7 +334,7 @@ func main() {
 			return
 		}
 
-		c.SetCookie("token", tokenString, 3600, "/", "", false, true)
+		c.SetCookie("token", tokenString, 3600, "/",domain, false, true)
 		c.JSON(http.StatusOK, gin.H{"token": tokenString})
 	})
 
@@ -359,8 +360,8 @@ func main() {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
 			return
 		}
-		c.SetCookie("token", tokenString, 3600, "/", "", false, true)
-		c.SetCookie("userId", strconv.Itoa(user.Id), 3600, "/", "", false, true)
+		c.SetCookie("token", tokenString, 3600, "/", domain, false, true)
+		c.SetCookie("userId", strconv.Itoa(user.Id), 3600, "/", domain, false, true)
 		c.JSON(http.StatusOK, gin.H{"token": tokenString})
 	})
 
@@ -840,7 +841,7 @@ func main() {
 
 	})
 	r.GET("/logout", func(c *gin.Context) {
-		c.SetCookie("token", "", -1, "/", "", false, true)
+		c.SetCookie("token", "", -1, "/", domain, false, true)
 		c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
 	})
 

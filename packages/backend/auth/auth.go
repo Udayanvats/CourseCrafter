@@ -40,6 +40,7 @@ func GetGoogleUrl(c *gin.Context) {
 func LoginWithGoogle(c *gin.Context) {
 	GOOGLE_CLIENT_ID := env.Get("GOOGLE_CLIENT_ID", "")
 	GOOGLE_CLIENT_SECRET := env.Get("GOOGLE_CLIENT_SECRET", "")
+	var domain = env.Get("DOMAIN", "localhost")
 	// Assuming you have a PostgreSQL database connection named "db"
 
 	code := struct {
@@ -116,7 +117,7 @@ func LoginWithGoogle(c *gin.Context) {
 	}
 
 	// Set JWT token in cookie
-	c.SetCookie("token", tokenString, 3600*24, "/", "", false, true)
+	c.SetCookie("token", tokenString, 3600*24, "/",domain, false, true)
 
 	c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("User %s created", userInfo.Name)})
 }
