@@ -23,11 +23,11 @@ jobs:
       - name: Install python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          yarn extractor:install
 
       - name: insall go dependencies
         run: |
-          go mod download
+          yarn backend:install
       - name: Add .env file
         run: |
           touch ./packages/backend/.env
