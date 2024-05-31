@@ -16,7 +16,7 @@ var S3Client *s3.Client
 var bucketName = "coursecrafter"
 
 func LoadS3() error {
-	env.Load(".env")
+	
 	fmt.Println("Loading S3")
 	// Initialize AWS session
 	var AWS_ACCESS_KEY = env.Get("AWS_ACCESS_KEY", "")

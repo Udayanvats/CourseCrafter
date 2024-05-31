@@ -15,9 +15,9 @@
     "backend:get": "yarn workspace backend get",
     "extractor:start": "yarn workspace extractor start",
     "boot": "concurrently  \"yarn extractor:start\" \"yarn backend:start\" \"yarn dev\"  ",
-
     "deploy:install": "yarn backend:install && yarn workspace extractor install",
-    "deploy:start": "concurrently  \"yarn extractor:start\" \"yarn backend:start\"  "
+    "extractor:install":"yarn workspace extractor install"
+
   },
   "workspaces": {
     "packages": [
@@ -34,6 +34,7 @@
     "@tabler/icons-react": "^3.4.0",
     "clsx": "^2.1.1",
     "framer-motion": "^11.2.2",
+    "pm2": "^5.4.0",
     "tailwind-merge": "^2.3.0"
   }
 }

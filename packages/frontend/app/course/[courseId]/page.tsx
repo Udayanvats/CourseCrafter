@@ -65,7 +65,7 @@ export default function CoursePage({ params: {
     console.log(courseId)
     useEffect(() => {
         function startES() {
-            const eventStream = new EventSource('http://localhost:8080/coursecontent/' + courseId)
+            const eventStream = new EventSource(`${process.env.NEXT_PUBLIC_BACKEND_URL}/coursecontent/` + courseId)
             eventStream.onmessage = (event) => {
                 const eventSourseData: EventSourceData = JSON.parse(event.data)
                 console.log(eventSourseData.done)
