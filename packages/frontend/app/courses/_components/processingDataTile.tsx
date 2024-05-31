@@ -1,11 +1,9 @@
 import { RiFilePpt2Fill } from "react-icons/ri";
 import { IoDocumentText } from "react-icons/io5";
 import { motion } from "framer-motion"
-import { tailspin } from 'ldrs'
 import { FaCircleCheck } from "react-icons/fa6";
 
 
-tailspin.register()
 
 
 export default function ProcessingDataTile({ filename, status, type }: {
@@ -14,6 +12,12 @@ export default function ProcessingDataTile({ filename, status, type }: {
     type: string
 
 }) {
+    import('ldrs').then(ldrs => {
+        const { tailspin } = ldrs;
+
+        // Register components
+        tailspin.register();
+    });
     return (
         <motion.div
         layout
