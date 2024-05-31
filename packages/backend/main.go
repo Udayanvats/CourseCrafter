@@ -19,6 +19,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/gofor-little/env"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -253,6 +254,10 @@ func handleStreamingRequest(ctx context.Context, c *gin.Context, courseId string
 func main() {
 
 	// Create S3 client
+
+	if err := env.Load(".env"); err != nil {
+		panic(err)
+	}
 	err := aws.LoadS3()
 	if err != nil {
 		panic("Failed to load S3: " + err.Error())

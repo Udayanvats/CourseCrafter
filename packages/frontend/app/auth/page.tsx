@@ -35,7 +35,7 @@ export default function Auth() {
   const handleRegister = async () => {
     try {
       // Make a POST request to signup endpoint
-      const response = await fetch("http://localhost:8080/signup", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/signup`, {
         method: "POST",
         headers: {
           // "Content-Type": "application/json",
@@ -60,7 +60,7 @@ export default function Auth() {
   };
 
   const handleLogin = async () => {
-    const response = await fetch("http://localhost:8080/login", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -81,7 +81,7 @@ export default function Auth() {
   // const router = useRouter();
 
   const loginWithGoogle = async () => {
-    const res = await fetch("http://localhost:8080/auth/google/url", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google/url`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

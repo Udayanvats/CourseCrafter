@@ -9,7 +9,7 @@ export default function LoggedIn(){
         const code = searchParams.get('code')
         // JSON.stringify(code)
         async function loginWithGoogle() {
-            const res=await fetch("http://localhost:8080/auth/google/login", {
+            const res=await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google/login`, {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
