@@ -16,8 +16,7 @@
     "install": "yarn frontend:install && yarn backend:install && yarn workspace extractor install",
     "extractor:start": "yarn workspace extractor start",
     "boot": "concurrently  \"yarn extractor:start\" \"yarn backend:start\" \"yarn dev\"  ",
-    "deploy:install": "yarn backend:install && yarn workspace extractor install",
-    // "deploy:start": "yarn extractor:start && yarn backend:start"
+    "deploy:install": "yarn backend:install && yarn workspace extractor install"
   },
   "workspaces": {
     "packages": [

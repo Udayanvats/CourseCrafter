@@ -25,8 +25,7 @@ jobs:
           . .venv/bin/activate
           touch ./packages/backend/.env
           echo "${{ secrets.BACKEND_SECRET }}" >> ./packages/backend/.env
-          echo "${{ secrets.EXTRACTOR_SECRET }}" >> ./packages/extractor/.env
-        
+          echo "${{ secrets.EXTRACTOR_SECRET }}" >> ./packages/extractor/.env  
       - name: starting extractor
         run: |
           . .venv/bin/activate
