@@ -29,10 +29,10 @@ jobs:
       - name: starting extractor
         run: |
           . .venv/bin/activate
-            yarn extractor:start &
+            yarn extractor:start 
       - name: starting backend 
         run: |
           . .venv/bin/activate
-            yarn backend:start &
+            yarn backend:start 
 
      
