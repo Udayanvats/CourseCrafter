@@ -16,6 +16,8 @@ jobs:
         with:
           python-version: 3.9
 
+      
+
       # - name: add venv
       #   run: |
       #     python3 -m venv .venv
@@ -33,7 +35,10 @@ jobs:
           touch ./packages/backend/.env
           echo "${{ secrets.BACKEND_SECRET }}" >> ./packages/backend/.env
           echo "${{ secrets.EXTRACTOR_SECRET }}" >> ./packages/extractor/.env
+
+      - name: Reload systemd
+        run: sudo systemctl daemon-reload
       - name: starting extractor
-        run: yarn extractor:start &
+        run: sudo systemctl start extractor.service
       - name: starting backend
-        run: yarn backend:start &
+        run: yarn systemctl start backend.service
