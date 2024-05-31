@@ -41,4 +41,4 @@ jobs:
       - name: starting extractor
         run: sudo systemctl start extractor.service
       - name: starting backend
-        run: yarn systemctl start backend.service
+        run: sudo systemctl start backend.service
