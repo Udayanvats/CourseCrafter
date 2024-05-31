@@ -6,7 +6,6 @@ import GetStartedButton from "./_components/landingpage/button";
 import Buildup from "./_components/landingpage/buildup";
 import Features from "./_components/landingpage/Features";
 import Video from "./_components/landingpage/video";
-import { AiOutlineFilePpt } from "react-icons/ai";
 import UploadContent from "./_components/buildupContent/upload";
 import ConvertContent from "./_components/buildupContent/convert";
 import AboutUs from "./_components/landingpage/aboutus";
