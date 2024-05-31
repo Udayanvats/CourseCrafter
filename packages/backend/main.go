@@ -71,7 +71,6 @@ func handleStreamingRequest(ctx context.Context, c *gin.Context, courseId string
 	client.Flush()
 	utils.CourseContentMutex.Lock()
 
-
 	utils.CourseContentMutex.Unlock()
 
 	if channel == nil {
@@ -254,7 +253,7 @@ func main() {
 
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowOrigins:     []string{"http://localhost:3000", "https://backend.coursecrafter.site"},
 		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
 		AllowHeaders:     []string{"Content-Type"},
 		AllowCredentials: true,
@@ -360,7 +359,6 @@ func main() {
 		userID, _ := c.Get("userId")
 		userId, _ := userID.(int)
 		fmt.Println(userId, "userId")
-		
 
 		modeInt, err := strconv.Atoi(modeStr)
 		if err != nil {
