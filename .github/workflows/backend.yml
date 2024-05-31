@@ -34,6 +34,6 @@ jobs:
           echo "${{ secrets.BACKEND_SECRET }}" >> ./packages/backend/.env
           echo "${{ secrets.EXTRACTOR_SECRET }}" >> ./packages/extractor/.env
       - name: starting extractor
-        run: yarn extractor:start
+        run: yarn extractor:start &
       - name: starting backend
-        run: yarn backend:start
+        run: yarn backend:start &
