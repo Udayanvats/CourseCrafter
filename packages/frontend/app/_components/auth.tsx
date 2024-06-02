@@ -241,6 +241,3 @@ export default function Auth() {
     </div >
   );
 }
-function userRouter() {
-  throw new Error("Function not implemented.");
-}

@@ -25,6 +25,7 @@ const Buildup = () => {
 
   useEffect(() => {
     const handleScroll = () => {
+      console.log(window.scrollY, "scrollasdasd")
       setScrollY(window.scrollY);
       const winHeight = 2000;
       const docHeight = document.documentElement.scrollHeight;

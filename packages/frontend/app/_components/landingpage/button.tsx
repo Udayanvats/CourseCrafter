@@ -1,13 +1,25 @@
 "use client";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
+import Cookies from "js-cookie";
+import { get } from "@/api";
 
 const GetStartedButton = () => {
-  const router =useRouter()
+  const router = useRouter()
+
   return (
     <button
-      onClick={() => {
-        router.push('/courses')
+      onClick={async () => {
+        const res = await get("isLoggedIn", {});
+      
+        const { auth } = res;
+        if (!auth) {
+          //@ts-ignore
+          document.getElementById("login_modal").showModal()
+        }
+        else {
+          router.push('/courses')
+        }
       }}
       className=" z-10 p-[3px] relative"
     >

@@ -12,28 +12,31 @@ const Navbar = () => {
           </Link>
           <ul className=" z-10 flex items-center space-x-8 ml-8">
             <li>
-              <a
+            <Link
+              scroll={true}
                 href="#features-section"
                 className="text-gray-900 hover:text-blue-700 text-white dark:hover:text-blue-500 hover:underline"
               >
                 Features
-              </a>
+              </Link>
             </li>
             <li>
-              <a
+              <Link
+              scroll={true}
                 href="#usage"
                 className="text-gray-900 hover:text-blue-700 text-white dark:hover:text-blue-500 hover:underline"
               >
                 How to use
-              </a>
+              </Link>
             </li>
             <li>
-              <a
-                href="#"
+            <Link
+              scroll={true}
+                href="#aboutus"
                 className="text-gray-900 hover:text-blue-700 text-white dark:hover:text-blue-500 hover:underline"
               >
                 About Us
-              </a>
+              </Link>
             </li>
           </ul>
         </div>

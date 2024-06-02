@@ -8,6 +8,7 @@ import (
 	// "github.com/jackc/pgx/v4"
 	"CourseCrafter/utils"
 
+	"github.com/gofor-little/env"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/lib/pq"
@@ -18,7 +19,7 @@ var pool *pgxpool.Pool
 
 func Connect() error {
 	var err error
-	pool, err = pgxpool.Connect(context.Background(), "host=43.205.59.104 user=postgres password=postgres dbname=coursecrafter sslmode=disable")
+	pool, err = pgxpool.Connect(context.Background(), fmt.Sprintf("host=%s user=postgres password=postgres dbname=coursecrafter sslmode=disable",env.Get("HOST","43.205.59.104")))
 	if err != nil {
 		fmt.Printf("Unable to connect to database: %v\n", err)
 		return err

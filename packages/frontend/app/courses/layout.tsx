@@ -11,7 +11,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
   const { auth } = res;
 
   if (!auth) {
-    redirect("/auth");
+    redirect("/");
   }
   return (
     <div>

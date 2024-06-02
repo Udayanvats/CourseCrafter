@@ -42,7 +42,7 @@ export default function ConvertContent() {
                     Easily build applications with our intuitive tools, simplifying database interactions, schema evolution, and data management. Lay a solid foundation for your application while ensuring adaptability to future needs
                 </div>
                 <div className="mt-9 flex h-[300px]">
-                    <div className=" border border-blue-400 w-fit h-fit m-3 rounded-xl p-9">
+                    <div className=" border border-blue-400 w-fit h-fit m-3 rounded-xl p-7">
                         <div className="flex items-center">
 
                             <div className=" bg-blue-950 p-4 w-fit rounded-lg">
