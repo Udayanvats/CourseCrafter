@@ -27,7 +27,7 @@ func GetGoogleUrl(c *gin.Context) {
 	conf := &oauth2.Config{
 		ClientID:     GOOGLE_CLIENT_ID,
 		ClientSecret: GOOGLE_CLIENT_SECRET,
-		RedirectURL:  fmt.Sprintf("%s/loggedIn", env.Get("FRONTEND_URL", "http://localhost:3000")),
+		RedirectURL:  env.Get("FRONTEND_URL", "http://localhost:3000"),
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.profile",
 		},
@@ -54,7 +54,7 @@ func LoginWithGoogle(c *gin.Context) {
 	conf := &oauth2.Config{
 		ClientID:     GOOGLE_CLIENT_ID,
 		ClientSecret: GOOGLE_CLIENT_SECRET,
-		RedirectURL:  fmt.Sprintf("%s/loggedIn", env.Get("FRONTEND_URL", "http://localhost:3000")),
+		RedirectURL:  env.Get("FRONTEND_URL", "http://localhost:3000"),
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.profile",
 			"https://www.googleapis.com/auth/userinfo.email",

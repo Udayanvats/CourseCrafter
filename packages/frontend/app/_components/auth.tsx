@@ -20,19 +20,38 @@ export default function Auth() {
   // const searchParams = useSearchParams();
   const tabs = ["login", "signup"];
   const [selectedTab, setSelectedTab] = useState(tabs[0]);
+    const searchParams= useSearchParams()
+  useEffect(() => {
+    const code = searchParams.get("code");
 
-  // useEffect(() => {
-  //     const code = searchParams.get('code')
-  //     async function loginWithGoogle() {
-  //         await post("loginWithGoogle", JSON.stringify(code))
-  //         router.replace("/")
-  //         router.refresh()
+    async function loginWithGoogle() {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ code }),
+          cache: "no-store",
+          credentials: "include",
+        }
+      );
 
-  //     }
-  //     if (code) {
-  //         loginWithGoogle()
-  //     }
-  // }, [])
+      if (res.ok) {
+        console.log("logged in");
+        router.replace("/courses");
+        router.refresh();
+      } else {
+        console.error("Failed to log in");
+        // Handle error here, e.g., show a message to the user
+      }
+    }
+
+    if (code) {
+      loginWithGoogle();
+    }
+  }, [searchParams, router]);
   const handleRegister = async () => {
     try {
       // Make a POST request to signup endpoint
