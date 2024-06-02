@@ -11,6 +11,7 @@ const inter = Open_Sans({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "CourseCrafter",
   description: "Generate courses from your PPTs and PDFs with the help of AI  ",
+  keywords=["AI","Courses","PPT","PDF","Generate","CourseCrafter","Study","Learn","Education","Artificial Intelligence","ChatGPT","chat gpt","Study with AI"]
   
 };
 
