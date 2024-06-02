@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import Cookies from "js-cookie";
 import { get } from "@/api";
+import * as NProgress from "nprogress";
 
 const GetStartedButton = () => {
   const router = useRouter()
@@ -18,6 +19,7 @@ const GetStartedButton = () => {
           document.getElementById("login_modal").showModal()
         }
         else {
+          NProgress.start()
           router.push('/courses')
         }
       }}

@@ -15,7 +15,7 @@ const Navbar = () => {
             <Link
               scroll={true}
                 href="#features-section"
-                className="text-gray-900 hover:text-blue-700 text-white dark:hover:text-blue-500 hover:underline"
+                className="text-gray-900  hover:text-indigo-500 text-white  hover:underline underline-offset-4 "
               >
                 Features
               </Link>
@@ -24,7 +24,7 @@ const Navbar = () => {
               <Link
               scroll={true}
                 href="#usage"
-                className="text-gray-900 hover:text-blue-700 text-white dark:hover:text-blue-500 hover:underline"
+                className="text-gray-900 hover:text-indigo-500 text-white  hover:underline active:bg-indigo-500 underline-offset-4 "
               >
                 How to use
               </Link>
@@ -33,7 +33,7 @@ const Navbar = () => {
             <Link
               scroll={true}
                 href="#aboutus"
-                className="text-gray-900 hover:text-blue-700 text-white dark:hover:text-blue-500 hover:underline"
+                className="text-gray-900 hover:text-indigo-500 text-white  hover:underline underline-offset-4"
               >
                 About Us
               </Link>
