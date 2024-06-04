@@ -1,11 +1,27 @@
 "use client";
-import React from "react";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import Cookies from "js-cookie";
+import { get } from "@/api";
+import * as NProgress from "nprogress";
 
 const GetStartedButton = () => {
+  const router = useRouter()
+
   return (
     <button
-      onClick={() => {
-        console.log("clicked");
+      onClick={async () => {
+        const res = await get("isLoggedIn", {});
+      
+        const { auth } = res;
+        if (!auth) {
+          //@ts-ignore
+          document.getElementById("login_modal").showModal()
+        }
+        else {
+          NProgress.start()
+          router.push('/courses')
+        }
       }}
       className=" z-10 p-[3px] relative"
     >

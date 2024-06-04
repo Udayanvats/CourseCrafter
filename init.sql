@@ -2,7 +2,9 @@ CREATE TABLE users(
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL
+    password VARCHAR(255) NOT NULL,
+    "profileImage" VARCHAR(255)
+    
 );
 
 
@@ -16,5 +18,9 @@ CREATE TABLE course (
     "isProcessed" BOOLEAN DEFAULT FALSE,
     mode INTEGER NOT NULL,
     "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "isBookmark" BOOLEAN DEFAULT FALSE,
+    progress INTEGER DEFAULT 0,
+    "progressData" JSONB DEFAULT '{}',
+    "totalChapters" INTEGER DEFAULT 0,
     "processingData" JSONB DEFAULT '{}'
 );

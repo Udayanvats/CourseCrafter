@@ -4,15 +4,12 @@ import (
 	"CourseCrafter/auth"
 	"CourseCrafter/aws"
 	"CourseCrafter/cohere"
-	"context"
-	"io"
-	"runtime"
-
-	// "CourseCrafter/cohere"
-	// "CourseCrafter/cohere"
 	"CourseCrafter/database"
 	"CourseCrafter/rmq"
 	"CourseCrafter/utils"
+	"context"
+	"io"
+	"runtime"
 
 	"encoding/json"
 	"fmt"
@@ -22,6 +19,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/gofor-little/env"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -69,10 +67,33 @@ func handleStreamingRequest(ctx context.Context, c *gin.Context, courseId string
 	client.Write([]byte("data: " + string(topicJsonResponse) + "\n\n"))
 
 	client.Flush()
-	utils.CourseContentMutex.Lock()
 
+	go func() {
+		pyqs, err := aws.GetTextFromS3("pyqs/" + courseId + ".txt")
 
-	utils.CourseContentMutex.Unlock()
+		if err != nil {
+			fmt.Println("Failed to get text from S3 pyqs:", err)
+			return
+		}
+		var pyqResponse Response = Response{
+			Data:           nil,
+			Error:          nil,
+			Done:           false,
+			InitailReponse: nil,
+			TopicList:      nil,
+			PyqContent:     &pyqs,
+		}
+		pyqJsonResponse, err := json.Marshal(pyqResponse)
+		if err != nil {
+			fmt.Println("error while converting inital res to json", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.Writer.Header().Set("Connection", "close")
+			return
+		}
+		client.Write([]byte("data: " + string(pyqJsonResponse) + "\n\n"))
+		fmt.Println("done pyq")
+		client.Flush()
+	}()
 
 	if channel == nil {
 		fmt.Println("channel is nil")
@@ -231,8 +252,13 @@ func handleStreamingRequest(ctx context.Context, c *gin.Context, courseId string
 }
 
 func main() {
+	var domain = env.Get("DOMAIN", "localhost")
 
 	// Create S3 client
+
+	if err := env.Load(".env"); err != nil {
+		panic(err)
+	}
 	err := aws.LoadS3()
 	if err != nil {
 		panic("Failed to load S3: " + err.Error())
@@ -254,7 +280,7 @@ func main() {
 
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowOrigins:     []string{"https://coursecrafter.site","http://localhost:3000"},
 		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
 		AllowHeaders:     []string{"Content-Type"},
 		AllowCredentials: true,
@@ -308,7 +334,7 @@ func main() {
 			return
 		}
 
-		c.SetCookie("jwt", tokenString, 3600, "/", "", false, true)
+		c.SetCookie("token", tokenString, 3600, "/", domain, false, true)
 		c.JSON(http.StatusOK, gin.H{"token": tokenString})
 	})
 
@@ -334,8 +360,8 @@ func main() {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
 			return
 		}
-		c.SetCookie("token", tokenString, 3600, "/", "", false, true)
-		c.SetCookie("userId", strconv.Itoa(user.Id), 3600, "/", "", false, true)
+		c.SetCookie("token", tokenString, 3600, "/", domain, false, true)
+		c.SetCookie("userId", strconv.Itoa(user.Id), 3600, "/", domain, false, true)
 		c.JSON(http.StatusOK, gin.H{"token": tokenString})
 	})
 
@@ -360,7 +386,6 @@ func main() {
 		userID, _ := c.Get("userId")
 		userId, _ := userID.(int)
 		fmt.Println(userId, "userId")
-		
 
 		modeInt, err := strconv.Atoi(modeStr)
 		if err != nil {
@@ -497,16 +522,26 @@ func main() {
 
 	r.GET("/courses", auth.AuthMiddleware(), func(c *gin.Context) {
 		userID, _ := c.Get("userId")
+		bookmark := c.Query("bookmark")
+
+		fmt.Println("BOOKMARK", bookmark)
+		bookMarkBool, _ := strconv.ParseBool(bookmark)
+		fmt.Println("BOOKMARK BOOL", bookMarkBool)
+
+		var bookMarkFinal *bool = &bookMarkBool
+		if bookmark == "" {
+			bookMarkFinal = nil
+		}
 
 		fmt.Println("This is the userID", userID)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "userId is required"})
-			return
-		}
+		// if err != nil {
+		// 	c.JSON(http.StatusBadRequest, gin.H{"error": "userId is required"})
+		// 	return
+		// }
 		userId, _ := userID.(int)
 		// userIdnum, _ := strconv.Atoi(userId)
 		fmt.Print("THIS IS USER ID being sent", userId)
-		courses, err := database.GetCourses(userId)
+		courses, err := database.GetCourses(userId, bookMarkFinal)
 		if err != nil {
 			fmt.Println(err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -550,6 +585,7 @@ func main() {
 			ProcessingData string `json:"processingData"`
 			Error          string `json:"error"`
 			Done           bool   `json:"done"`
+			DocsDone       bool   `json:"docsDone"`
 		}
 
 		var initailReponse ProcessingES
@@ -569,37 +605,38 @@ func main() {
 		client.Flush()
 
 		// if all processing is done
-		// allDone := true
-		// for _, data := range course.ProcessingData {
-		// 	if !data.Status {
-		// 		allDone = false
-		// 		break
-		// 	}
-		// }
+		allDone := true
+		for _, data := range course.ProcessingData {
+			if !data.Status {
+				allDone = false
+				break
+			}
+		}
 
-		// if allDone {
-		// 	var doneResponse ProcessingES
-		// 	doneResponse.Done = true
-		// 	doneResponseString, err := json.Marshal(doneResponse)
-		// 	if err != nil {
-		// 		fmt.Println("error while converting done res to json", err)
-		// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		// 		c.Writer.Header().Set("Connection", "close")
+		if allDone {
+			var doneResponse ProcessingES
+			doneResponse.DocsDone = true
+			doneResponseString, err := json.Marshal(doneResponse)
+			if err != nil {
+				fmt.Println("error while converting done res to json", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				c.Writer.Header().Set("Connection", "close")
 
-		// 		return
-		// 	}
-		// 	client.Write([]byte("data: " + string(doneResponseString) + "\n\n"))
-		// 	client.Flush()
-		// 	c.Writer.Header().Set("Connection", "close")
+				return
+			}
+			client.Write([]byte("data: " + string(doneResponseString) + "\n\n"))
+			client.Flush()
 
-		// 	return
-		// }
+		}
+
+		fmt.Println("Listening ")
 
 		channel := utils.CourseProcessingChannels[courseId]
 
 		for message := range channel {
-			// fmt.Println("messageeeee", string(message))
-			if string(message) == "done" {
+			fmt.Println("messageeeee", string(message))
+			if string(message) == "[DONE]" {
+				fmt.Println("DONE RECEIVED")
 				var doneResponse ProcessingES
 				doneResponse.Done = true
 				doneResponseString, err := json.Marshal(doneResponse)
@@ -612,7 +649,20 @@ func main() {
 				client.Flush()
 				break
 
+			} else if string(message) == "[DOCS_DONE]" {
+				var doneResponse ProcessingES
+				doneResponse.DocsDone = true
+				doneResponseString, err := json.Marshal(doneResponse)
+				if err != nil {
+					fmt.Println("error while converting done res to json", err)
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					return
+				}
+				client.Write([]byte("data: " + string(doneResponseString) + "\n\n"))
+				client.Flush()
+
 			}
+
 			var response ProcessingES
 			response.Data = string(message)
 
@@ -716,5 +766,88 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"message": "Course deleted successfully"})
 	})
 
-	r.Run("localhost:8080")
+	r.GET("/isLoggedIn", func(c *gin.Context) {
+		token, err := c.Cookie("token")
+		if err != nil {
+			fmt.Println("")
+			c.JSON(http.StatusOK, gin.H{"auth": false})
+			return
+		}
+
+		userId, err := auth.VerifyToken(token)
+		fmt.Print(err)
+
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{"auth": false})
+
+			return
+		}
+		exists, user := database.UserExists(userId)
+		if !exists {
+			c.JSON(http.StatusOK, gin.H{"auth": false})
+			return
+
+		}
+
+		fmt.Println("USER ID IN MIDDLEWARE", userId)
+		c.JSON(http.StatusOK, gin.H{"auth": true, "user": user})
+
+	})
+	r.POST("/updateBookmarkStatus", func(ctx *gin.Context) {
+		var req struct {
+			CouseId  string `json:"courseId"`
+			Bookmark bool   `json:"bookmark"`
+		}
+
+		if err := ctx.ShouldBindJSON(&req); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		err := database.UpdateBookmarkStatus(req.CouseId, req.Bookmark)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{"message": "Bookmark status updated successfully"})
+	})
+	r.POST("/updateProgress", func(ctx *gin.Context) {
+		var req struct {
+			CouseId    string `json:"courseId"`
+			TopicIndex int    `json:"topicIndex"`
+		}
+
+		if err := ctx.ShouldBindJSON(&req); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		fmt.Println(req.TopicIndex, "topicIndex")
+
+		err := database.UpdateProgress(req.CouseId, strconv.Itoa(req.TopicIndex))
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{"message": "Progress updated successfully"})
+	})
+
+	r.GET("/getProgressData", func(ctx *gin.Context) {
+		courseId := ctx.Query("courseId")
+		course, err := database.GetCourse(courseId)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{"data": course.ProgressData})
+
+	})
+	r.GET("/logout", func(c *gin.Context) {
+		c.SetCookie("token", "", -1, "/", domain, false, true)
+		c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
+	})
+
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"message": "Hello test"})
+	})
+
+	r.Run("0.0.0.0:8080")
 }

@@ -27,7 +27,7 @@ func GetGoogleUrl(c *gin.Context) {
 	conf := &oauth2.Config{
 		ClientID:     GOOGLE_CLIENT_ID,
 		ClientSecret: GOOGLE_CLIENT_SECRET,
-		RedirectURL:  "http://localhost:3000/loggedIn",
+		RedirectURL:  env.Get("FRONTEND_URL", "http://localhost:3000"),
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.profile",
 		},
@@ -40,6 +40,7 @@ func GetGoogleUrl(c *gin.Context) {
 func LoginWithGoogle(c *gin.Context) {
 	GOOGLE_CLIENT_ID := env.Get("GOOGLE_CLIENT_ID", "")
 	GOOGLE_CLIENT_SECRET := env.Get("GOOGLE_CLIENT_SECRET", "")
+	var domain = env.Get("DOMAIN", "localhost")
 	// Assuming you have a PostgreSQL database connection named "db"
 
 	code := struct {
@@ -53,9 +54,10 @@ func LoginWithGoogle(c *gin.Context) {
 	conf := &oauth2.Config{
 		ClientID:     GOOGLE_CLIENT_ID,
 		ClientSecret: GOOGLE_CLIENT_SECRET,
-		RedirectURL:  "http://localhost:3000/loggedIn",
+		RedirectURL:  env.Get("FRONTEND_URL", "http://localhost:3000"),
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.profile",
+			"https://www.googleapis.com/auth/userinfo.email",
 		},
 		Endpoint: google.Endpoint,
 	}
@@ -84,8 +86,8 @@ func LoginWithGoogle(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to get user info"})
 		return
 	}
-
-	user := utils.User{Name: userInfo.Name, Email: userInfo.Email, Password: userInfo.Email}
+	fmt.Println(userInfo.Email, "UserInfo.emmail")
+	user := utils.User{Name: userInfo.Name, Email: userInfo.Email, Password: userInfo.Email, ProfileImage: &userInfo.Picture}
 
 	// Assuming you have a function AddUser in your database package
 	loggedUser, err := database.GetUserByEmail(userInfo.Email)
@@ -115,7 +117,7 @@ func LoginWithGoogle(c *gin.Context) {
 	}
 
 	// Set JWT token in cookie
-	c.SetCookie("jwt", tokenString, 3600*24, "/", "", false, true)
+	c.SetCookie("token", tokenString, 3600*24, "/", domain, false, true)
 
 	c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("User %s created", userInfo.Name)})
 }
@@ -141,9 +143,9 @@ func HashPassword(password string) (string, error) {
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		token, err := c.Cookie("jwt")
+		token, err := c.Cookie("token")
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing token"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing token", "authError": true})
 			return
 		}
 
@@ -151,9 +153,15 @@ func AuthMiddleware() gin.HandlerFunc {
 		fmt.Print(err)
 
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token", "authError": true})
 			return
 		}
+
+		exists, _ := database.UserExists(userId)
+		if !exists {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "User not found", "authError": true})
+		}
+
 		fmt.Println("USER ID IN MIDDLEWARE", userId)
 		c.Set("userId", userId)
 
@@ -176,6 +184,7 @@ func VerifyToken(tokenString string) (int, error) {
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		fmt.Println(claims["id"], "asdfSAD")
 		userID := int(claims["id"].(float64))
+
 		return userID, nil
 	} else {
 		return 0, fmt.Errorf("invalid token")

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/gofor-little/env"
 )
@@ -42,10 +43,11 @@ const (
 )
 
 type User struct {
-	Id       int    `json:"id"`
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Id           int     `json:"id"`
+	Name         string  `json:"name"`
+	Email        string  `json:"email"`
+	Password     string  `json:"password"`
+	ProfileImage *string `json:"profileImage"`
 }
 
 type Course struct {
@@ -56,6 +58,11 @@ type Course struct {
 	UserId         int                       `json:"userId"`
 	ProcessingData map[string]ProcessingData `json:"processingData"`
 	Id             string                    `json:"id"`
+	IsBookmark     bool                      `json:"isBookmark"`
+	Progress       int                       `json:"progress"`
+	CreatedAt      time.Time                 `json:"createdAt"`
+	TotalChapters  int                       `json:"totalChapters"`
+	ProgressData   map[string]bool           `json:"progressData"`
 }
 
 type ProcessingData struct {
@@ -295,6 +302,7 @@ Output format:
   },
   ...
 ]
+only create 3 questions per topic
 
 Only provide the array, nothing else.
 Only the questions from the input String matter other contents like the question paper name,year and other irrelevant stuff doesn't matters.

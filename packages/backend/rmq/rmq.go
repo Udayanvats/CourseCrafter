@@ -15,13 +15,14 @@ import (
 	"CourseCrafter/database"
 	"CourseCrafter/utils"
 
+	"github.com/gofor-little/env"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 var conn *amqp.Connection
 
 func Connect() error {
-	rabbitMQURL := "amqp://guest:guest@localhost:5672/"
+	rabbitMQURL := fmt.Sprintf("amqp://%s:%s@%s:5672/",env.Get("RABBITMQ_USER","guest"),env.Get("RABBITMQ_PASSWORD","guest"),env.Get("HOST","43.205.59.104"))
 	conection, err := amqp.Dial(rabbitMQURL)
 	conn = conection
 	if err != nil {
@@ -150,8 +151,11 @@ func ListenToNotification() {
 			utils.CourseProcessingChannels[notification.CourseId] = courseProcessingChannel
 		}
 		fmt.Println("SENDING MESSAGE", notification.Message)
-		if notification.Message == "done" {
+		if notification.Message == "[DONE]" {
 			fmt.Println("DONE MESSAGE", notification.Message)
+			go func() {
+				courseProcessingChannel <- []byte("[DOCS_DONE]")
+			}()
 			if utils.CourseContentMap[notification.CourseId] == nil {
 				utils.CourseContentMap[notification.CourseId] = &utils.CourseContent{
 					Content:      "",
@@ -202,7 +206,10 @@ func ListenToNotification() {
 
 			file.Close()
 			os.Remove(notification.CourseId + ".txt")
-			courseProcessingChannel <- []byte(notification.Message)
+			go func() {
+				fmt.Println("SENDING MESSAGE TO CHANNEL")
+				courseProcessingChannel <- []byte(notification.Message)
+			}()
 
 			var receivedMode utils.Mode
 			if notification.Mode != nil {

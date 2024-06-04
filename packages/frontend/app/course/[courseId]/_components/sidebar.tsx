@@ -1,20 +1,24 @@
 import { TopicList } from "../page"
+import { FaCheckCircle } from "react-icons/fa";
 
 
 
-export default function Sidebar({ topicList, currentTopicIndex, setCurrentTopicIndex ,subTopicIndex,setSubTopicIndex}: {
+export default function Sidebar({progressData, topicList, currentTopicIndex, setCurrentTopicIndex ,subTopicIndex,setSubTopicIndex}: {
     topicList: TopicList[],
     currentTopicIndex: number,
     setCurrentTopicIndex: React.Dispatch<React.SetStateAction<number>>
     subTopicIndex: number
     setSubTopicIndex: React.Dispatch<React.SetStateAction<number>>
+    progressData:{
+        [key:string]:boolean
+    }
 
 
 }) {
     console.log(currentTopicIndex, "currentTopicIndex")
 
     return (
-        <div className=" h-screen left-0 top-0 flex  w-[350px] overflow-y-auto flex-col p-3 ">
+        <div className=" h-[calc(100vh-88px)] left-0 top-0 flex  w-[350px] overflow-y-auto flex-col p-3 ">
 
 
 
@@ -31,7 +35,7 @@ export default function Sidebar({ topicList, currentTopicIndex, setCurrentTopicI
 
 
                             <li
-                                className="relative"
+                                className={`relative flex`}
                                
                             >
                                 <input  onClick={() => {
@@ -43,7 +47,7 @@ export default function Sidebar({ topicList, currentTopicIndex, setCurrentTopicI
                                 <details open={currentTopicIndex === index} >
                                     <summary onClick={() => {
 
-                                    }}>{topic.topic}</summary>
+                                    }}>{topic.topic} {progressData[index]&&<FaCheckCircle size={16} color="green" />}</summary>
                                     <ul className="border-slate-600 border-l ">
 
                                         {
@@ -55,11 +59,15 @@ export default function Sidebar({ topicList, currentTopicIndex, setCurrentTopicI
                                                         block: 'center',
                                                         inline: 'center'
                                                     })
-                                                }} className="w-full active "> <a className={`${subTopicIndex===subindex&&"active"}`}>{subtopic}</a></li>
+                                                }} className="w-full active  "> <a className={`${subTopicIndex===subindex&&" bg-gradient-primary hover:bg-gradient-secondary text-white"}`}>{subtopic}</a></li>
                                             ))
                                         }
                                     </ul>
+
                                 </details>
+                                
+
+
                             </li>
 
                         ))

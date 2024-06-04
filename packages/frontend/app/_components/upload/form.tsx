@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import UploadPYQs from "./uploadpyqs";
 import Details from "./details";
 import { useRouter } from "next/navigation";
+import { post } from "@/api";
 
 export default function UploadForm({
   uploadFormData,
@@ -31,39 +32,40 @@ export default function UploadForm({
   }
 
   async function upload() {
-    const formData = new FormData();
-    uploadFormData.docs.forEach((doc: File) => {
-      formData.append("docs", doc);
-    });
-    uploadFormData.pyqs.forEach((doc: File) => {
-      formData.append("pyqs", doc);
-    });
-    formData.append("mode", uploadFormData.mode.toString());
-    formData.append("title", uploadFormData.title);
+    try {
+      const formData = new FormData();
+      uploadFormData.docs.forEach((doc: File) => {
+        formData.append("docs", doc);
+      });
+      uploadFormData.pyqs.forEach((doc: File) => {
+        formData.append("pyqs", doc);
+      });
+      formData.append("mode", uploadFormData.mode.toString());
+      formData.append("title", uploadFormData.title);
 
-    const response = await fetch(
-    
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/upload`,
-      {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-        cache: "no-store",
-      }
-    );
+      const response = await post(
 
-    if (response.ok) {
-      const res = await response.json();
+        `upload`,
+        formData,
 
-      console.log("file uploaded successfully");
-      router.push(`/courses?courseId=${res?.courseId}`);
-    } else {
-      console.log("file upload failed");
+      );
+
+      if (response) {
+        // const res = await response.json();
+
+        console.log("file uploaded successfully");
+        router.push(`/courses?courseId=${response?.courseId}`);
+      } 
+
+      // router.push("/dashboard",{
+
+      // })
     }
+    catch (error) {
+      console.log(error)
+      console.log("file upload failed");
 
-    // router.push("/dashboard",{
-
-    // })
+    }
   }
 
   console.log(current);

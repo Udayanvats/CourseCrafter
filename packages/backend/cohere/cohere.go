@@ -3,6 +3,7 @@ package cohere
 import (
 	// "CourseCrafter/aws"
 	"CourseCrafter/aws"
+	"CourseCrafter/database"
 	"CourseCrafter/utils"
 	"context"
 	"encoding/json"
@@ -12,19 +13,23 @@ import (
 	"os"
 	"sync"
 
-	cohere "github.com/cohere-ai/cohere-go/v2"
-	cohereclient "github.com/cohere-ai/cohere-go/v2/client"
 	"github.com/gofor-little/env"
-	// "github.com/sashabaranov/go-openai"
+	openai "github.com/sashabaranov/go-openai"
 )
 
-func CallCohere(authToken string, prompt string) (*cohere.NonStreamedChatResponse, error) {
-	client := cohereclient.NewClient(cohereclient.WithToken(authToken))
+func CallCohere(authToken string, prompt string) (openai.ChatCompletionResponse, error) {
+	client := openai.NewClient(authToken)
 
-	response, err := client.Chat(
+	response, err := client.CreateChatCompletion(
 		context.TODO(),
-		&cohere.ChatRequest{
-			Message: prompt,
+		openai.ChatCompletionRequest{
+			Model: openai.GPT3Dot5Turbo,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: prompt,
+				},
+			},
 		},
 	)
 	if err != nil {
@@ -35,17 +40,27 @@ func CallCohere(authToken string, prompt string) (*cohere.NonStreamedChatRespons
 }
 
 func StartGeneration(extractedJSON string, courseID string, topicLists string, channel chan utils.StreamResponse) {
-	var cohereToken = env.Get("COHERE_API_KEY", "")
+	// var cohereToken = env.Get("COHERE_API_KEY", "")
+	var gptToken = env.Get("GPT_API_KEY", "")
 	fmt.Println(courseID, "cohere Course Id")
 
 	inputPrompt := utils.InputPrompt(extractedJSON, topicLists)
 
-	client := cohereclient.NewClient(cohereclient.WithToken(cohereToken))
+	// client := cohereclient.NewClient(cohereclient.WithToken(cohereToken))
+	client := openai.NewClient(gptToken)
 
-	stream, err := client.ChatStream(
+	// stream, err := client.ChatStream(
+	// 	context.TODO(),
+	// 	&cohere.ChatStreamRequest{
+	// 		Message: inputPrompt,
+	// 	},
+	// )
+	stream, err := client.CreateCompletionStream(
 		context.TODO(),
-		&cohere.ChatStreamRequest{
-			Message: inputPrompt,
+		openai.CompletionRequest{
+			Model:  openai.GPT3Dot5Turbo,
+			Prompt: inputPrompt,
+			Stream: true,
 		},
 	)
 
@@ -90,9 +105,9 @@ func StartGeneration(extractedJSON string, courseID string, topicLists string, c
 			channel <- utils.StreamResponse{Error: &errMessage}
 		}
 
-		if message.TextGeneration != nil && message.TextGeneration.Text != "" {
+		if message.Choices[0].Text != "" {
 
-			channel <- utils.StreamResponse{Message: message.TextGeneration.Text}
+			channel <- utils.StreamResponse{Message: message.Choices[0].Text}
 		}
 	}
 
@@ -127,7 +142,7 @@ func StartGeneration(extractedJSON string, courseID string, topicLists string, c
 }
 
 func StartDetailedGeneration(extracted_json string, courseID string, topicListString string, channel chan utils.StreamResponse) {
-	var cohereToken = env.Get("COHERE_API_KEY", "")
+	var cohereToken = env.Get("GPT_API_KEY", "")
 	fmt.Println("STARTING DETAILED GENERATION")
 	fmt.Println(courseID, "cohere Course Id", cohereToken)
 
@@ -142,15 +157,17 @@ func StartDetailedGeneration(extracted_json string, courseID string, topicListSt
 
 	channel <- utils.StreamResponse{Message: "["}
 	for i := 0; i < len(topicListObject); i++ {
-		client := cohereclient.NewClient(cohereclient.WithToken(cohereToken))
+		client := openai.NewClient(cohereToken)
 
 		fmt.Println(topicListObject[i].Topic, "topic")
 		inputPrompt := utils.DetailedPrompt(extracted_json, topicListObject[i])
 		fmt.Println("input prompt", inputPrompt)
-		stream, err := client.ChatStream(
+		stream, err := client.CreateCompletionStream(
 			context.TODO(),
-			&cohere.ChatStreamRequest{
-				Message: inputPrompt,
+			openai.CompletionRequest{
+				Model:  openai.GPT3Dot5Turbo,
+				Prompt: inputPrompt,
+				Stream: true,
 			},
 		)
 
@@ -174,10 +191,10 @@ func StartDetailedGeneration(extracted_json string, courseID string, topicListSt
 
 			}
 
-			if message.TextGeneration != nil && message.TextGeneration.Text != "" {
-				courseContent += message.TextGeneration.Text
+			if message.Choices[0].Text != "" {
+				courseContent += message.Choices[0].Text
 				// fmt.Println(message.TextGeneration.Text, "message")
-				channel <- utils.StreamResponse{Message: message.TextGeneration.Text}
+				channel <- utils.StreamResponse{Message: message.Choices[0].Text}
 			}
 		}
 		// if i != len(topicListObject)-1 {
@@ -224,7 +241,7 @@ func StartDetailedGeneration(extracted_json string, courseID string, topicListSt
 }
 
 func StartGenerationTopics(extracted_json string, courseId string) string {
-	var cohereToken = env.Get("COHERE_API_KEY", "")
+	var cohereToken = env.Get("GPT_API_KEY", "")
 	fmt.Println(courseId, "cohere Course Id", cohereToken)
 	inputPrompt := utils.ListTopicsPrompt(extracted_json)
 	fmt.Println("input prompt")
@@ -233,12 +250,28 @@ func StartGenerationTopics(extracted_json string, courseId string) string {
 		fmt.Println("error while starting generation", err)
 		panic("failed to generate content: " + err.Error())
 	}
-	return topicsList.Text
+	generatedText := topicsList.Choices[0].Message.Content
+
+	var topicsLists []struct {
+		Topic     string   `json:"topic"`
+		SubTopics []string `json:"subtopics"`
+	}
+	json.Unmarshal([]byte(generatedText), &topicsLists)
+
+	fmt.Println(len(topicsLists), "topics list")
+	err = database.UpdateTotalChapters(courseId, len(topicsLists))
+
+	if err != nil {
+		fmt.Println("error while updating total chapters", err)
+	}
+
+	return generatedText
 
 }
 
 func PyqsGeneration(extracted_json string, topicListString string, channel chan utils.StreamResponse, courseId string) {
-	var cohereToken = env.Get("COHERE_API_KEY", "")
+	var cohereToken = env.Get("GPT_API_KEY", "")
+	fmt.Println("STARTING PYQS GENERATION")
 	inputPrompt := utils.GeneratePYQanalaysis(extracted_json, topicListString)
 	// fmt.Println("input prompt")
 	pyqAnalaysis, err := CallCohere(cohereToken, inputPrompt)
@@ -246,15 +279,23 @@ func PyqsGeneration(extracted_json string, topicListString string, channel chan 
 		fmt.Println("error while starting generation", err)
 		panic("failed to generate content: " + err.Error())
 	}
-	pyqContent := pyqAnalaysis.Text
+	pyqContent := pyqAnalaysis.Choices[0].Message.Content
+	fmt.Println("pyq content", pyqContent)
 
-	file, err := os.CreateTemp("", "pyqs"+courseId+".json")
+	file, err := os.CreateTemp("", "pyqs"+courseId+".txt")
 	if err != nil {
 		fmt.Println("Error creating temporary file:", err)
 		panic("Error creating temporary: " + err.Error())
 	}
+	file.Write([]byte(pyqContent))
+	_, err = file.Seek(0, 0)
+	if err != nil {
+		fmt.Println("Error seeking file:", err)
+		panic("Error seeking file: " + err.Error())
+	}
 	defer os.Remove(file.Name())
-	aws.UploadFileToS3("pyqs/"+courseId+".json", file)
+	aws.UploadFileToS3("pyqs/"+courseId+".txt", file)
+	fmt.Println("file uploaded to s3")
 	channel <- utils.StreamResponse{
 		PyqContent: &pyqContent,
 	}

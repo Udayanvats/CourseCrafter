@@ -1,6 +1,5 @@
 FROM python:3.9-slim
 
-# ENV PYHTONUNBUFFERED=1
 
 
 WORKDIR /
@@ -14,7 +13,11 @@ COPY . .
 RUN apt-get update \
   && apt-get -y install tesseract-ocr
 
-#  5000:5672
+
+
+
+
+RUN tesseract --version
 
 
 

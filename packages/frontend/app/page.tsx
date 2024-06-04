@@ -1,19 +1,43 @@
-import Image from "next/image";
-import Upload from "./_components/upload";
-import Homepage from "./homepage/page";
+import { BackgroundBeams } from "@/components/ui/background-beams";
+import React, { useEffect } from "react";
+import Navbar from "./_components/navbar";
+import Hero from "./_components/landingpage/hero";
+import GetStartedButton from "./_components/landingpage/button";
+import Buildup from "./_components/landingpage/buildup";
+import Features from "./_components/landingpage/Features";
+import Video from "./_components/landingpage/video";
+import UploadContent from "./_components/buildupContent/upload";
+import ConvertContent from "./_components/buildupContent/convert";
+import AboutUs from "./_components/landingpage/aboutus";
+import Footer from "./_components/landingpage/footer";
 
-export default function Home() {
+const LandingPage = () => {
+
+  // useEffect(()=>{
+  //   if (typeof window !== "undefined") {
+  //     window.scroll({
+      
+  //       behavior: 'smooth'
+  //    });
+  //   }
+  // },[])
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24 h-full">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-       
+    <div className="h-full w-full">
+      <Navbar />
+      <div className="bg-background">
+        <div className="h-[45rem] w-full  bg-background relative flex flex-col items-center justify-center antialiased">
+          <Hero />
+          <GetStartedButton />
+        </div>
+        <Buildup />
+        {/* Hello */}
+        <Video />
+        <AboutUs />
+        <Footer />
       </div>
-      <Homepage />
-      <Upload />
-    </main>
+      <BackgroundBeams />
+    </div>
   );
-}
+};
+
+export default LandingPage;

@@ -1,5 +1,6 @@
 // import { env } from "process"
 
+import { redirect } from "next/navigation"
 import { toast } from "react-toastify"
 
 
@@ -20,6 +21,12 @@ export const post = async (url: string, data: any, headers = {}, serverHeaders: 
         })
         
         const resp= await res.json()
+        if(resp?.authError){
+            // redirect("/auth")
+            
+           
+
+        }
         if(resp?.error){
             throw new Error(resp.error)
         }
@@ -46,6 +53,9 @@ export const get = async (url: string, headers = {}, serverHeaders: any = null) 
             cache: "no-cache"
         })
         const resp= await res.json()
+        // if(resp?.authError){
+        //     redirect("/auth")
+        // }
         if(resp?.error){
             throw new Error(resp.error)
         }

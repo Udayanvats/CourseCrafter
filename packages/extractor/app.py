@@ -17,6 +17,7 @@ load_dotenv()
 
 AWS_SERVER_PUBLIC_KEY = os.getenv('AWS_ACCESS_KEY')
 AWS_SERVER_SECRET_KEY = os.getenv('AWS_SECRET_KEY')
+HOST = os.getenv('HOST') or 'localhost'
 print(AWS_SERVER_PUBLIC_KEY)
 print(AWS_SERVER_SECRET_KEY)
 
@@ -28,10 +29,10 @@ s3 = boto3.client('s3',
     region_name="ap-south-1"
 )
 
-RABBITMQ_HOST = 'localhost'
+RABBITMQ_HOST = HOST
 RABBITMQ_PORT = 5672
-RABBITMQ_USERNAME = 'guest'
-RABBITMQ_PASSWORD = 'guest'
+RABBITMQ_USERNAME = os.getenv('RABBITMQ_USER')
+RABBITMQ_PASSWORD = os.getenv('RABBITMQ_PASSWORD')
 bucket_name = 'coursecrafter'
 
 credentials = pika.PlainCredentials(RABBITMQ_USERNAME, RABBITMQ_PASSWORD)
@@ -199,7 +200,7 @@ def process_documents(ch, method, properties, body):
             "status": True,
             "object_path": "text/" + courseId + ".json",
             "error": "",
-            "message": "done",
+            "message": "[DONE]",
             "courseId": courseId,
             "mode": mode
         }))
