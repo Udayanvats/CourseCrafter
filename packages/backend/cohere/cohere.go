@@ -40,7 +40,6 @@ func CallCohere(authToken string, prompt string) (openai.ChatCompletionResponse,
 }
 
 func StartGeneration(extractedJSON string, courseID string, topicLists string, channel chan utils.StreamResponse) {
-	// var cohereToken = env.Get("COHERE_API_KEY", "")
 	var gptToken = env.Get("GPT_API_KEY", "")
 	fmt.Println(courseID, "cohere Course Id")
 
