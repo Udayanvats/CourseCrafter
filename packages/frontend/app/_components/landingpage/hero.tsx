@@ -25,8 +25,8 @@ const Hero = () => {
           style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)" }}
         >
           {texts[textIndex]}{" "}
-          <span className="text-transparent bg-gradient-to-r from-blue-500 to-blue-700 bg-clip-text transition-opacity duration-500">
-            AI
+          <span className="bg-gradient-to-b from-indigo-500  to-purple-500 inline-block text-transparent bg-clip-text">
+              AI
           </span>
         </h1>
         <p className="text-gray max-w-2xl mx-auto my-4 text-xl text-center font-semibold relative z-10">

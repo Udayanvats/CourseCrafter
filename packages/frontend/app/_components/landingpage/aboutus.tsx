@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 const AboutUs = () => {
   return (
-    <div className="  bg-black-400 shadow-xl py-20">
+    <div id="aboutus" className="  bg-black-400 shadow-xl py-20">
       <div className="container mx-auto px-4 text-center">
         <motion.h1
           initial={{ opacity: 0, y: -50 }}

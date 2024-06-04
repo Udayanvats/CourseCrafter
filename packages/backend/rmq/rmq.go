@@ -15,13 +15,14 @@ import (
 	"CourseCrafter/database"
 	"CourseCrafter/utils"
 
+	"github.com/gofor-little/env"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 var conn *amqp.Connection
 
 func Connect() error {
-	rabbitMQURL := "amqp://test:test@43.205.59.104:5672/"
+	rabbitMQURL := fmt.Sprintf("amqp://%s:%s@%s:5672/",env.Get("RABBITMQ_USER","guest"),env.Get("RABBITMQ_PASSWORD","guest"),env.Get("HOST","43.205.59.104"))
 	conection, err := amqp.Dial(rabbitMQURL)
 	conn = conection
 	if err != nil {

@@ -32,15 +32,15 @@ export default function UploadContent() {
         className="px-20 pb-6 pt-6 shadow-lg    rounded-lg mx-12  mt-16 ">
             <div className="h-[500px] ">
                 <div className="text-2xl  font-bold tracking-wide text-gray-500">
-                    <span className="text-white">BUILD.</span>
-                    STREAMLINE YOUR DEVELOPMENT
+                    <span className="text-white">UPLOAD </span>
+                     YOUR STUDY MATERIALS
 
                 </div>
                 <div className="mt-5 text-[19px]">
-                    Easily build applications with our intuitive tools, simplifying database interactions, schema evolution, and data management. Lay a solid foundation for your application while ensuring adaptability to future needs
+                    Easily upload your study materail and previous year questions and we will convert them into interactive study guides for you.
                 </div>
                 <div className="mt-9 flex h-[300px]">
-                    <div className=" border border-blue-400 w-fit h-fit m-3 rounded-xl p-9">
+                    <div className=" border border-blue-400 w-fit h-fit m-3 rounded-xl p-5">
                         <div className="flex items-center">
 
                             <div className=" bg-blue-950 p-4 w-fit rounded-lg">
@@ -62,7 +62,7 @@ export default function UploadContent() {
 
                     </div>
                     <div className="  w-fit h-fit m-3 rounded-xl overflow-hidden">
-                        <Image src={"/uploadPpts.png"} alt={"upload"} width={820} height={700} />
+                        <Image src={"/uploadPpts.png"} alt={"upload"} width={920} height={900} />
 
                     </div>
 

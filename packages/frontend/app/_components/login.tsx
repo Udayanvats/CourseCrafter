@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Auth from "../auth/page";
 import { get } from "@/api";
 import Cookies from "js-cookie";
 import Avatar from "./avatar";
+import Auth from "./auth";
 export type User = {
   name: string;
   email: string;

@@ -1,5 +1,5 @@
 import { BackgroundBeams } from "@/components/ui/background-beams";
-import React from "react";
+import React, { useEffect } from "react";
 import Navbar from "./_components/navbar";
 import Hero from "./_components/landingpage/hero";
 import GetStartedButton from "./_components/landingpage/button";
@@ -12,6 +12,15 @@ import AboutUs from "./_components/landingpage/aboutus";
 import Footer from "./_components/landingpage/footer";
 
 const LandingPage = () => {
+
+  // useEffect(()=>{
+  //   if (typeof window !== "undefined") {
+  //     window.scroll({
+      
+  //       behavior: 'smooth'
+  //    });
+  //   }
+  // },[])
   return (
     <div className="h-full w-full">
       <Navbar />

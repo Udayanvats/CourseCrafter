@@ -27,7 +27,7 @@ func GetGoogleUrl(c *gin.Context) {
 	conf := &oauth2.Config{
 		ClientID:     GOOGLE_CLIENT_ID,
 		ClientSecret: GOOGLE_CLIENT_SECRET,
-		RedirectURL:  fmt.Sprintf("%x,/loggedIn", env.Get("FRONTEND_URL", "https://localhost:3000")),
+		RedirectURL:  env.Get("FRONTEND_URL", "http://localhost:3000"),
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.profile",
 		},
@@ -40,6 +40,7 @@ func GetGoogleUrl(c *gin.Context) {
 func LoginWithGoogle(c *gin.Context) {
 	GOOGLE_CLIENT_ID := env.Get("GOOGLE_CLIENT_ID", "")
 	GOOGLE_CLIENT_SECRET := env.Get("GOOGLE_CLIENT_SECRET", "")
+	var domain = env.Get("DOMAIN", "localhost")
 	// Assuming you have a PostgreSQL database connection named "db"
 
 	code := struct {
@@ -53,7 +54,7 @@ func LoginWithGoogle(c *gin.Context) {
 	conf := &oauth2.Config{
 		ClientID:     GOOGLE_CLIENT_ID,
 		ClientSecret: GOOGLE_CLIENT_SECRET,
-		RedirectURL:  fmt.Sprintf("%x,/loggedIn", env.Get("FRONTEND_URL", "https://localhost:3000")),
+		RedirectURL:  env.Get("FRONTEND_URL", "http://localhost:3000"),
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.profile",
 			"https://www.googleapis.com/auth/userinfo.email",
@@ -116,7 +117,7 @@ func LoginWithGoogle(c *gin.Context) {
 	}
 
 	// Set JWT token in cookie
-	c.SetCookie("token", tokenString, 3600*24, "/", "", false, true)
+	c.SetCookie("token", tokenString, 3600*24, "/", domain, false, true)
 
 	c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("User %s created", userInfo.Name)})
 }
