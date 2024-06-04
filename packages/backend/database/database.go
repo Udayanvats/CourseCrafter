@@ -19,7 +19,7 @@ var pool *pgxpool.Pool
 
 func Connect() error {
 	var err error
-	pool, err = pgxpool.Connect(context.Background(), fmt.Sprintf("host=%s user=postgres password=postgres dbname=coursecrafter sslmode=disable",env.Get("HOST","43.205.59.104")))
+	pool, err = pgxpool.Connect(context.Background(), fmt.Sprintf("host=%s user=%s password=%s dbname=coursecrafter",env.Get("DATABASE_HOST",""),env.Get("DATABASE_USER",""),env.Get("DATABASE_PASS","")))
 	if err != nil {
 		fmt.Printf("Unable to connect to database: %v\n", err)
 		return err
