@@ -1,8 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import { ContentType } from "../page";
-import { grid } from 'ldrs'
 
-grid.register()
 
 
 
@@ -22,6 +20,12 @@ interface ContentProps {
 }
 
 export default function Content({ contents, topic, setSubTopicIndex ,pyqContent}: ContentProps) {
+    import('ldrs').then(ldrs => {
+        const { grid } = ldrs;
+
+        // Register components
+        grid.register();
+    });
     const divRefs = useRef<(HTMLDivElement | null)[]>([]);
 
     useEffect(() => {
