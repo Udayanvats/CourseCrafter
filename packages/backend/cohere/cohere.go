@@ -55,12 +55,17 @@ func StartGeneration(extractedJSON string, courseID string, topicLists string, c
 	// 		Message: inputPrompt,
 	// 	},
 	// )
-	stream, err := client.CreateCompletionStream(
+	stream, err := client.CreateChatCompletionStream(
 		context.TODO(),
-		openai.CompletionRequest{
+		openai.ChatCompletionRequest{
 			Model:  openai.GPT3Dot5Turbo,
-			Prompt: inputPrompt,
 			Stream: true,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: inputPrompt,
+				},
+			},
 		},
 	)
 
@@ -105,9 +110,9 @@ func StartGeneration(extractedJSON string, courseID string, topicLists string, c
 			channel <- utils.StreamResponse{Error: &errMessage}
 		}
 
-		if message.Choices[0].Text != "" {
+		if message.Choices[0].Delta.Content != "" {
 
-			channel <- utils.StreamResponse{Message: message.Choices[0].Text}
+			channel <- utils.StreamResponse{Message: message.Choices[0].Delta.Content}
 		}
 	}
 
@@ -162,12 +167,18 @@ func StartDetailedGeneration(extracted_json string, courseID string, topicListSt
 		fmt.Println(topicListObject[i].Topic, "topic")
 		inputPrompt := utils.DetailedPrompt(extracted_json, topicListObject[i])
 		fmt.Println("input prompt", inputPrompt)
-		stream, err := client.CreateCompletionStream(
+		stream, err := client.CreateChatCompletionStream(
 			context.TODO(),
-			openai.CompletionRequest{
+			openai.ChatCompletionRequest{
 				Model:  openai.GPT3Dot5Turbo,
-				Prompt: inputPrompt,
 				Stream: true,
+				Messages: []openai.ChatCompletionMessage{
+					{
+						Role:    openai.ChatMessageRoleUser,
+						Content: inputPrompt,
+					},
+				},
+				MaxTokens: 4000,
 			},
 		)
 
@@ -191,10 +202,10 @@ func StartDetailedGeneration(extracted_json string, courseID string, topicListSt
 
 			}
 
-			if message.Choices[0].Text != "" {
-				courseContent += message.Choices[0].Text
+			if message.Choices[0].Delta.Content != "" {
+				courseContent += message.Choices[0].Delta.Content
 				// fmt.Println(message.TextGeneration.Text, "message")
-				channel <- utils.StreamResponse{Message: message.Choices[0].Text}
+				channel <- utils.StreamResponse{Message: message.Choices[0].Delta.Content}
 			}
 		}
 		// if i != len(topicListObject)-1 {
