@@ -123,7 +123,7 @@ func LoginWithGoogle(c *gin.Context) {
 	}
 
 	// Set JWT token in cookie
-	c.SetCookie("token", tokenString, 3600*24, "/", domain, false, true)
+	c.SetCookie("token", tokenString, 3600*24, "/", domain, true, true)
 
 	c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("User %s created", userInfo.Name)})
 }
