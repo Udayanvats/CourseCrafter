@@ -54,13 +54,6 @@ export default function ProcessingCourseComponent({ courseId }: {
                 setProcessingData((prev) =>
                     ({ ...prev, [data.data]: { ...prev[data.data], status: true } })
                 )
-
-
-
-
-
-
-
             }
 
         }

@@ -255,7 +255,7 @@ func DetailedPrompt(courseJson string, topicList TopicListObjectType) string {
 
 	More Intructions:
 	Introduction -> Detailed description of the topic.
-	Content ->  Should be array, each element represents all the contents of the corresponding subtopic as just a string , each element should contain detailed description of the subtopic.
+	Content ->  Should be array, each element represents all the contents of the corresponding subtopic as just a string , each element should contain detailed description of the subtopic,each element should be atleast 500 words long .
 	Conclusion -> Summary of all the important parts of the topic.
 
 	You have to only return the json Object , and not an Array , do not return any additional text or symbols or code indicators.

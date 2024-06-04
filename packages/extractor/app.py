@@ -18,10 +18,7 @@ load_dotenv()
 AWS_SERVER_PUBLIC_KEY = os.getenv('AWS_ACCESS_KEY')
 AWS_SERVER_SECRET_KEY = os.getenv('AWS_SECRET_KEY')
 HOST = os.getenv('HOST') or 'localhost'
-print(AWS_SERVER_PUBLIC_KEY)
-print(AWS_SERVER_SECRET_KEY)
 
-print(AWS_SERVER_PUBLIC_KEY, AWS_SERVER_SECRET_KEY)
 
 s3 = boto3.client('s3',
     aws_access_key_id=AWS_SERVER_PUBLIC_KEY, 
