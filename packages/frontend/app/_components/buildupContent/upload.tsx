@@ -39,20 +39,20 @@ export default function UploadContent() {
                 <div className="mt-5 text-[19px]">
                     Easily upload your study materail and previous year questions and we will convert them into interactive study guides for you.
                 </div>
-                <div className="mt-9 flex h-[300px]">
+                <div className="mt-9 flex  h-[500px] ">
                     <div className=" border border-blue-400 w-fit h-fit m-3 rounded-xl p-5">
                         <div className="flex items-center">
 
                             <div className=" bg-blue-950 p-4 w-fit rounded-lg">
 
-                                <AiOutlineFilePpt size={55} className="fill-blue-500" />
+                                <AiOutlineFilePpt size={45} className="fill-blue-500" />
                             </div>
                             <div className=" bg-orange-950 p-4 w-fit rounded-lg ml-3">
 
-                                <FaRegFilePdf size={55} className="fill-orange-500" />
+                                <FaRegFilePdf size={45} className="fill-orange-500" />
                             </div>
 
-                            <div className="text-white text-2xl font-bold ml-3">
+                            <div className="text-white text-xl font-bold ml-3">
                                 Upload your Documents
                             </div>
                         </div>
@@ -61,8 +61,8 @@ export default function UploadContent() {
                         </div>
 
                     </div>
-                    <div className="  w-fit h-fit m-3 rounded-xl overflow-hidden">
-                        <Image src={"/uploadPpts.png"} alt={"upload"} width={920} height={900} />
+                    <div className="  w-full h-[500px]  rounded-xl  overflow-hidden my-3 ">
+                        <Image src={"/uploadPpts.png"} alt={"upload"} width={1000} height={500} />
 
                     </div>
 

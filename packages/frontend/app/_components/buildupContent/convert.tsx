@@ -35,11 +35,11 @@ export default function ConvertContent() {
             <div className="h-[500px] ">
                 <div className="text-2xl  font-bold tracking-wide text-gray-500">
                     <span className="text-white">CONVERT. </span>
-                    STREAMLINE YOUR DEVELOPMENT
+                    YOUR DOCUMENTS
 
                 </div>
                 <div className="mt-5 text-[19px]">
-                    Easily build applications with our intuitive tools, simplifying database interactions, schema evolution, and data management. Lay a solid foundation for your application while ensuring adaptability to future needs
+                Effortlessly Convert Your PowerPoints and PDFs into Engaging, Interactive Courses - Tailored Specifically for You!
                 </div>
                 <div className="mt-9 flex h-[300px]">
                     <div className=" border border-blue-400 w-fit h-fit m-3 rounded-xl p-7">
@@ -47,7 +47,7 @@ export default function ConvertContent() {
 
                             <div className=" bg-blue-950 p-4 w-fit rounded-lg">
 
-                                <RiBardLine size={55} className="fill-blue-500" />
+                                <RiBardLine size={45} className="fill-blue-500" />
                             </div>
                           
 
@@ -55,7 +55,7 @@ export default function ConvertContent() {
                                 Convert your Documents
                             </div>
                         </div>
-                        <div className="mt-6 text-[18px]">
+                        <div className="mt-6 text-[16px]">
                             We Use the latest AI technology to convert your ppts into easy to understand notes. This will help you to understand the content better and also help you to revise the content easily.
                         </div>
 
