@@ -1,47 +1,50 @@
-name: backend
-on: push
-jobs:
-  test:
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v3
+  name: backend
+  on:
+    push:
+      branches:
+        - main
+  jobs:
+    test:
+      runs-on: self-hosted
+      steps:
+        - uses: actions/checkout@v3
 
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.22.1
+        - name: Set up Go
+          uses: actions/setup-go@v2
+          with:
+            go-version: 1.22.1
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
+        - name: Set up Python
+          uses: actions/setup-python@v2
+          with:
+            python-version: 3.9
 
-      
+        
 
-      # - name: add venv
-      #   run: |
-      #     python3 -m venv .venv
+        # - name: add venv
+        #   run: |
+        #     python3 -m venv .venv
 
-      - name: Install python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          yarn extractor:install
+        - name: Install python dependencies
+          run: |
+            python -m pip install --upgrade pip
+            yarn extractor:install
 
-      - name: insall go dependencies
-        run: |
-          yarn backend:install
-      - name: Add .env file
-        run: |
-          touch ./packages/backend/.env
-          echo "${{ secrets.BACKEND_SECRET }}" >> ./packages/backend/.env
-          echo "${{ secrets.EXTRACTOR_SECRET }}" >> ./packages/extractor/.env
-      - name: Stop extractor
-        run: sudo systemctl stop extractor.service
-      - name: Stop backend
-        run: sudo systemctl stop backend.service
-      - name: Reload systemd
-        run: sudo systemctl daemon-reload
-      - name: starting extractor
-        run: sudo systemctl start extractor.service
-      - name: starting backend
-        run: sudo systemctl start backend.service
+        - name: insall go dependencies
+          run: |
+            yarn backend:install
+        - name: Add .env file
+          run: |
+            touch ./packages/backend/.env
+            echo "${{ secrets.BACKEND_SECRET }}" >> ./packages/backend/.env
+            echo "${{ secrets.EXTRACTOR_SECRET }}" >> ./packages/extractor/.env
+        - name: Stop extractor
+          run: sudo systemctl stop extractor.service
+        - name: Stop backend
+          run: sudo systemctl stop backend.service
+        - name: Reload systemd
+          run: sudo systemctl daemon-reload
+        - name: starting extractor
+          run: sudo systemctl start extractor.service
+        - name: starting backend
+          run: sudo systemctl start backend.service
