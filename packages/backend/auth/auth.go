@@ -30,6 +30,7 @@ func GetGoogleUrl(c *gin.Context) {
 		RedirectURL:  env.Get("FRONTEND_URL", "http://localhost:3000"),
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.profile",
+			"https://www.googleapis.com/auth/userinfo.email",
 		},
 		Endpoint: google.Endpoint,
 	}
@@ -69,7 +70,7 @@ func LoginWithGoogle(c *gin.Context) {
 		return
 	}
 
-	oauth2Service, err := oauth2pkg.NewService(ctx, option.WithScopes("https://www.googleapis.com/auth/userinfo.profile"), option.WithTokenSource(conf.TokenSource(ctx, tok)))
+	oauth2Service, err := oauth2pkg.NewService(ctx, option.WithScopes("https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"), option.WithTokenSource(conf.TokenSource(ctx, tok)))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to create OAuth2 service"})
 		return
@@ -82,6 +83,11 @@ func LoginWithGoogle(c *gin.Context) {
 	}
 	var ID int
 	userInfo, err := userinfoService.Get().Do(googleapi.QueryParameter("access_token", tok.AccessToken))
+	fmt.Println(userInfo.Email, "User_Info")
+	if userInfo.Email == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to get email"})
+		return
+	}
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to get user info"})
 		return
@@ -117,7 +123,7 @@ func LoginWithGoogle(c *gin.Context) {
 	}
 
 	// Set JWT token in cookie
-	c.SetCookie("token", tokenString, 3600*24, "/", domain, false, true)
+	c.SetCookie("token", tokenString, 3600*24, "/", domain, true, true)
 
 	c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("User %s created", userInfo.Name)})
 }

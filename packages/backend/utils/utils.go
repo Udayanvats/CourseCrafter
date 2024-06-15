@@ -209,6 +209,7 @@ func DetailedPrompt(courseJson string, topicList TopicListObjectType) string {
 	"The following is the json format in which the input will be provided to you:"
 	
 	
+
 	Input JSON Format:
 	[
 	  {
@@ -229,14 +230,10 @@ func DetailedPrompt(courseJson string, topicList TopicListObjectType) string {
 	%s
 	
 	Instructions for Note Generation:
+
+	Answer following in 2000 tokens
+
 	
-	Detail-Oriented Notes: Break down the extracted text into detailed study notes. Include explanations, examples, and definitions to ensure comprehensive coverage of the topic. Provide real-world examples to illustrate key concepts and enhance understanding.
-	
-	Clarity and Simplicity: Ensure that the generated notes are clear and easy to understand. Use concise language and keep the explanations straightforward to facilitate quick comprehension.
-	
-	Scoring Optimization: Aim to produce study materials that can help students score well in exams. Prioritize accuracy, relevance, and completeness in the generated notes.
-	
-	Minimum 5 Key Points: Each set of notes should contain a minimum of 5 key points that are essential for understanding the topic thoroughly and scoring well in exams.
 	
 	JSON Format: Provide the notes in the following JSON format, Provide the JSON Object:
 	
@@ -255,7 +252,7 @@ func DetailedPrompt(courseJson string, topicList TopicListObjectType) string {
 
 	More Intructions:
 	Introduction -> Detailed description of the topic.
-	Content ->  Should be array, each element represents all the contents of the corresponding subtopic as just a string , each element should contain detailed description of the subtopic,each element should be atleast 500 words long .
+	Content ->  Should be array, each element represents all the contents of the corresponding subtopic as just a string , each element should contain detailed description of the subtopic,each element should be atleast 500 tokens  .
 	Conclusion -> Summary of all the important parts of the topic.
 
 	You have to only return the json Object , and not an Array , do not return any additional text or symbols or code indicators.
@@ -263,6 +260,7 @@ func DetailedPrompt(courseJson string, topicList TopicListObjectType) string {
 	Overall, the generated notes should be detailed, informative, and engaging enough for a student that studies from these notes shouldn't have to search for the same topic ever again.
 	
 	Additional Context:
+	I Want Long Answers
 	The extracted text contains key concepts, definitions, and explanations presented in a lecture. The goal is to create detailed study notes that include examples and explanations in simple language to assist students in understanding the material thoroughly and quickly, thereby improving their academic performance.
 	`, courseJson, string(jsonstring))
 }
