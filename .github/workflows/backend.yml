@@ -48,4 +48,3 @@
           run: sudo systemctl start extractor.service
         - name: starting backend
           run: sudo systemctl start backend.service
-
