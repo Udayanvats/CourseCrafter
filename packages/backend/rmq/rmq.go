@@ -22,7 +22,7 @@ import (
 var conn *amqp.Connection
 
 func Connect() error {
-	rabbitMQURL := fmt.Sprintf("amqp://%s:%s@%s:5672/",env.Get("RABBITMQ_USER","guest"),env.Get("RABBITMQ_PASSWORD","guest"),env.Get("HOST","43.205.59.104"))
+	rabbitMQURL := env.Get("RABBITMQ_URL","")
 	conection, err := amqp.Dial(rabbitMQURL)
 	conn = conection
 	if err != nil {

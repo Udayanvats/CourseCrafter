@@ -17,7 +17,6 @@ load_dotenv()
 
 AWS_SERVER_PUBLIC_KEY = os.getenv('AWS_ACCESS_KEY')
 AWS_SERVER_SECRET_KEY = os.getenv('AWS_SECRET_KEY')
-HOST = os.getenv('HOST') or 'localhost'
 
 
 s3 = boto3.client('s3',
@@ -26,16 +25,12 @@ s3 = boto3.client('s3',
     region_name="ap-south-1"
 )
 
-RABBITMQ_HOST = HOST
-RABBITMQ_PORT = 5672
-RABBITMQ_USERNAME = os.getenv('RABBITMQ_USER')
-RABBITMQ_PASSWORD = os.getenv('RABBITMQ_PASSWORD')
+
+RABBITMQ_URL = os.getenv('RABBITMQ_URL')
 bucket_name = 'coursecrafter'
 
-credentials = pika.PlainCredentials(RABBITMQ_USERNAME, RABBITMQ_PASSWORD)
-parameters = pika.ConnectionParameters(host=RABBITMQ_HOST, port=RABBITMQ_PORT, credentials=credentials)
 
-connection = pika.BlockingConnection(parameters)
+connection = pika.BlockingConnection(pika.URLParameters(RABBITMQ_URL))
 channel = connection.channel()
 
 
